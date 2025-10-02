@@ -25,9 +25,35 @@ export function Header({
 }: HeaderProps) {
   const {shop, menu} = header;
   return (
-    <header className="header">
-      <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
-        <strong>{shop.name}</strong>
+    <header style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 1000,
+      background: '#000',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+      height: '80px', // BodyArmor exact header height
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '0 2rem',
+      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
+    }}>
+      <NavLink 
+        prefetch="intent" 
+        to="/" 
+        style={{
+          textDecoration: 'none',
+          color: '#fff',
+          fontSize: '1.5rem', // BodyArmor logo size
+          fontWeight: 900,
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em'
+        }} 
+        end
+      >
+        DRINKSIP
       </NavLink>
       <HeaderMenu
         menu={menu}
@@ -55,13 +81,29 @@ export function HeaderMenu({
   const {close} = useAside();
 
   return (
-    <nav className={className} role="navigation">
+    <nav 
+      role="navigation" 
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '2.5rem' // BodyArmor exact spacing
+      }}
+    >
       {viewport === 'mobile' && (
         <NavLink
           end
           onClick={close}
           prefetch="intent"
-          style={activeLinkStyle}
+          style={{
+            color: '#fff',
+            textDecoration: 'none',
+            fontSize: '0.9rem', // BodyArmor menu font size
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            padding: '0.5rem 0',
+            transition: 'color 0.3s ease'
+          }}
           to="/"
         >
           Home
@@ -79,12 +121,21 @@ export function HeaderMenu({
             : item.url;
         return (
           <NavLink
-            className="header-menu-item"
             end
             key={item.id}
             onClick={close}
             prefetch="intent"
-            style={activeLinkStyle}
+            style={({isActive}) => ({
+              color: isActive ? '#E8B122' : '#fff',
+              textDecoration: 'none',
+              fontSize: '1rem', // BodyArmor exact menu font size - bigger and thicker
+              fontWeight: 800, // BodyArmor extra bold weight
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              padding: '0.5rem 0',
+              transition: 'color 0.3s ease',
+              borderBottom: isActive ? '2px solid #E8B122' : 'none'
+            })}
             to={url}
           >
             {item.title}
@@ -100,9 +151,28 @@ function HeaderCtas({
   cart,
 }: Pick<HeaderProps, 'isLoggedIn' | 'cart'>) {
   return (
-    <nav className="header-ctas" role="navigation">
+    <nav 
+      role="navigation" 
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '1.5rem'
+      }}
+    >
       <HeaderMenuMobileToggle />
-      <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
+      <NavLink 
+        prefetch="intent" 
+        to="/account" 
+        style={{
+          color: '#fff',
+          textDecoration: 'none',
+          fontSize: '0.9rem',
+          fontWeight: 600,
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+          transition: 'color 0.3s ease'
+        }}
+      >
         <Suspense fallback="Sign in">
           <Await resolve={isLoggedIn} errorElement="Sign in">
             {(isLoggedIn) => (isLoggedIn ? 'Account' : 'Sign in')}
@@ -130,7 +200,30 @@ function HeaderMenuMobileToggle() {
 function SearchToggle() {
   const {open} = useAside();
   return (
-    <button className="reset" onClick={() => open('search')}>
+    <button 
+      onClick={() => open('search')}
+      style={{
+        background: 'transparent',
+        border: '2px solid #fff',
+        borderRadius: '20px', // BodyArmor pill shape
+        color: '#fff',
+        fontSize: '0.8rem',
+        fontWeight: 700,
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+        padding: '0.6rem 1.2rem', // BodyArmor pill padding
+        cursor: 'pointer',
+        transition: 'all 0.3s ease'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = '#fff';
+        e.currentTarget.style.color = '#000';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = 'transparent';
+        e.currentTarget.style.color = '#fff';
+      }}
+    >
       Search
     </button>
   );
@@ -141,8 +234,7 @@ function CartBadge({count}: {count: number | null}) {
   const {publish, shop, cart, prevCart} = useAnalytics();
 
   return (
-    <a
-      href="/cart"
+    <button
       onClick={(e) => {
         e.preventDefault();
         open('cart');
@@ -153,9 +245,31 @@ function CartBadge({count}: {count: number | null}) {
           url: window.location.href || '',
         } as CartViewPayload);
       }}
+      style={{
+        background: '#E8B122', // DrinkSip brand color
+        border: '2px solid #E8B122',
+        borderRadius: '20px', // BodyArmor pill shape
+        color: '#000',
+        fontSize: '0.8rem',
+        fontWeight: 700,
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+        padding: '0.6rem 1.2rem', // BodyArmor pill padding
+        cursor: 'pointer',
+        transition: 'all 0.3s ease',
+        position: 'relative'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = 'transparent';
+        e.currentTarget.style.color = '#E8B122';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = '#E8B122';
+        e.currentTarget.style.color = '#000';
+      }}
     >
-      Cart {count === null ? <span>&nbsp;</span> : count}
-    </a>
+      Cart {count === null ? '' : `(${count})`}
+    </button>
   );
 }
 

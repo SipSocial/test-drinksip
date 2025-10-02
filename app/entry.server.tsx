@@ -17,6 +17,22 @@ export default async function handleRequest(
       checkoutDomain: context.env.PUBLIC_CHECKOUT_DOMAIN,
       storeDomain: context.env.PUBLIC_STORE_DOMAIN,
     },
+    // Allow DrinkSip CDN images and other necessary resources
+    imgSrc: [
+      'self',
+      'data:',
+      'https:',
+      'https://cdn.shopify.com',
+      'https://via.placeholder.com',
+      '*.shopify.com',
+      '*.myshopify.com'
+    ],
+    connectSrc: [
+      'self',
+      'https:',
+      '*.shopify.com',
+      '*.myshopify.com'
+    ]
   });
 
   const body = await renderToReadableStream(

@@ -10,12 +10,14 @@
     "preview": "shopify hydrogen preview --build",
     "lint": "eslint --no-error-on-unmatched-pattern .",
     "typecheck": "tsc --noEmit",
-    "codegen": "shopify hydrogen codegen"
+    "codegen": "shopify hydrogen codegen",
+    "ban:words": "node scripts/ban-words.js"
   },
   "prettier": "@shopify/prettier-config",
   "dependencies": {
     "@shopify/hydrogen": "2025.5.0",
     "@shopify/remix-oxygen": "^3.0.0",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
     "graphql": "^16.10.0",
     "graphql-tag": "^2.12.6",
     "isbot": "^5.1.22",

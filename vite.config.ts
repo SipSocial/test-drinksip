@@ -13,6 +13,16 @@ export default defineConfig({
     reactRouter(),
     tsconfigPaths(),
   ],
+  // Enhanced file watching for WSL
+  server: {
+    watch: {
+      usePolling: true,
+      interval: 100,
+    },
+    hmr: {
+      overlay: true,
+    },
+  },
   build: {
     // Allow a strict Content-Security-Policy
     // withtout inlining assets as base64:

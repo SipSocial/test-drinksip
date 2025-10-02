@@ -2,7 +2,7 @@ import {type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import {useLoaderData, type MetaFunction} from 'react-router';
 import {getPaginationVariables, Image, Money} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
-import {ProductItem} from '~/components/ProductItem';
+import {ProductCard} from '~/components/ProductCard';
 
 export const meta: MetaFunction<typeof loader> = () => {
   return [{title: `Hydrogen | Products`}];
@@ -57,10 +57,12 @@ export default function Collection() {
         resourcesClassName="products-grid"
       >
         {({node: product, index}) => (
-          <ProductItem
+          <ProductCard 
             key={product.id}
-            product={product}
-            loading={index < 8 ? 'eager' : undefined}
+            id={product.id}
+            handle={product.handle}
+            title={product.title}
+            image={product.featuredImage?.url || ''}
           />
         )}
       </PaginatedResourceSection>

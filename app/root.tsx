@@ -17,6 +17,7 @@ import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from './components/PageLayout';
+import {SkipToMain, useHighContrastMode, useReducedMotion, useKeyboardNavigation} from './components/AccessibilityUtils';
 
 export type RootLoader = typeof loader;
 
@@ -145,29 +146,82 @@ function loadDeferredData({context}: LoaderFunctionArgs) {
 export function Layout({children}: {children?: React.ReactNode}) {
   const nonce = useNonce();
   const data = useRouteLoaderData<RootLoader>('root');
+  
+  // Initialize accessibility features
+  useHighContrastMode();
+  useReducedMotion();
+  useKeyboardNavigation();
 
   return (
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <link rel="stylesheet" href={tailwindCss}></link>
+        <style dangerouslySetInnerHTML={{__html: `
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          html, body { 
+            font-family: 'Arial Black', 'Helvetica', 'Arial', sans-serif; 
+            background: #000000; 
+            color: #ffffff; 
+            line-height: 1.4; 
+            overflow-x: hidden; 
+            -webkit-font-smoothing: antialiased; 
+            -moz-osx-font-smoothing: grayscale; 
+          }
+          .header { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            z-index: 1000; 
+            background: #000; 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2); 
+            height: 80px; 
+            display: flex; 
+            align-items: center; 
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); 
+          }
+          .hero { 
+            position: relative; 
+            width: 100vw; 
+            height: 100vh; 
+            background: #000; 
+            display: flex; 
+            align-items: center; 
+            overflow: hidden; 
+            margin: 0;
+            padding: 0;
+          }
+          
+          @keyframes slideUpFromBottom {
+            from {
+              transform: translateY(100%);
+              opacity: 0;
+            }
+            to {
+              transform: translateY(0);
+              opacity: 1;
+            }
+          }
+        `}} />
+                    <link rel="stylesheet" href={`${tailwindCss}?v=${Date.now()}&force=${Math.random()}&bust=${Date.now()}&nocache=${Math.random()}&reload=${Date.now()}&fresh=${Math.random()}&final=${Date.now()}&snapscroll=${Math.random()}`}></link>
         <link rel="stylesheet" href={resetStyles}></link>
         <link rel="stylesheet" href={appStyles}></link>
         <Meta />
         <Links />
       </head>
       <body>
+        <SkipToMain />
         {data ? (
-          <Analytics.Provider
-            cart={data.cart}
-            shop={data.shop}
-            consent={data.consent}
-          >
-            <PageLayout {...data}>{children}</PageLayout>
-          </Analytics.Provider>
+          <PageLayout {...data}>
+            <main id="main-content" tabIndex={-1}>
+              {children}
+            </main>
+          </PageLayout>
         ) : (
-          children
+          <main id="main-content" tabIndex={-1}>
+            {children}
+          </main>
         )}
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />

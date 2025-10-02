@@ -159,6 +159,22 @@ button.reset:hover:not(:has(> *)) {
 
 /*
 * --------------------------------------------------
+* Viewport sections - prevent layout shifts
+* --------------------------------------------------
+*/
+main {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/*
+* --------------------------------------------------
 * components/Header
 * --------------------------------------------------
 */
@@ -519,4 +535,20 @@ button.reset:hover:not(:has(> *)) {
 
 .account-logout {
   display: inline-block;
+}
+
+/*
+* --------------------------------------------------
+* Product Page Animations
+* --------------------------------------------------
+*/
+@keyframes slideUpFromBottom {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }

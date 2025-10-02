@@ -1,420 +1,327 @@
-import {
-  type LoaderFunctionArgs,
-  type ActionFunctionArgs,
-} from '@shopify/remix-oxygen';
-import {useLoaderData, type MetaFunction} from 'react-router';
-import {getPaginationVariables, Analytics} from '@shopify/hydrogen';
-import {SearchForm} from '~/components/SearchForm';
-import {SearchResults} from '~/components/SearchResults';
-import {
-  type RegularSearchReturn,
-  type PredictiveSearchReturn,
-  getEmptyPredictiveSearchResult,
-} from '~/lib/search';
+import { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router';
+import type { MetaFunction, LoaderFunctionArgs } from '@shopify/remix-oxygen';
+import { useLoaderData } from 'react-router';
+import { ProductCard } from '~/components/ProductCard';
+import { LoadingSpinner } from '~/components/LoadingSpinner';
+import { shopQuery } from '~/lib/shopify.server';
+import { SEARCH_QUERY } from '~/graphql/queries';
 
-export const meta: MetaFunction = () => {
-  return [{title: `Hydrogen | Search`}];
+export const meta: MetaFunction = ({ location }) => {
+  const searchParams = new URLSearchParams(location.search);
+  const query = searchParams.get('q') || '';
+  
+  return [
+    { title: query ? `Search results for "${query}" | DrinkSip` : 'Search | DrinkSip' },
+    { name: 'description', content: `Search our premium non-alcoholic beer collection. Find your perfect DrinkSip flavor.` },
+    { name: 'robots', content: 'noindex, follow' }
+  ];
 };
 
-export async function loader({request, context}: LoaderFunctionArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  const isPredictive = url.searchParams.has('predictive');
-  const searchPromise: Promise<PredictiveSearchReturn | RegularSearchReturn> =
-    isPredictive
-      ? predictiveSearch({request, context})
-      : regularSearch({request, context});
+  const searchQuery = url.searchParams.get('q') || '';
+  
+  if (!searchQuery) {
+    return { results: [], query: '', suggestions: [] };
+  }
 
-  searchPromise.catch((error: Error) => {
-    console.error(error);
-    return {term: '', result: null, error: error.message};
-  });
+  try {
+    // Mock search results for now - replace with real Shopify search
+    const mockResults = [
+      { id: '1', handle: 'hazy-ipa', title: 'DrinkSip Hazy IPA', tags: ['core-series'], featuredImage: { url: 'https://via.placeholder.com/400x600/E8B122/000000?text=DrinkSip+Hazy+IPA' }, metafields: [] },
+      { id: '2', handle: 'watermelon-refresher', title: 'Watermelon Refresher', tags: ['refresher-series'], featuredImage: { url: 'https://via.placeholder.com/400x600/F05757/FFFFFF?text=Watermelon' }, metafields: [] },
+      { id: '3', handle: 'blood-orange-refresher', title: 'Blood Orange Refresher', tags: ['refresher-series'], featuredImage: { url: 'https://via.placeholder.com/400x600/ED5335/FFFFFF?text=Blood+Orange' }, metafields: [] },
+      { id: '4', handle: 'lemon-lime-refresher', title: 'Lemon Lime Refresher', tags: ['refresher-series'], featuredImage: { url: 'https://via.placeholder.com/400x600/77C14A/FFFFFF?text=Lemon+Lime' }, metafields: [] },
+      { id: '5', handle: '311-hazy-ipa', title: 'DrinkSip x 311 Hazy IPA', tags: ['artist-series'], featuredImage: { url: 'https://via.placeholder.com/400x600/E8B122/000000?text=DrinkSip+x+311' }, metafields: [] },
+      { id: '6', handle: 'deftones-tone-zero-lager', title: 'DrinkSip x Deftones Tone Zero Lager', tags: ['artist-series'], featuredImage: { url: 'https://via.placeholder.com/400x600/ED5335/FFFFFF?text=DrinkSip+x+Deftones' }, metafields: [] }
+    ];
 
-  return await searchPromise;
+    // Filter results based on search query
+    const results = mockResults.filter(product => 
+      product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.handle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+
+    const suggestions = ['hazy ipa', 'refresher', 'watermelon', 'blood orange', '311', 'deftones', 'core series', 'artist series'];
+
+    return { results, query: searchQuery, suggestions };
+  } catch (error) {
+    console.error('Search error:', error);
+    return { results: [], query: searchQuery, suggestions: [] };
+  }
 }
 
-/**
- * Renders the /search route
- */
-export default function SearchPage() {
-  const {type, term, result, error} = useLoaderData<typeof loader>();
-  if (type === 'predictive') return null;
+export default function Search() {
+  const { results, query, suggestions } = useLoaderData<typeof loader>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchInput, setSearchInput] = useState(query);
+  const [isSearching, setIsSearching] = useState(false);
+
+  const handleSearch = (newQuery: string) => {
+    if (newQuery.trim()) {
+      setIsSearching(true);
+      setSearchParams({ q: newQuery.trim() });
+      setTimeout(() => setIsSearching(false), 500); // Simulate search delay
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSearch(searchInput);
+  };
 
   return (
-    <div className="search">
-      <h1>Search</h1>
-      <SearchForm>
-        {({inputRef}) => (
-          <>
-            <input
-              defaultValue={term}
-              name="q"
-              placeholder="Search…"
-              ref={inputRef}
-              type="search"
-            />
-            &nbsp;
-            <button type="submit">Search</button>
-          </>
-        )}
-      </SearchForm>
-      {error && <p style={{color: 'red'}}>{error}</p>}
-      {!term || !result?.total ? (
-        <SearchResults.Empty />
-      ) : (
-        <SearchResults result={result} term={term}>
-          {({articles, pages, products, term}) => (
-            <div>
-              <SearchResults.Products products={products} term={term} />
-              <SearchResults.Pages pages={pages} term={term} />
-              <SearchResults.Articles articles={articles} term={term} />
+    <div style={{
+      background: '#000',
+      color: '#fff',
+      minHeight: '100vh',
+      paddingTop: '120px' // Account for header
+    }}>
+      {/* Search Header */}
+      <section style={{
+        padding: '2rem',
+        background: '#000',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+      }}>
+        <div style={{
+          maxWidth: '1400px',
+          margin: '0 auto'
+        }}>
+          <h1 style={{
+            fontSize: 'clamp(2rem, 4vw, 3rem)',
+            fontWeight: 900,
+            textTransform: 'uppercase',
+            letterSpacing: '-0.02em',
+            marginBottom: '2rem',
+            color: '#fff',
+            textAlign: 'center'
+          }}>
+            Search DrinkSip
+          </h1>
+
+          {/* Search Form */}
+          <form onSubmit={handleSubmit} style={{
+            maxWidth: '600px',
+            margin: '0 auto',
+            position: 'relative'
+          }}>
+            <div style={{
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Search for products, flavors, series..."
+                style={{
+                  width: '100%',
+                  padding: '1.5rem 2rem',
+                  paddingRight: '5rem',
+                  fontSize: '1.1rem',
+                  border: '2px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '50px',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  color: '#fff',
+                  outline: 'none',
+                  transition: 'all 0.3s ease'
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = '#fff';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                }}
+              />
+              <button
+                type="submit"
+                disabled={isSearching}
+                style={{
+                  position: 'absolute',
+                  right: '8px',
+                  width: '50px',
+                  height: '50px',
+                  border: 'none',
+                  borderRadius: '50%',
+                  background: '#fff',
+                  color: '#000',
+                  fontSize: '1.2rem',
+                  cursor: isSearching ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.3s ease',
+                  opacity: isSearching ? 0.6 : 1
+                }}
+                onMouseEnter={(e) => {
+                  if (!isSearching) {
+                    e.currentTarget.style.background = '#f0f0f0';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isSearching) {
+                    e.currentTarget.style.background = '#fff';
+                  }
+                }}
+              >
+                {isSearching ? <LoadingSpinner size="small" color="#000" /> : '🔍'}
+              </button>
+            </div>
+          </form>
+
+          {/* Search Suggestions */}
+          {!query && suggestions.length > 0 && (
+            <div style={{
+              maxWidth: '600px',
+              margin: '2rem auto 0',
+              textAlign: 'center'
+            }}>
+              <p style={{
+                color: '#888',
+                fontSize: '0.9rem',
+                marginBottom: '1rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
+              }}>
+                Popular Searches
+              </p>
+              <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '0.5rem',
+                justifyContent: 'center'
+              }}>
+                {suggestions.map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    onClick={() => handleSearch(suggestion)}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      borderRadius: '20px',
+                      background: 'transparent',
+                      color: '#fff',
+                      fontSize: '0.8rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                      e.currentTarget.style.borderColor = '#fff';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'transparent';
+                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                    }}
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
-        </SearchResults>
-      )}
-      <Analytics.SearchView data={{searchTerm: term, searchResults: result}} />
+        </div>
+      </section>
+
+      {/* Search Results */}
+      <section style={{
+        padding: '4rem 2rem',
+        background: '#000'
+      }}>
+        <div style={{
+          maxWidth: '1400px',
+          margin: '0 auto'
+        }}>
+          {query && (
+            <div style={{
+              marginBottom: '3rem',
+              textAlign: 'center'
+            }}>
+              <h2 style={{
+                fontSize: '1.5rem',
+                fontWeight: 900,
+                textTransform: 'uppercase',
+                color: '#fff',
+                marginBottom: '0.5rem'
+              }}>
+                {results.length > 0 ? `${results.length} Results` : 'No Results'}
+              </h2>
+              <p style={{
+                color: '#888',
+                fontSize: '1rem'
+              }}>
+                {results.length > 0 
+                  ? `Showing results for "${query}"`
+                  : `No products found for "${query}". Try a different search term.`
+                }
+              </p>
+            </div>
+          )}
+
+          {/* Results Grid */}
+          {results.length > 0 && (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: '2rem',
+              marginBottom: '4rem'
+            }}>
+              {results.map((product: any) => (
+                <ProductCard
+                  key={product.id}
+                  id={product.id}
+                  handle={product.handle}
+                  title={product.title}
+                  image={product.featuredImage?.url || `https://via.placeholder.com/400x600/E8B122/FFFFFF?text=${encodeURIComponent(product.title)}`}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* No Results - Show Popular Products */}
+          {query && results.length === 0 && (
+            <div style={{
+              textAlign: 'center',
+              marginTop: '4rem'
+            }}>
+              <h3 style={{
+                fontSize: '1.8rem',
+                fontWeight: 900,
+                textTransform: 'uppercase',
+                color: '#fff',
+                marginBottom: '2rem'
+              }}>
+                Popular Products
+              </h3>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                gap: '2rem',
+                maxWidth: '800px',
+                margin: '0 auto'
+              }}>
+                <ProductCard
+                  id="1"
+                  handle="hazy-ipa"
+                  title="DrinkSip Hazy IPA"
+                  image="https://via.placeholder.com/400x600/E8B122/000000?text=DrinkSip+Hazy+IPA"
+                />
+                <ProductCard
+                  id="2"
+                  handle="watermelon-refresher"
+                  title="Watermelon Refresher"
+                  image="https://via.placeholder.com/400x600/F05757/FFFFFF?text=Watermelon"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
-}
-
-/**
- * Regular search query and fragments
- * (adjust as needed)
- */
-const SEARCH_PRODUCT_FRAGMENT = `#graphql
-  fragment SearchProduct on Product {
-    __typename
-    handle
-    id
-    publishedAt
-    title
-    trackingParameters
-    vendor
-    selectedOrFirstAvailableVariant(
-      selectedOptions: []
-      ignoreUnknownOptions: true
-      caseInsensitiveMatch: true
-    ) {
-      id
-      image {
-        url
-        altText
-        width
-        height
-      }
-      price {
-        amount
-        currencyCode
-      }
-      compareAtPrice {
-        amount
-        currencyCode
-      }
-      selectedOptions {
-        name
-        value
-      }
-      product {
-        handle
-        title
-      }
-    }
-  }
-` as const;
-
-const SEARCH_PAGE_FRAGMENT = `#graphql
-  fragment SearchPage on Page {
-     __typename
-     handle
-    id
-    title
-    trackingParameters
-  }
-` as const;
-
-const SEARCH_ARTICLE_FRAGMENT = `#graphql
-  fragment SearchArticle on Article {
-    __typename
-    handle
-    id
-    title
-    trackingParameters
-  }
-` as const;
-
-const PAGE_INFO_FRAGMENT = `#graphql
-  fragment PageInfoFragment on PageInfo {
-    hasNextPage
-    hasPreviousPage
-    startCursor
-    endCursor
-  }
-` as const;
-
-// NOTE: https://shopify.dev/docs/api/storefront/latest/queries/search
-export const SEARCH_QUERY = `#graphql
-  query RegularSearch(
-    $country: CountryCode
-    $endCursor: String
-    $first: Int
-    $language: LanguageCode
-    $last: Int
-    $term: String!
-    $startCursor: String
-  ) @inContext(country: $country, language: $language) {
-    articles: search(
-      query: $term,
-      types: [ARTICLE],
-      first: $first,
-    ) {
-      nodes {
-        ...on Article {
-          ...SearchArticle
-        }
-      }
-    }
-    pages: search(
-      query: $term,
-      types: [PAGE],
-      first: $first,
-    ) {
-      nodes {
-        ...on Page {
-          ...SearchPage
-        }
-      }
-    }
-    products: search(
-      after: $endCursor,
-      before: $startCursor,
-      first: $first,
-      last: $last,
-      query: $term,
-      sortKey: RELEVANCE,
-      types: [PRODUCT],
-      unavailableProducts: HIDE,
-    ) {
-      nodes {
-        ...on Product {
-          ...SearchProduct
-        }
-      }
-      pageInfo {
-        ...PageInfoFragment
-      }
-    }
-  }
-  ${SEARCH_PRODUCT_FRAGMENT}
-  ${SEARCH_PAGE_FRAGMENT}
-  ${SEARCH_ARTICLE_FRAGMENT}
-  ${PAGE_INFO_FRAGMENT}
-` as const;
-
-/**
- * Regular search fetcher
- */
-async function regularSearch({
-  request,
-  context,
-}: Pick<
-  LoaderFunctionArgs,
-  'request' | 'context'
->): Promise<RegularSearchReturn> {
-  const {storefront} = context;
-  const url = new URL(request.url);
-  const variables = getPaginationVariables(request, {pageBy: 8});
-  const term = String(url.searchParams.get('q') || '');
-
-  // Search articles, pages, and products for the `q` term
-  const {errors, ...items} = await storefront.query(SEARCH_QUERY, {
-    variables: {...variables, term},
-  });
-
-  if (!items) {
-    throw new Error('No search data returned from Shopify API');
-  }
-
-  const total = Object.values(items).reduce(
-    (acc, {nodes}) => acc + nodes.length,
-    0,
-  );
-
-  const error = errors
-    ? errors.map(({message}) => message).join(', ')
-    : undefined;
-
-  return {type: 'regular', term, error, result: {total, items}};
-}
-
-/**
- * Predictive search query and fragments
- * (adjust as needed)
- */
-const PREDICTIVE_SEARCH_ARTICLE_FRAGMENT = `#graphql
-  fragment PredictiveArticle on Article {
-    __typename
-    id
-    title
-    handle
-    blog {
-      handle
-    }
-    image {
-      url
-      altText
-      width
-      height
-    }
-    trackingParameters
-  }
-` as const;
-
-const PREDICTIVE_SEARCH_COLLECTION_FRAGMENT = `#graphql
-  fragment PredictiveCollection on Collection {
-    __typename
-    id
-    title
-    handle
-    image {
-      url
-      altText
-      width
-      height
-    }
-    trackingParameters
-  }
-` as const;
-
-const PREDICTIVE_SEARCH_PAGE_FRAGMENT = `#graphql
-  fragment PredictivePage on Page {
-    __typename
-    id
-    title
-    handle
-    trackingParameters
-  }
-` as const;
-
-const PREDICTIVE_SEARCH_PRODUCT_FRAGMENT = `#graphql
-  fragment PredictiveProduct on Product {
-    __typename
-    id
-    title
-    handle
-    trackingParameters
-    selectedOrFirstAvailableVariant(
-      selectedOptions: []
-      ignoreUnknownOptions: true
-      caseInsensitiveMatch: true
-    ) {
-      id
-      image {
-        url
-        altText
-        width
-        height
-      }
-      price {
-        amount
-        currencyCode
-      }
-    }
-  }
-` as const;
-
-const PREDICTIVE_SEARCH_QUERY_FRAGMENT = `#graphql
-  fragment PredictiveQuery on SearchQuerySuggestion {
-    __typename
-    text
-    styledText
-    trackingParameters
-  }
-` as const;
-
-// NOTE: https://shopify.dev/docs/api/storefront/latest/queries/predictiveSearch
-const PREDICTIVE_SEARCH_QUERY = `#graphql
-  query PredictiveSearch(
-    $country: CountryCode
-    $language: LanguageCode
-    $limit: Int!
-    $limitScope: PredictiveSearchLimitScope!
-    $term: String!
-    $types: [PredictiveSearchType!]
-  ) @inContext(country: $country, language: $language) {
-    predictiveSearch(
-      limit: $limit,
-      limitScope: $limitScope,
-      query: $term,
-      types: $types,
-    ) {
-      articles {
-        ...PredictiveArticle
-      }
-      collections {
-        ...PredictiveCollection
-      }
-      pages {
-        ...PredictivePage
-      }
-      products {
-        ...PredictiveProduct
-      }
-      queries {
-        ...PredictiveQuery
-      }
-    }
-  }
-  ${PREDICTIVE_SEARCH_ARTICLE_FRAGMENT}
-  ${PREDICTIVE_SEARCH_COLLECTION_FRAGMENT}
-  ${PREDICTIVE_SEARCH_PAGE_FRAGMENT}
-  ${PREDICTIVE_SEARCH_PRODUCT_FRAGMENT}
-  ${PREDICTIVE_SEARCH_QUERY_FRAGMENT}
-` as const;
-
-/**
- * Predictive search fetcher
- */
-async function predictiveSearch({
-  request,
-  context,
-}: Pick<
-  ActionFunctionArgs,
-  'request' | 'context'
->): Promise<PredictiveSearchReturn> {
-  const {storefront} = context;
-  const url = new URL(request.url);
-  const term = String(url.searchParams.get('q') || '').trim();
-  const limit = Number(url.searchParams.get('limit') || 10);
-  const type = 'predictive';
-
-  if (!term) return {type, term, result: getEmptyPredictiveSearchResult()};
-
-  // Predictively search articles, collections, pages, products, and queries (suggestions)
-  const {predictiveSearch: items, errors} = await storefront.query(
-    PREDICTIVE_SEARCH_QUERY,
-    {
-      variables: {
-        // customize search options as needed
-        limit,
-        limitScope: 'EACH',
-        term,
-      },
-    },
-  );
-
-  if (errors) {
-    throw new Error(
-      `Shopify API errors: ${errors.map(({message}) => message).join(', ')}`,
-    );
-  }
-
-  if (!items) {
-    throw new Error('No predictive search data returned from Shopify API');
-  }
-
-  const total = Object.values(items).reduce(
-    (acc, item) => acc + item.length,
-    0,
-  );
-
-  return {type, term, result: {items, total}};
 }

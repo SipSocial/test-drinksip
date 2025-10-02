@@ -1,0 +1,38 @@
+User-agent: *
+Allow: /
+
+# Disallow admin and internal pages
+Disallow: /admin/
+Disallow: /cart
+Disallow: /account/
+Disallow: /checkout/
+Disallow: /orders/
+Disallow: /api/
+Disallow: /.well-known/
+Disallow: /search?*
+
+# Allow important pages
+Allow: /
+Allow: /collections/
+Allow: /products/
+Allow: /pages/
+Allow: /search
+
+# Sitemap location
+Sitemap: https://drinksip.com/sitemap.xml
+
+# Crawl delay (optional)
+Crawl-delay: 1
+
+# Specific bot instructions
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
