@@ -174,17 +174,6 @@ export function Layout({children}: {children?: React.ReactNode}) {
             margin: 0;
             padding: 0;
           }
-          
-          @keyframes slideUpFromBottom {
-            from {
-              transform: translateY(100%);
-              opacity: 0;
-            }
-            to {
-              transform: translateY(0);
-              opacity: 1;
-            }
-          }
         `}} />
                     <link rel="stylesheet" href={tailwindCss}></link>
         <link rel="stylesheet" href={resetStyles}></link>

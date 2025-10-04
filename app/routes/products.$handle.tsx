@@ -130,6 +130,338 @@ export async function loader({params}: LoaderFunctionArgs) {
   return { product, recommendations };
 }
 
+// Product-specific chips based on flavor profiles
+function getProductChips(handle: string): string[] {
+  const chipMap: Record<string, string[]> = {
+    'hazy-ipa': ['Hoppy', 'Hazy', 'Delicious'],
+    'watermelon-refresher': ['Tart', 'Refreshing', 'Delicious'],
+    'blood-orange-refresher': ['Citrusy', 'Bright', 'Delicious'],
+    'lemon-lime-refresher': ['Crisp', 'Zesty', 'Delicious'],
+    '311-hazy-ipa': ['Bold', 'Limited', 'Hoppy'],
+    'deftones-tone-zero-lager': ['Smooth', 'Limited', 'Premium']
+  };
+  
+  return chipMap[handle] || ['Refreshing', 'Premium', 'Delicious'];
+}
+
+// Product Tabs Component - BodyArmor Style
+function ProductTabs({ product }: { product: any }) {
+  const [activeTab, setActiveTab] = useState('details');
+
+  const tabs = [
+    { id: 'details', label: 'Details' },
+    { id: 'nutrition', label: 'Nutrition Facts' },
+    { id: 'ingredients', label: 'Ingredients' },
+    { id: 'reviews', label: 'Reviews' }
+  ];
+
+  return (
+    <div style={{ width: '100%' }}>
+      {/* Tab Navigation */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        marginBottom: '3rem',
+        borderBottom: '2px solid #f0f0f0',
+        flexWrap: 'wrap',
+        gap: '1rem'
+      }}>
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: '1rem 2rem',
+              fontSize: '1rem',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              cursor: 'pointer',
+              color: activeTab === tab.id ? '#000' : '#999',
+              borderBottom: activeTab === tab.id ? '3px solid #000' : '3px solid transparent',
+              transition: 'all 0.3s ease',
+              marginBottom: '-2px'
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        {activeTab === 'details' && (
+          <ProductDetails product={product} />
+        )}
+
+        {activeTab === 'nutrition' && (
+          <NutritionFacts product={product} />
+        )}
+
+        {activeTab === 'ingredients' && (
+          <Ingredients product={product} />
+        )}
+
+        {activeTab === 'reviews' && (
+          <Reviews product={product} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Product Details Component
+function ProductDetails({ product }: { product: any }) {
+  return (
+    <div style={{ textAlign: 'left' }}>
+      <div style={{ 
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+        gap: '1.5rem',
+        marginBottom: '2rem'
+      }}>
+        {[
+          '790MG ELECTROLYTES',
+          'NATURAL FLAVORS & SWEETENERS', 
+          'NO ARTIFICIAL DYES',
+          'VITAMINS',
+          'ANTIOXIDANTS VITAMINS A, C, & E',
+          'COCONUT WATER'
+        ].map((feature, index) => (
+          <div key={index} style={{
+            padding: '1.5rem',
+            background: '#f8f8f8',
+            borderRadius: '8px',
+            fontSize: '0.9rem',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            borderLeft: `4px solid ${product.color}`,
+            textAlign: 'center'
+          }}>
+            {feature}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Nutrition Facts Component - BodyArmor Style
+function NutritionFacts({ product }: { product: any }) {
+  const nutritionData = {
+    servingSize: '1 Bottle',
+    calories: 110,
+    totalFat: '0g', 
+    sodium: '30mg',
+    potassium: '680mg',
+    totalCarbs: '25g',
+    sugar: '25g',
+    addedSugar: '23g',
+    protein: '0g',
+    microNutrients: [
+      { name: 'Vitamin A', amount: '300mcg', daily: '33%' },
+      { name: 'Vitamin E', amount: '5mg', daily: '33%' },
+      { name: 'Vitamin B6', amount: '1.7mg', daily: '100%' },
+      { name: 'Vitamin B12', amount: '2.4mcg', daily: '100%' },
+      { name: 'Magnesium', amount: '75mg', daily: '18%' },
+      { name: 'Vitamin C', amount: '63mg', daily: '70%' },
+      { name: 'Niacin', amount: '16mg', daily: '100%' },
+      { name: 'Folate', amount: '400mcg DFE (240mcg folic acid)', daily: '100%' },
+      { name: 'Pantothenic Acid', amount: '5mg', daily: '100%' },
+      { name: 'Zinc', amount: '7.7mg', daily: '70%' }
+    ]
+  };
+
+  return (
+    <div style={{ textAlign: 'left' }}>
+      <h3 style={{ 
+        fontSize: '1.2rem', 
+        marginBottom: '1.5rem', 
+        textTransform: 'uppercase',
+        fontWeight: 700,
+        color: '#000'
+      }}>
+        Ingredients 
+      </h3>
+      <div style={{ 
+        background: '#f8f8f8', 
+        padding: '2rem', 
+        borderRadius: '12px',
+        marginBottom: '2rem'
+      }}>
+        <div style={{ 
+          borderBottom: '2px solid #000', 
+          paddingBottom: '0.5rem', 
+          marginBottom: '1rem',
+          display: 'flex',
+          justifyContent: 'space-between'
+        }}>
+          <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>Serving size {nutritionData.servingSize}</div>
+        </div>
+        
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0', borderBottom: '1px solid #ddd' }}>
+          <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>Calories</span>
+          <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>{nutritionData.calories}</span>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.3rem 0', borderBottom: '1px solid #ddd' }}>
+          <span>Total Fat</span>
+          <span>{nutritionData.totalFat}</span>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.3rem 0', borderBottom: '1px solid #ddd' }}>
+          <span>Sodium</span>
+          <span>{nutritionData.sodium}</span>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.3rem 0', borderBottom: '1px solid #ddd' }}>
+          <span>Potassium</span>
+          <span>{nutritionData.potassium}</span>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.3rem 0', borderBottom: '1px solid #ddd' }}>
+          <span>Total Carbohydrate</span>
+          <span>{nutritionData.totalCarbs}</span>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.3rem 0 0.3rem 1rem', borderBottom: '1px solid #ddd' }}>
+          <span>Sugar</span>
+          <span>{nutritionData.sugar}</span>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.3rem 0 0.3rem 2rem', borderBottom: '1px solid #ddd' }}>
+          <span>• Includes Added Sugar</span>
+          <span>{nutritionData.addedSugar}</span>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.3rem 0', borderBottom: '2px solid #000' }}>
+          <span>Protein</span>
+          <span>{nutritionData.protein}</span>
+        </div>
+
+        <div style={{ marginTop: '1rem' }}>
+          <h4 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem' }}>Micro Nutrients</h4>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem 2rem' }}>
+            {nutritionData.microNutrients.map((nutrient, index) => (
+              <div key={index} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                <span>{nutrient.name}</span>
+                <span>{nutrient.amount}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Ingredients Component - BodyArmor Style  
+function Ingredients({ product }: { product: any }) {
+  return (
+    <div style={{ textAlign: 'left' }}>
+      <div style={{ fontSize: '1rem', lineHeight: 1.8, color: '#333' }}>
+        Filtered Water, Cane Sugar, Coconut Water Concentrate, Citric Acid, Electrolyte Blend (Dipotassium Phosphate, Magnesium Oxide, Zinc Oxide), Fruit and Vegetable Juice (Color), Vitamins (Ascorbic Acid [Vitamin C], Calcium D-Pantothenate [Vitamin B5], Niacinamide [Vitamin B3], alpha-Tocopheryl Acetate [Vitamin E], Pyridoxine Hydrochloride [Vitamin B6], Vitamin A Palmitate [Vitamin A], Folic Acid [Vitamin B9], Cyanocobalamin [Vitamin B12]), Gum Arabic, Natural Strawberry Banana Flavor with other Natural Flavors, Ester Gum, Stevia Glycosides (Stevia Sweetener), beta-Apo-8'-carotenal (Color).
+      </div>
+    </div>
+  );
+}
+
+// Reviews Component - BodyArmor Style
+function Reviews({ product }: { product: any }) {
+  const reviews = {
+    average: 4.6,
+    total: 104,
+    breakdown: [
+      { stars: 5, count: 86 },
+      { stars: 4, count: 7 },
+      { stars: 3, count: 2 },
+      { stars: 2, count: 1 },
+      { stars: 1, count: 8 }
+    ]
+  };
+
+  return (
+    <div style={{ textAlign: 'left' }}>
+      <h3 style={{ 
+        fontSize: '1.8rem', 
+        marginBottom: '2rem', 
+        textTransform: 'uppercase',
+        fontWeight: 700,
+        color: '#000'
+      }}>
+        Customer Reviews
+      </h3>
+      
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', gap: '2px', marginBottom: '0.5rem' }}>
+          {[...Array(5)].map((_, i) => (
+            <span key={i} style={{ 
+              color: i < Math.floor(reviews.average) ? '#FFD700' : '#ddd',
+              fontSize: '1.5rem'
+            }}>
+              ★
+            </span>
+          ))}
+        </div>
+        <div style={{ fontSize: '1.2rem', fontWeight: 700 }}>
+          {reviews.average}/5
+        </div>
+        <div style={{ fontSize: '1rem', color: '#666' }}>
+          {reviews.total} reviews
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '2rem' }}>
+        {reviews.breakdown.map((item) => (
+          <div key={item.stars} style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '1rem', 
+            marginBottom: '0.8rem' 
+          }}>
+            <span style={{ minWidth: '20px' }}>{item.stars} ★</span>
+            <div style={{ 
+              flex: 1, 
+              height: '8px', 
+              backgroundColor: '#e0e0e0', 
+              borderRadius: '4px',
+              overflow: 'hidden'
+            }}>
+              <div style={{ 
+                width: `${(item.count / reviews.total) * 100}%`,
+                height: '100%',
+                backgroundColor: product.color,
+                transition: 'width 0.3s ease'
+              }} />
+            </div>
+            <span style={{ minWidth: '80px', fontSize: '0.9rem', color: '#666' }}>
+              {item.count} review{item.count !== 1 ? 's' : ''}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <button style={{
+        background: '#000',
+        color: '#fff',
+        border: 'none',
+        padding: '1rem 2rem',
+        borderRadius: '8px',
+        fontSize: '1rem',
+        fontWeight: 600,
+        textTransform: 'uppercase',
+        cursor: 'pointer',
+        transition: 'all 0.3s ease'
+      }}>
+        Write a Review →
+      </button>
+    </div>
+  );
+}
+
 export default function ProductPage() {
     const {product, recommendations} = useLoaderData<typeof loader>();
 
@@ -148,24 +480,13 @@ export default function ProductPage() {
       // left: '0',
       // zIndex: 10
     }}>
-      {/* PDP Text Animations */}
       <style>
         {`
-          @keyframes slideInFromLeft {
+          /* Mobile PDP Title Animation */
+          @keyframes titleSlideFromCenter {
             0% {
               opacity: 0;
-              transform: translateX(-120px) scale(0.95);
-            }
-            100% {
-              opacity: 1;
-              transform: translateX(0) scale(1);
-            }
-          }
-          
-          @keyframes slideUpFromBottom {
-            0% {
-              opacity: 0;
-              transform: translateY(100px) scale(0.9);
+              transform: translateY(20vh) scale(0.8);
             }
             100% {
               opacity: 1;
@@ -173,24 +494,28 @@ export default function ProductPage() {
             }
           }
           
-          .pdp-series-animate {
-            animation: slideInFromLeft 1.0s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-            opacity: 0;
+          /* Mobile PDP Can Animation - Slides in from left */
+          @keyframes canSlideInFromLeft {
+            0% {
+              opacity: 0;
+              transform: translateX(-100px);
+            }
+            100% {
+              opacity: 1;
+              transform: translateX(0);
+            }
           }
           
-          .pdp-title-animate {
-            animation: slideInFromLeft 1.2s cubic-bezier(0.23, 1, 0.32, 1) 0.2s forwards;
-            opacity: 0;
-          }
-          
-          .pdp-description-animate {
-            animation: slideInFromLeft 1.4s cubic-bezier(0.23, 1, 0.32, 1) 0.4s forwards;
-            opacity: 0;
-          }
-          
-          .pdp-buttons-animate {
-            animation: slideInFromLeft 1.6s cubic-bezier(0.23, 1, 0.32, 1) 0.6s forwards;
-            opacity: 0;
+          /* Mobile PDP Chips & Buttons Animation - Fade in from bottom */
+          @keyframes fadeInUp {
+            0% {
+              opacity: 0;
+              transform: translateY(20px);
+            }
+            100% {
+              opacity: 1;
+              transform: translateY(0);
+            }
           }
           
           .product-image-hover {
@@ -211,7 +536,6 @@ export default function ProductPage() {
             bottom: -20px;
             background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
             opacity: 0;
-            animation: none;
             pointer-events: none;
             z-index: -1;
             transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
@@ -219,21 +543,206 @@ export default function ProductPage() {
           
           .product-image-hover:hover::before {
             opacity: 1;
-            animation: pulseGlow 2s ease-in-out infinite alternate;
           }
-          
-          @keyframes pulseGlow {
-            0% { opacity: 0.6; transform: scale(1); }
-            100% { opacity: 1; transform: scale(1.05); }
-          }
-          
-          /* Desktop-only hero positioning */
-          @media (min-width: 768px) {
-            .pdp-hero-container {
-              padding-top: 0px !important; /* Move up another 50% (12px to 0px) */
-              transform: translateY(-10vh); /* Increased upward movement */
+
+          /* Mobile-optimized layout - BodyArmor style with overlapping title - PRODUCT PAGES ONLY */
+          @media (max-width: 767px) {
+            .pdp-hero .pdp-hero-container {
+              display: flex !important;
+              flex-direction: column !important;
+              justify-content: flex-start !important;
+              align-items: center !important;
+              text-align: center !important;
+              padding: 6rem 1rem 1rem !important;
+              gap: 0 !important;
+              min-height: 100vh !important;
+              position: relative !important;
+              overflow: visible !important;
+            }
+            
+            .pdp-hero .pdp-hero-text {
+              position: absolute !important;
+              top: 35% !important;
+              left: 50% !important;
+              transform: translate(-50%, -50%) !important;
+              width: 100% !important;
+              z-index: 1 !important;
+              pointer-events: none !important;
+            }
+            
+            /* Hide series label on mobile - it will be in the next section */
+            .pdp-hero .pdp-series-animate {
+              display: none !important;
+            }
+            
+            .pdp-hero .pdp-title-animate {
+              font-size: clamp(4rem, 14vw, 6rem) !important;
+              line-height: 0.85 !important;
+              margin: 0 !important;
+              padding: 0 1rem !important;
+              font-weight: 900 !important;
+              color: #fff !important;
+              text-align: center !important;
+              width: 100% !important;
+              display: block !important;
+              text-transform: uppercase !important;
+              letter-spacing: -0.02em !important;
+              animation: titleSlideFromCenter 0.8s cubic-bezier(0.23, 1, 0.32, 1) 0.2s both !important;
+            }
+            
+            /* Hide description on mobile */
+            .pdp-hero .pdp-description-animate {
+              display: none !important;
+            }
+            
+            .pdp-hero .pdp-hero-image {
+              position: relative !important;
+              width: 100% !important;
+              z-index: 10 !important;
+              display: flex !important;
+              justify-content: center !important;
+              align-items: center !important;
+              padding: 0 !important;
+              margin-top: 0 !important;
+              animation: canSlideInFromLeft 0.8s cubic-bezier(0.23, 1, 0.32, 1) 1.0s both !important;
+            }
+            
+            .pdp-hero .pdp-hero-image > div {
+              width: 100% !important;
+              display: flex !important;
+              justify-content: center !important;
+            }
+            
+            .pdp-hero .pdp-hero-image img {
+              max-width: 70vw !important;
+              height: auto !important;
+              max-height: 60vh !important;
+              object-fit: contain !important;
+            }
+            
+            /* Mobile: Show single can, hide multiple cans */
+            .desktop-product-image {
+              display: none !important;
+            }
+            
+            .mobile-product-image {
+              display: block !important;
+            }
+            
+            /* Product chips in single horizontal row */
+            .pdp-hero .pdp-chips-animate {
+              position: absolute !important;
+              bottom: 21vh !important;
+              left: 50% !important;
+              transform: translateX(-50%) !important;
+              display: flex !important;
+              gap: 0.5rem !important;
+              justify-content: center !important;
+              flex-wrap: nowrap !important;
+              z-index: 4 !important;
+              width: 100% !important;
+              max-width: 90% !important;
+              padding: 0 1rem !important;
+              animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) 1.8s both !important;
+            }
+            
+            .pdp-hero .product-chip {
+              background: rgba(255, 255, 255, 0.9) !important;
+              backdrop-filter: blur(10px) !important;
+              -webkit-backdrop-filter: blur(10px) !important;
+              padding: 0.8rem 1.2rem !important;
+              border-radius: 25px !important;
+              font-size: 0.8rem !important;
+              font-weight: 600 !important;
+              text-transform: uppercase !important;
+              letter-spacing: 0.05em !important;
+              border: none !important;
+              opacity: 1 !important;
+              white-space: nowrap !important;
+              flex-shrink: 0 !important;
+              flex: 1 !important;
+              text-align: center !important;
+              box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+            }
+            
+            /* Buttons at the bottom but within viewport */
+            .pdp-hero .pdp-buttons-animate {
+              position: absolute !important;
+              bottom: 1vh !important;
+              left: 50% !important;
+              transform: translateX(-50%) !important;
+              display: flex !important;
+              flex-direction: column !important;
+              gap: 1rem !important;
+              width: 100% !important;
+              max-width: 320px !important;
+              z-index: 4 !important;
+              padding: 0 2rem !important;
+              animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) 2.0s both !important;
+            }
+            
+            /* Shop Now Button - White with product color text */
+            .pdp-hero .pdp-buttons-animate .shop-now-btn {
+              width: 140% !important;
+              padding: 0.8rem 2rem !important;
+              text-align: center !important;
+              border-radius: 50px !important;
+              font-weight: 700 !important;
+              font-size: 1rem !important;
+              text-transform: uppercase !important;
+              letter-spacing: 0.1em !important;
+              background: rgba(255, 255, 255, 0.95) !important;
+              border: none !important;
+              box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+              opacity: 1 !important;
+              cursor: pointer !important;
+              backdrop-filter: blur(10px) !important;
+              -webkit-backdrop-filter: blur(10px) !important;
+              position: relative !important;
+              left: 50% !important;
+              margin-left: -70% !important;
+            }
+            
+            /* Find Near Me Link - Simple text styling */
+            .pdp-hero .pdp-buttons-animate .find-near-me-btn {
+              width: 100% !important;
+              padding: 0.5rem 0 !important;
+              text-align: center !important;
+              border-radius: 0 !important;
+              font-weight: 500 !important;
+              font-size: 0.85rem !important;
+              text-transform: uppercase !important;
+              letter-spacing: 0.1em !important;
+              background: transparent !important;
+              color: rgba(255, 255, 255, 0.8) !important;
+              border: none !important;
+              box-shadow: none !important;
+              backdrop-filter: none !important;
+              -webkit-backdrop-filter: none !important;
+              opacity: 1 !important;
+              text-decoration: none !important;
+              display: block !important;
+              margin-top: 0 !important;
             }
           }
+           
+           /* Desktop - PRODUCT PAGES ONLY */
+           @media (min-width: 768px) {
+             .pdp-hero .pdp-hero-container {
+               padding-top: 0px !important;
+               transform: translateY(-10vh) !important;
+             }
+             
+             /* Desktop: Show multiple cans, hide single can */
+             .desktop-product-image {
+               display: block !important;
+             }
+             
+             .mobile-product-image {
+               display: none !important;
+             }
+           }
+          
         `}
       </style>
 
@@ -260,10 +769,10 @@ export default function ProductPage() {
           gap: '4rem',
           alignItems: 'center',
           width: '100%',
-            paddingTop: '2rem' // Reduced since no header
+          paddingTop: '2rem' // Reduced since no header
         }}>
           {/* Left: Hero Text Content */}
-          <div style={{
+          <div className="pdp-hero-text" style={{
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
@@ -277,7 +786,6 @@ export default function ProductPage() {
                 textTransform: 'uppercase',
                 letterSpacing: '0.15em',
                 marginBottom: '1rem',
-                opacity: 0,
                 fontWeight: 600
               }}
             >
@@ -286,43 +794,61 @@ export default function ProductPage() {
             <h1 
               className="pdp-title-animate"
               style={{
-                fontSize: 'clamp(3rem, 6vw, 5rem)',
+                fontSize: 'clamp(4rem, 8vw, 6.5rem)',
                 fontWeight: 900,
                 textTransform: 'uppercase',
                 lineHeight: 0.9,
                 letterSpacing: '-0.02em',
                 marginBottom: '2rem',
-                color: '#fff',
-                opacity: 0
+                color: '#fff'
               }}
             >
               {product.title}
             </h1>
             
-            <p 
-              className="pdp-description-animate"
-              style={{
-                fontSize: '1.3rem',
-                lineHeight: 1.5,
-                marginBottom: '3rem',
-                opacity: 0,
-                maxWidth: '500px'
-              }}
-            >
-              {product.description}
-            </p>
+             <p 
+               className="pdp-description-animate"
+               style={{
+                 fontSize: '1.3rem',
+                 lineHeight: 1.5,
+                 marginBottom: '3rem',
+                 maxWidth: '500px'
+               }}
+             >
+               {product.description}
+             </p>
 
-            <div 
-              className="pdp-buttons-animate"
+             {/* Product Chips - Mobile Only */}
+             <div 
+               className="pdp-chips-animate"
+               style={{
+                 display: 'none' // Hidden on desktop, shown on mobile via CSS
+               }}
+             >
+               {getProductChips(product.handle).map((chip, index) => (
+                 <span
+                   key={chip}
+                   className="product-chip"
+                   style={{
+                     color: product.color
+                   }}
+                 >
+                   {chip}
+                 </span>
+               ))}
+             </div>
+ 
+             <div 
+               className="pdp-buttons-animate"
               style={{ 
                 display: 'flex', 
                 gap: '1.5rem', 
                 flexWrap: 'wrap', 
-                marginBottom: '2rem',
-                opacity: 0
+                marginBottom: '2rem'
               }}
             >
               <button 
+                className="shop-now-btn"
                 style={{
                   background: '#fff',
                   color: product.color,
@@ -345,9 +871,10 @@ export default function ProductPage() {
                   e.currentTarget.style.color = product.color;
                 }}
               >
-                Subscribe & Save
+                Shop Now
               </button>
               <Link 
+                className="find-near-me-btn"
                 to="/pages/where-to-buy" 
                 style={{
                   border: '3px solid #fff',
@@ -371,13 +898,13 @@ export default function ProductPage() {
                   e.currentTarget.style.color = '#fff';
                 }}
               >
-                Find Near Me
+                FIND IT NEAR ME →
               </Link>
             </div>
           </div>
 
           {/* Right: Product Image */}
-          <div style={{
+          <div className="pdp-hero-image" style={{
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
@@ -387,9 +914,6 @@ export default function ProductPage() {
             {product.handle === 'watermelon-refresher' && (
               <div style={{
                 position: 'relative',
-                animation: 'slideUpFromBottom 1.8s cubic-bezier(0.23, 1, 0.32, 1) 0.8s forwards',
-                transform: 'translateY(100px) scale(0.9)',
-                opacity: 0,
                 width: '100%',
                 maxWidth: '600px',
                 display: 'flex',
@@ -415,15 +939,12 @@ export default function ProductPage() {
             )}
 
             {product.handle === 'hazy-ipa' && (
-              <div style={{
-                animation: 'slideUpFromBottom 1.8s cubic-bezier(0.23, 1, 0.32, 1) 0.8s forwards',
-                transform: 'translateY(100px) scale(0.9)',
-                opacity: 0
-              }}>
+              <div>
+                {/* Desktop: Multiple cans */}
                 <img 
                   src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/hazy-cans.png?v=1759269017"
                   alt="DrinkSip Hazy IPA"
-                  className="product-image-hover"
+                  className="product-image-hover desktop-product-image"
                   style={{
                     width: '100%',
                     maxWidth: '600px',
@@ -433,15 +954,26 @@ export default function ProductPage() {
                     transition: 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)'
                   }}
                 />
+                {/* Mobile: Single can */}
+                <img 
+                  src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Hazy_IPA_0645f5ce-2ec5-4fda-87ee-fb36a4ee4295.png?v=1759017824"
+                  alt="DrinkSip Hazy IPA"
+                  className="product-image-hover mobile-product-image"
+                  style={{
+                    width: '100%',
+                    maxWidth: '600px',
+                    height: 'auto',
+                    filter: 'drop-shadow(0 30px 60px rgba(0, 0, 0, 0.4))',
+                    cursor: 'pointer',
+                    transition: 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)',
+                    display: 'none'
+                  }}
+                />
               </div>
             )}
 
             {product.handle === 'blood-orange-refresher' && (
-              <div style={{
-                animation: 'slideUpFromBottom 1.8s cubic-bezier(0.23, 1, 0.32, 1) 0.8s forwards',
-                transform: 'translateY(100px) scale(0.9)',
-                opacity: 0
-              }}>
+              <div>
                 <img 
                   src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Blood_Orange_Refresher_82f1cfff-dfdd-44c5-bb02-6f8e74183f36.png?v=1759017824"
                   alt="DrinkSip Blood Orange Refresher"
@@ -459,11 +991,7 @@ export default function ProductPage() {
             )}
 
             {product.handle === 'lemon-lime-refresher' && (
-              <div style={{
-                animation: 'slideUpFromBottom 1.8s cubic-bezier(0.23, 1, 0.32, 1) 0.8s forwards',
-                transform: 'translateY(100px) scale(0.9)',
-                opacity: 0
-              }}>
+              <div>
                 <img 
                   src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Lemon_Lime_Refresher_9565ca39-8832-48ab-8c6b-bcd0899f87e9.png?v=1759017824"
                   alt="DrinkSip Lemon Lime Refresher"
@@ -481,11 +1009,7 @@ export default function ProductPage() {
             )}
 
             {product.handle === '311-hazy-ipa' && (
-              <div style={{
-                animation: 'slideUpFromBottom 1.8s cubic-bezier(0.23, 1, 0.32, 1) 0.8s forwards',
-                transform: 'translateY(100px) scale(0.9)',
-                opacity: 0
-              }}>
+              <div>
                 <img 
                   src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/311_Hazy_IPA_607644d9-92cb-4a02-af68-0eb18d34063a.png?v=1759017824"
                   alt="DrinkSip x 311 Hazy IPA"
@@ -503,11 +1027,7 @@ export default function ProductPage() {
             )}
 
             {(product.handle === 'deftones-tone-zero' || product.handle === 'deftones-tone-zero-lager') && (
-              <div style={{
-                animation: 'slideUpFromBottom 1.8s cubic-bezier(0.23, 1, 0.32, 1) 0.8s forwards',
-                transform: 'translateY(100px) scale(0.9)',
-                opacity: 0
-              }}>
+              <div>
                 <img 
                   src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Deftones_Tone_Zero_Lager_dcc52426-36ee-42ee-a3b5-b49f7d2d7480.png?v=1759017824"
                   alt="DrinkSip x Deftones Tone Zero Lager"
@@ -524,10 +1044,10 @@ export default function ProductPage() {
               </div>
             )}
           </div>
-        </div>
-      </section>
-
-      {/* You May Like Section - Copied from Homepage */}
+          </div>
+        </section>
+ 
+        {/* You May Like Section - Copied from Homepage */}
       <section style={{
         padding: '2.5rem 2rem 1.5rem', // Desktop padding
         background: '#000',
