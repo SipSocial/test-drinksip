@@ -5,7 +5,8 @@
    Premium typography with Peridot font family
    ============================================================================= */
 
-/* Foundry Peridot Font Family - @font-face declarations */
+/* Foundry Peridot Font Family - @font-face declarations - DISABLED (files missing) */
+/*
 @font-face {
   font-family: 'Peridot';
   src: url('/fonts/peridot-light.woff2') format('woff2'),
@@ -15,7 +16,9 @@
   font-style: normal;
   font-display: swap;
 }
+*/
 
+/*
 @font-face {
   font-family: 'Peridot';
   src: url('/fonts/peridot-regular.woff2') format('woff2'),
@@ -45,7 +48,9 @@
   font-style: normal;
   font-display: swap;
 }
+*/
 
+/*
 @font-face {
   font-family: 'Peridot Black';
   src: url('/fonts/peridot-black.woff2') format('woff2'),
@@ -55,6 +60,7 @@
   font-style: normal;
   font-display: swap;
 }
+*/
 
 /* CSS RESET & BASE */
 * {

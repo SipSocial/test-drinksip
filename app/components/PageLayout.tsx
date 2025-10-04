@@ -11,6 +11,7 @@ import {DrinkSipFooter} from '~/components/DrinkSipFooter';
 import {Header, HeaderMenu} from '~/components/Header';
 import {GlassHeader} from '~/components/GlassHeader';
 import {WhiteHeader} from '~/components/WhiteHeader';
+import {MobileBodyArmorHeader} from '~/components/MobileBodyArmorHeader';
 import {CartMain} from '~/components/CartMain';
 import {
   SEARCH_ENDPOINT,
@@ -43,9 +44,36 @@ export function PageLayout({
       <CartAside cart={cart} />
       <SearchAside />
       <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
-      {isHomepage ? <GlassHeader /> : <WhiteHeader />}
+      
+      {/* Desktop Headers - Hidden on Mobile */}
+      <div style={{ display: 'block' }} className="desktop-only-header">
+        {isHomepage ? <GlassHeader /> : <WhiteHeader />}
+      </div>
+      
+      {/* Mobile BODYARMOR-Style Header - Hidden on Desktop */}
+      <MobileBodyArmorHeader 
+        cart={cart} 
+        isLoggedIn={isLoggedIn} 
+        publicStoreDomain={publicStoreDomain} 
+      />
+      
       <main style={{ paddingTop: '0' }}>{children}</main>
       <DrinkSipFooter />
+      
+      {/* CSS to control mobile/desktop header display */}
+      <style>
+        {`
+          .desktop-only-header {
+            display: block;
+          }
+          
+          @media (max-width: 767px) {
+            .desktop-only-header {
+              display: none !important;
+            }
+          }
+        `}
+      </style>
     </Aside.Provider>
   );
 }
@@ -104,17 +132,19 @@ function MobileMenuAside({
   header: PageLayoutProps['header'];
   publicStoreDomain: PageLayoutProps['publicStoreDomain'];
 }) {
+  // Guard against null header or menu
+  if (!header || !header.menu || !header.shop?.primaryDomain?.url) {
+    return null;
+  }
+
   return (
-    header.menu &&
-    header.shop.primaryDomain?.url && (
-      <Aside type="mobile" heading="MENU">
-        <HeaderMenu
-          menu={header.menu}
-          viewport="mobile"
-          primaryDomainUrl={header.shop.primaryDomain.url}
-          publicStoreDomain={publicStoreDomain}
-        />
-      </Aside>
-    )
+    <Aside type="mobile" heading="MENU">
+      <HeaderMenu
+        menu={header.menu}
+        viewport="mobile"
+        primaryDomainUrl={header.shop.primaryDomain.url}
+        publicStoreDomain={publicStoreDomain}
+      />
+    </Aside>
   );
 }

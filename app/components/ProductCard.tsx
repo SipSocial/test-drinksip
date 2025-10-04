@@ -13,39 +13,42 @@ export function ProductCard({ id, handle, title, image, className = '' }: Produc
   const accentColor = getAccentHexForProduct(handle, title, [], []);
   
   return (
-    <Link 
-      to={`/products/${handle}`}
-      className={`bodyarmor-product-card ${className}`}
-      style={{
-        textDecoration: 'none',
-        color: 'inherit',
-        display: 'block',
-        transition: 'transform 0.3s ease'
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'translateY(-8px)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = 'translateY(0)';
-      }}
-    >
-      {/* BodyArmor JUMBO Cards - Always 3 Per Row, Responsive Scaling */}
-      <div style={{
-        // Always fit 3 jumbo cards - scales to available space
-        width: 'clamp(200px, 28vw, 735px)', // Scales to fit 3 cards: Mobile: 200px → Desktop: 735px
-        height: 'clamp(250px, 35vw, 910px)', // Proportional height scaling
-        border: 'clamp(3.3px, 0.825vw, 15.4px) solid #ffffff', // 10% increased responsive white border
-        borderRadius: '0px',
-        overflow: 'hidden',
-        // Removed shadow to prevent interference with product titles
-        position: 'relative',
-        background: accentColor,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0,
-        flexGrow: 0
-      }}>
+    <>
+      <Link 
+        to={`/products/${handle}`}
+        className={`bodyarmor-product-card ${className}`}
+        style={{
+          textDecoration: 'none',
+          color: 'inherit',
+          display: 'block',
+          transition: 'transform 0.3s ease'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-8px)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0)';
+        }}
+      >
+        {/* BodyArmor JUMBO Cards - MOBILE 2.5x LARGER */}
+        <div 
+          className="product-card-container"
+          style={{
+            // Desktop: Always fit 3 cards - scales to available space
+            width: 'clamp(200px, 28vw, 735px)', // Scales to fit 3 cards: Mobile: 200px → Desktop: 735px
+            height: 'clamp(250px, 35vw, 910px)', // Proportional height scaling
+            border: 'clamp(3px, 0.75vw, 14px) solid #ffffff', // Restored to original responsive white border
+            borderRadius: '0px',
+            overflow: 'hidden',
+            position: 'relative',
+            background: accentColor,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            flexGrow: 0
+          }}
+        >
         {/* Product Image - BodyArmor Scale */}
         <img 
           src={image}
@@ -95,23 +98,59 @@ export function ProductCard({ id, handle, title, image, className = '' }: Produc
       </div>
       
       {/* BodyArmor Product Title - Responsive Styling */}
-      <div style={{
-        marginTop: 'clamp(1rem, 1.5vw, 1.5rem)', // BodyArmor responsive margin
-        textAlign: 'center'
-      }}>
-        <h3 style={{
-          fontSize: 'clamp(0.6rem, 1.2vw, 1.1rem)', // Much smaller font size
-          fontWeight: '900',
-          color: '#fff',
-          margin: 0,
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-          lineHeight: 1,
-          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif'
-        }}>
+      <div 
+        className="product-title-container"
+        style={{
+          marginTop: 'clamp(1rem, 1.5vw, 1.5rem)', // BodyArmor responsive margin
+          textAlign: 'center'
+        }}
+      >
+        <h3 
+          className="product-title"
+          style={{
+            fontSize: 'clamp(0.6rem, 1.2vw, 1.1rem)', // Much smaller font size
+            fontWeight: '900',
+            color: '#fff',
+            margin: 0,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            lineHeight: 1,
+            fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif'
+          }}
+        >
           {title.replace('DrinkSip ', '')}
         </h3>
       </div>
     </Link>
+    
+    {/* MOBILE-SPECIFIC STYLES FOR JUMBO CARDS */}
+    <style>
+      {`
+        /* MOBILE ONLY - 2.5x LARGER PRODUCT CARDS */
+        @media (max-width: 767px) {
+          .product-card-container {
+            /* JUMBO sizing - 2.5x larger on mobile */
+            width: clamp(320px, 85vw - 2rem, 400px) !important;
+            height: clamp(400px, 106vw - 2.5rem, 500px) !important;
+            border-width: clamp(4px, 1vw, 8px) !important;
+          }
+          
+          .product-title-container {
+            margin-top: clamp(1.2rem, 3vw, 2rem) !important;
+          }
+          
+          .product-title {
+            font-size: clamp(0.8rem, 2.5vw, 1.4rem) !important;
+            letter-spacing: 0.08em !important;
+          }
+          
+          /* No hover effects on mobile */
+          .bodyarmor-product-card:hover {
+            transform: none !important;
+          }
+        }
+      `}
+    </style>
+  </>
   );
 }

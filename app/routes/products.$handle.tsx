@@ -132,51 +132,21 @@ export async function loader({params}: LoaderFunctionArgs) {
 
 export default function ProductPage() {
     const {product, recommendations} = useLoaderData<typeof loader>();
-    const [currentSection, setCurrentSection] = useState(0);
-
-
-  // Snap scroll sections
-  const sections = [
-    'hero',
-    'details', 
-    'nutrition',
-    'story',
-    'subscription'
-  ];
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const sectionIndex = Math.floor(scrollPosition / windowHeight);
-      setCurrentSection(Math.min(sectionIndex, sections.length - 1));
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const scrollToSection = (index: number) => {
-    window.scrollTo({
-      top: index * window.innerHeight,
-      behavior: 'smooth'
-    });
-  };
 
   return (
     <div style={{
       background: '#000',
       color: '#fff',
-      scrollSnapType: 'y mandatory',
-      height: '100vh',
+      // scrollSnapType: 'y mandatory', // DISABLED - No more snap scroll
+      minHeight: '100vh',
       width: '100vw',
-      overflowY: 'scroll',
+      overflowY: 'auto',
       margin: '0',
       padding: '0',
-      position: 'fixed',
-      top: '0',
-      left: '0',
-      zIndex: 10
+      // position: 'fixed', // REMOVED - This was causing scrolling issues
+      // top: '0',
+      // left: '0',
+      // zIndex: 10
     }}>
       {/* PDP Text Animations */}
       <style>
@@ -256,80 +226,21 @@ export default function ProductPage() {
             0% { opacity: 0.6; transform: scale(1); }
             100% { opacity: 1; transform: scale(1.05); }
           }
+          
+          /* Desktop-only hero positioning */
+          @media (min-width: 768px) {
+            .pdp-hero-container {
+              padding-top: 0px !important; /* Move up another 50% (12px to 0px) */
+              transform: translateY(-10vh); /* Increased upward movement */
+            }
+          }
         `}
       </style>
-      
-      {/* Black Header for PDP */}
-      <WhiteHeader />
-      
-      {/* Close Button - Positioned to work with black header */}
-      <Link
-        to="/"
-        style={{
-          position: 'fixed',
-          top: '124px', // Positioned below the reduced height header
-          right: '2rem',
-          zIndex: 1001,
-          width: '50px',
-          height: '50px',
-          borderRadius: '50%',
-          background: 'rgba(255, 255, 255, 0.1)',
-          backdrop: 'blur(10px)',
-          border: '2px solid rgba(255, 255, 255, 0.3)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#fff',
-          textDecoration: 'none',
-          fontSize: '1.5rem',
-          fontWeight: 'bold',
-          transition: 'all 0.3s ease',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
-          e.currentTarget.style.transform = 'scale(1.1)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-          e.currentTarget.style.transform = 'scale(1)';
-        }}
-      >
-        ×
-      </Link>
-
-      {/* Section Navigation Dots */}
-      <div style={{
-        position: 'fixed',
-        right: '2rem',
-        top: '50%',
-        transform: 'translateY(-50%)',
-        zIndex: 1000,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1rem'
-      }}>
-        {sections.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => scrollToSection(index)}
-            style={{
-            width: '12px',
-            height: '12px',
-            borderRadius: '50%',
-            border: '2px solid #fff',
-            background: currentSection === index ? '#fff' : 'transparent',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease'
-            }}
-            aria-label={`Go to section ${index + 1}`}
-          />
-        ))}
-      </div>
 
       {/* Hero Section */}
       <section className="pdp-hero" style={{
         background: product.color,
-        scrollSnapAlign: 'start',
+        // scrollSnapAlign: 'start', // DISABLED - No more snap scroll
         display: 'flex',
         alignItems: 'center',
         position: 'relative',
@@ -338,7 +249,9 @@ export default function ProductPage() {
         margin: '0',
         padding: '0'
       }}>
-        <div style={{
+        <div 
+          className="pdp-hero-container"
+          style={{
           maxWidth: '1400px',
           margin: '0 auto',
           padding: '0 2rem',
@@ -347,7 +260,7 @@ export default function ProductPage() {
           gap: '4rem',
           alignItems: 'center',
           width: '100%',
-          paddingTop: '114px' // Adjusted for reduced header height
+            paddingTop: '2rem' // Reduced since no header
         }}>
           {/* Left: Hero Text Content */}
           <div style={{
@@ -410,7 +323,6 @@ export default function ProductPage() {
               }}
             >
               <button 
-                onClick={() => scrollToSection(4)}
                 style={{
                   background: '#fff',
                   color: product.color,
@@ -615,495 +527,248 @@ export default function ProductPage() {
         </div>
       </section>
 
-      {/* Details Section */}
+      {/* You May Like Section - Copied from Homepage */}
       <section style={{
+        padding: '2.5rem 2rem 1.5rem', // Desktop padding
         background: '#000',
-        minHeight: '100vh',
-        scrollSnapAlign: 'start',
-        display: 'flex',
-        alignItems: 'center',
-        borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+        textAlign: 'center',
+        position: 'relative' // For controls positioning
       }}>
         <div style={{
           maxWidth: '1400px',
-          margin: '0 auto',
-          padding: '0 2rem',
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '6rem',
-          alignItems: 'center',
-          width: '100%'
+          margin: '0 auto'
         }}>
-          <div>
-            <h2 style={{
-              fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+          <h1 
+            className="you-may-like-header"
+            style={{
+              fontSize: 'clamp(4rem, 8vw, 6rem)', // Desktop size
               fontWeight: 900,
               textTransform: 'uppercase',
+              letterSpacing: '-0.03em',
               lineHeight: 0.9,
-              letterSpacing: '-0.02em',
-              marginBottom: '2rem',
-              color: '#fff'
-            }}>
-              Why It Works
-            </h2>
-            <ul style={{
-              listStyle: 'none',
-              padding: 0,
-              margin: 0
-            }}>
-              {product.features.map((feature: string, index: number) => (
-                <li key={index} style={{
-                  padding: '1.5rem 0',
-                  fontWeight: 900,
-                  textTransform: 'uppercase',
-                  fontSize: '1.1rem',
-                  letterSpacing: '0.08em',
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1rem'
-                }}>
-                  <span style={{
-                    width: '8px',
-                    height: '8px',
-                    background: product.color,
-                    borderRadius: '50%',
-                    flexShrink: 0
-                  }} />
-                  {feature}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div style={{
-            background: `linear-gradient(135deg, ${product.color}20, transparent)`,
-            borderRadius: '20px',
-            padding: '3rem',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '4rem', marginBottom: '2rem' }}>🍺</div>
-            <h3 style={{
-              fontSize: '1.8rem',
-              fontWeight: 900,
-              textTransform: 'uppercase',
-              marginBottom: '1rem',
-              color: '#fff'
-            }}>
-              Premium Quality
-            </h3>
-            <p style={{
-              color: '#ccc',
-              fontSize: '1.1rem',
+              color: '#fff',
+              marginBottom: '1rem'
+            }}
+          >
+            You May Like
+          </h1>
+          <p 
+            className="you-may-like-description"
+            style={{
+              fontSize: '1.3rem', // Desktop size
+              color: '#888',
+              maxWidth: '600px',
+              margin: '0 auto',
               lineHeight: 1.5
-            }}>
-              Crafted with the finest ingredients and brewing techniques to deliver an authentic beer experience without the alcohol.
+            }}
+          >
+            Our complete range of premium non-alcoholic beers.
             </p>
           </div>
-        </div>
-      </section>
-
-      {/* Nutrition Section */}
-      <section style={{
-        background: '#111',
-        minHeight: '100vh',
-        scrollSnapAlign: 'start',
-        display: 'flex',
+        
+        {/* Mobile Controls - BETWEEN HEADER AND CARDS */}
+        <div 
+          className="carousel-controls-container"
+          style={{
+            position: 'absolute',
+            top: '80%', // Position at bottom of header section
+            right: '2rem',
+            display: 'none', // Hidden by default, shown on mobile
         alignItems: 'center',
-        borderTop: '1px solid rgba(255, 255, 255, 0.1)'
-      }}>
-        <div style={{
-          maxWidth: '1400px',
-          margin: '0 auto',
-          padding: '0 2rem',
-          width: '100%',
-          textAlign: 'center'
-        }}>
-          <h2 style={{
-            fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-            fontWeight: 900,
-            textTransform: 'uppercase',
-            lineHeight: 0.9,
-            letterSpacing: '-0.02em',
-            marginBottom: '4rem',
-            color: '#fff'
-          }}>
-            Nutrition Facts
-          </h2>
-          
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '4rem',
-            maxWidth: '1000px',
-            margin: '0 auto'
-          }}>
-            {/* Nutrition Facts */}
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              borderRadius: '20px',
-              padding: '3rem',
-              border: '1px solid rgba(255, 255, 255, 0.1)'
-            }}>
-              <h3 style={{
-                fontSize: '1.5rem',
-                fontWeight: 900,
-                textTransform: 'uppercase',
-                marginBottom: '2rem',
-                color: product.color
-              }}>
-                Per 12 FL OZ
-              </h3>
-              <div style={{
-                display: 'grid',
-                gap: '1rem'
-              }}>
-                {[
-                  { label: 'Calories', value: '25' },
-                  { label: 'Total Carbs', value: '6g' },
-                  { label: 'Sugars', value: '4g' },
-                  { label: 'Sodium', value: '15mg' },
-                  { label: 'Alcohol', value: '<0.5%' }
-                ].map((item, index) => (
-                  <div key={index} style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '1rem 0',
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                    fontSize: '1.1rem',
-                    fontWeight: 600
-                  }}>
-                    <span style={{ color: '#ccc' }}>{item.label}</span>
-                    <span style={{ color: '#fff', fontWeight: 900 }}>{item.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Ingredients */}
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              borderRadius: '20px',
-              padding: '3rem',
-              border: '1px solid rgba(255, 255, 255, 0.1)'
-            }}>
-              <h3 style={{
-                fontSize: '1.5rem',
-                fontWeight: 900,
-                textTransform: 'uppercase',
-                marginBottom: '2rem',
-                color: product.color
-              }}>
-                Ingredients
-              </h3>
-              <div style={{
-                textAlign: 'left'
-              }}>
-                {[
-                  'Filtered Water',
-                  'Malted Barley',
-                  'Natural Hop Extract',
-                  'Natural Flavors',
-                  'Citric Acid',
-                  'Potassium Sorbate'
-                ].map((ingredient, index) => (
-                  <div key={index} style={{
-                    padding: '0.75rem 0',
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                    fontSize: '1rem',
-                    color: '#ccc',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem'
-                  }}>
-                    <span style={{
-                      width: '6px',
-                      height: '6px',
-                      background: product.color,
+            gap: '0.5rem',
+            zIndex: 100
+          }}
+        >
+          <button 
+            className="carousel-control carousel-control-left"
+            style={{
+              width: '44px',
+              height: '44px',
+              border: 'none',
                       borderRadius: '50%',
-                      flexShrink: 0
-                    }} />
-                    {ingredient}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Story Section */}
-      <section style={{
-        background: product.color,
-        minHeight: '100vh',
-        scrollSnapAlign: 'start',
+              background: 'rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
+              color: '#fff',
+              cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
-        borderTop: '1px solid rgba(255, 255, 255, 0.1)'
-      }}>
-        <div style={{
-          maxWidth: '1400px',
-          margin: '0 auto',
-          padding: '0 2rem',
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '6rem',
-          alignItems: 'center',
-          width: '100%'
-        }}>
-          <div style={{
-            display: 'flex',
             justifyContent: 'center',
-            alignItems: 'center'
-          }}>
-            <div style={{
-              width: '400px',
-              height: '400px',
+              fontSize: '1.2rem',
+              fontWeight: 300,
+              transition: 'all 0.2s ease',
+              WebkitTapHighlightColor: 'transparent'
+            }}
+            aria-label="Previous products"
+          >
+            ‹
+          </button>
+          
+          <button 
+            className="carousel-control carousel-control-right"
+            style={{
+              width: '44px',
+              height: '44px',
+              border: 'none',
               borderRadius: '50%',
-              background: 'rgba(255, 255, 255, 0.1)',
+              background: 'rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
+              color: '#fff',
+              cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '8rem'
-            }}>
-              🍺
-            </div>
-          </div>
-          <div>
-            <h2 style={{
-              fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-              fontWeight: 900,
-              textTransform: 'uppercase',
-              lineHeight: 0.9,
-              letterSpacing: '-0.02em',
-              marginBottom: '2rem',
-              color: '#fff'
-            }}>
-              The Story
-            </h2>
-            <p style={{
-              fontSize: '1.3rem',
-              lineHeight: 1.6,
-              marginBottom: '2rem',
-              opacity: 0.95
-            }}>
-              Born from a passion for authentic beer flavor without compromise. Our master brewers spent years perfecting the process to deliver the full-bodied taste you crave.
-            </p>
-            <p style={{
-              fontSize: '1.1rem',
-              lineHeight: 1.6,
-              opacity: 0.9
-            }}>
-              Every sip tells the story of craftsmanship, innovation, and the relentless pursuit of the perfect non-alcoholic beer experience.
-            </p>
-          </div>
+              fontSize: '1.2rem',
+              fontWeight: 300,
+              transition: 'all 0.2s ease',
+              WebkitTapHighlightColor: 'transparent'
+            }}
+            aria-label="Next products"
+          >
+            ›
+          </button>
         </div>
       </section>
 
-      {/* Subscription Section */}
-      <section style={{
+       {/* MOBILE JUMBO Product Carousel with Controls */}
+       <section 
+         className="product-carousel-section"
+         style={{
+           padding: 'clamp(3rem, 8vw, 4rem) 0 clamp(1rem, 3vw, 2rem) 0', // More top padding to prevent overlap
         background: '#000',
-        minHeight: '100vh',
-        scrollSnapAlign: 'start',
+           overflow: 'hidden',
+           position: 'relative'
+         }}
+       >
+         {/* Carousel Container */}
+         <div 
+           className="product-carousel-container"
+           style={{
         display: 'flex',
-        alignItems: 'center',
-        borderTop: '1px solid rgba(255, 255, 255, 0.1)'
-      }}>
-        <div style={{
-          maxWidth: '1000px',
-          margin: '0 auto',
-          padding: '0 2rem',
-          textAlign: 'center',
-          width: '100%'
-        }}>
-          <h2 style={{
-            fontSize: 'clamp(3rem, 6vw, 5rem)',
-            fontWeight: 900,
-            textTransform: 'uppercase',
-            lineHeight: 0.9,
-            letterSpacing: '-0.02em',
-            marginBottom: '2rem',
-            color: '#fff'
-          }}>
-            Never Run Out
-          </h2>
-          <p style={{
-            fontSize: '1.3rem',
-            color: '#ccc',
-            marginBottom: '4rem',
-            maxWidth: '600px',
-            margin: '0 auto 4rem'
-          }}>
-            Subscribe and save 15% on every order. Skip, pause, or cancel anytime.
-          </p>
-
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-            gap: '2rem',
-            marginBottom: '4rem'
-          }}>
-            {[
-              { frequency: 'Every 2 Weeks', savings: '15%', popular: false },
-              { frequency: 'Every Month', savings: '15%', popular: true },
-              { frequency: 'Every 2 Months', savings: '15%', popular: false }
-            ].map((plan, index) => (
-              <div key={index} style={{
-                background: plan.popular ? product.color : 'rgba(255, 255, 255, 0.05)',
-                borderRadius: '20px',
-                padding: '2.5rem 2rem',
-                border: plan.popular ? `3px solid ${product.color}` : '1px solid rgba(255, 255, 255, 0.1)',
-                position: 'relative',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                if (!plan.popular) {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                  e.currentTarget.style.transform = 'translateY(-4px)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!plan.popular) {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }
-              }}>
-                {plan.popular && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '-12px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    background: '#fff',
-                    color: '#000',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '20px',
-                    fontSize: '0.8rem',
-                    fontWeight: 900,
-                    textTransform: 'uppercase'
-                  }}>
-                    Most Popular
-                  </div>
-                )}
-                <h3 style={{
-                  fontSize: '1.3rem',
-                  fontWeight: 900,
-                  textTransform: 'uppercase',
-                  marginBottom: '1rem',
-                  color: plan.popular ? '#000' : '#fff'
-                }}>
-                  {plan.frequency}
-                </h3>
-                <div style={{
-                  fontSize: '2rem',
-                  fontWeight: 900,
-                  color: plan.popular ? '#000' : product.color,
-                  marginBottom: '1rem'
-                }}>
-                  Save {plan.savings}
-                </div>
-                <button style={{
-                  width: '100%',
-                  padding: '1rem',
-                  border: plan.popular ? '2px solid #000' : '2px solid #fff',
-                  background: plan.popular ? '#000' : 'transparent',
-                  color: plan.popular ? '#fff' : '#fff',
-                  fontWeight: 900,
-                  textTransform: 'uppercase',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}>
-                  Subscribe Now
-                </button>
+             animation: 'scroll 25s linear infinite',
+             gap: 'clamp(1rem, 3vw, 2rem)',
+             width: 'fit-content'
+           }}
+         >
+           {[
+             // Core Series
+             { id: '1', handle: 'hazy-ipa', title: 'DrinkSip Hazy IPA', tags: ['core-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Hazy_IPA_0645f5ce-2ec5-4fda-87ee-fb36a4ee4295.png?v=1759017824' }, metafields: [] },
+             
+             // Refresher Series
+             { id: '2', handle: 'watermelon-refresher', title: 'DrinkSip Watermelon Refresher', tags: ['refresher-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Watermelon_Refresher_e64ca8fe-8af8-43b5-8b3a-d20dc04152c2.png?v=1759017823' }, metafields: [] },
+             { id: '3', handle: 'blood-orange-refresher', title: 'DrinkSip Blood Orange Refresher', tags: ['refresher-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Blood_Orange_Refresher_82f1cfff-dfdd-44c5-bb02-6f8e74183f36.png?v=1759017824' }, metafields: [] },
+             { id: '4', handle: 'lemon-lime-refresher', title: 'DrinkSip Lemon Lime Refresher', tags: ['refresher-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Lemon_Lime_Refresher_9565ca39-8832-48ab-8c6b-bcd0899f87e9.png?v=1759017824' }, metafields: [] },
+             
+             // Artist Series
+             { id: '5', handle: '311-hazy-ipa', title: 'DrinkSip x 311 Hazy IPA', tags: ['artist-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/311_Hazy_IPA_607644d9-92cb-4a02-af68-0eb18d34063a.png?v=1759017824' }, metafields: [] },
+             { id: '6', handle: 'deftones-tone-zero-lager', title: 'DrinkSip x Deftones Tone Zero Lager', tags: ['artist-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Deftones_Tone_Zero_Lager_dcc52426-36ee-42ee-a3b5-b49f7d2d7480.png?v=1759017824' }, metafields: [] },
+             
+             // Duplicate set for seamless loop
+             { id: 'dup-1', handle: 'hazy-ipa', title: 'DrinkSip Hazy IPA', tags: ['core-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Hazy_IPA_0645f5ce-2ec5-4fda-87ee-fb36a4ee4295.png?v=1759017824' }, metafields: [] },
+             { id: 'dup-2', handle: 'watermelon-refresher', title: 'DrinkSip Watermelon Refresher', tags: ['refresher-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Watermelon_Refresher_e64ca8fe-8af8-43b5-8b3a-d20dc04152c2.png?v=1759017823' }, metafields: [] },
+             { id: 'dup-3', handle: 'blood-orange-refresher', title: 'DrinkSip Blood Orange Refresher', tags: ['refresher-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Blood_Orange_Refresher_82f1cfff-dfdd-44c5-bb02-6f8e74183f36.png?v=1759017824' }, metafields: [] },
+             { id: 'dup-4', handle: 'lemon-lime-refresher', title: 'DrinkSip Lemon Lime Refresher', tags: ['refresher-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Lemon_Lime_Refresher_9565ca39-8832-48ab-8c6b-bcd0899f87e9.png?v=1759017824' }, metafields: [] },
+             { id: 'dup-5', handle: '311-hazy-ipa', title: 'DrinkSip x 311 Hazy IPA', tags: ['artist-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/311_Hazy_IPA_607644d9-92cb-4a02-af68-0eb18d34063a.png?v=1759017824' }, metafields: [] },
+             { id: 'dup-6', handle: 'deftones-tone-zero-lager', title: 'DrinkSip x Deftones Tone Zero Lager', tags: ['artist-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Deftones_Tone_Zero_Lager_dcc52426-36ee-42ee-a3b5-b49f7d2d7480.png?v=1759017824' }, metafields: [] }
+           ].map((product: any) => (
+             <div 
+               key={product.id} 
+               className="product-card-wrapper"
+               style={{ 
+                 flex: '0 0 clamp(200px, 28vw, 400px)', // Desktop sizing
+                 display: 'flex',
+                 justifyContent: 'center'
+               }}
+             >
+               <ProductCard
+                 id={product.id}
+                 handle={product.handle}
+                 title={product.title}
+                 image={product.featuredImage.url}
+               />
               </div>
             ))}
           </div>
 
-          <p style={{
-            color: '#888',
-            fontSize: '0.9rem',
-            maxWidth: '500px',
-            margin: '0 auto'
-          }}>
-            Free shipping on all subscription orders. Manage your subscription anytime in your account.
-          </p>
-        </div>
-      </section>
-
-      {/* You May Also Like - Fixed at bottom */}
-      <section style={{
-        background: '#000',
-        padding: '6rem 0',
-        borderTop: '1px solid rgba(255, 255, 255, 0.1)'
-      }}>
-        <div style={{
-          maxWidth: '1400px',
-          margin: '0 auto',
-          padding: '0 2rem'
-        }}>
-          <h2 style={{
-            textAlign: 'center',
-            fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-            fontWeight: 900,
-            textTransform: 'uppercase',
-            lineHeight: 0.9,
-            letterSpacing: '-0.02em',
-            marginBottom: '4rem',
-            color: '#fff'
-          }}>
-            You may also like
-          </h2>
-          
-          <div style={{
-            display: 'flex',
-            gap: '1.5rem',
-            overflowX: 'auto',
-            scrollBehavior: 'smooth',
-            paddingBottom: '1rem'
-          }}>
-            {recommendations.map((rec: any) => {
-              // Map product images based on handle
-              let imageUrl = '';
-              switch(rec.handle) {
-                case 'hazy-ipa':
-                  imageUrl = 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/hazy-cans.png?v=1759269017';
-                  break;
-                case 'watermelon-refresher':
-                  imageUrl = 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/two-watermelon-cans.png?v=1759269017';
-                  break;
-                case 'blood-orange-refresher':
-                  imageUrl = 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Blood_Orange_Refresher_82f1cfff-dfdd-44c5-bb02-6f8e74183f36.png?v=1759017824';
-                  break;
-                case 'lemon-lime-refresher':
-                  imageUrl = 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Lemon_Lime_Refresher_9565ca39-8832-48ab-8c6b-bcd0899f87e9.png?v=1759017824';
-                  break;
-                case '311-hazy-ipa':
-                  imageUrl = 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/311_Hazy_IPA_607644d9-92cb-4a02-af68-0eb18d34063a.png?v=1759017824';
-                  break;
-                case 'deftones-tone-zero':
-                case 'deftones-tone-zero-lager':
-                  imageUrl = 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Deftones_Tone_Zero_Lager_dcc52426-36ee-42ee-a3b5-b49f7d2d7480.png?v=1759017824';
-                  break;
-                default:
-                  imageUrl = `https://via.placeholder.com/400x600/${rec.color.replace('#', '')}/${rec.color === '#E8B122' ? '000' : 'fff'}?text=${encodeURIComponent(rec.title)}`;
-              }
-              
-              return (
-                <div key={rec.id} style={{ flex: '0 0 280px' }}>
-                  <ProductCard
-                    id={rec.id}
-                    handle={rec.handle}
-                    title={rec.title}
-                    image={imageUrl}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </div>
+         {/* MOBILE & DESKTOP STYLES */}
+         <style>
+           {`
+             /* DESKTOP & MOBILE - You May Like Section */
+             .you-may-like-header {
+               font-size: 32px !important; /* 32px on mobile by default */
+               margin-bottom: 2rem !important; /* More space below header */
+             }
+             
+             /* Hide description on both desktop and mobile */
+             .you-may-like-description {
+               display: none !important;
+             }
+             
+             /* Show controls on both desktop and mobile */
+             .carousel-controls-container {
+               display: flex !important;
+               top: 85% !important; /* More space above controls */
+             }
+             
+             /* Desktop specific styling */
+             @media (min-width: 768px) {
+               /* Desktop header size: 62.62px */
+               .you-may-like-header {
+                 font-size: 62.62px !important;
+               }
+               
+               /* Better spacing on desktop */
+               .product-carousel-section {
+                 padding: 3rem 0 2rem 0 !important; /* Good spacing for desktop */
+               }
+               
+               /* Desktop product cards - slight overlapping */
+               .product-card-wrapper {
+                 margin-right: -1.4rem !important; /* Slight overlapping with more breathing room */
+               }
+               
+               /* Control hover effects on desktop */
+               .carousel-control:hover {
+                 background: rgba(255, 255, 255, 0.3) !important;
+                 transform: scale(1.05) !important;
+               }
+             }
+             
+             /* MOBILE ONLY - Additional mobile-specific styles */
+             @media (max-width: 767px) {
+               /* JUMBO Product Cards - 2.5x larger, almost full viewport */
+               .product-card-wrapper {
+                 flex: 0 0 calc(85vw - 2rem) !important; /* Almost full viewport with padding */
+                 min-width: 280px !important;
+                 max-width: 350px !important;
+                 margin-right: 0.5rem !important; /* Tighter spacing on mobile too */
+               }
+               
+               /* Better spacing on mobile - MORE SPACE BELOW CONTROLS */
+               .product-carousel-section {
+                 padding: 3rem 0 1rem 0 !important; /* Even more top padding for space below controls */
+               }
+               
+               /* Control active effects on mobile */
+               .carousel-control:active {
+                 background: rgba(255, 255, 255, 0.3) !important;
+                 transform: scale(0.95) !important;
+               }
+             }
+             
+             /* Keep auto-play on both desktop and mobile */
+             .product-carousel-container {
+               animation: scroll 25s linear infinite !important;
+             }
+             
+             /* Animation keyframes */
+             @keyframes scroll {
+               0% { transform: translateX(0); }
+               100% { transform: translateX(-50%); }
+             }
+           `}
+         </style>
       </section>
     </div>
   );

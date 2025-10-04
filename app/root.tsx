@@ -63,34 +63,29 @@ export function links() {
       rel: 'preconnect',
       href: 'https://shop.app',
     },
-    {rel: 'icon', type: 'image/svg+xml', href: favicon},
+    {rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg'},
   ];
 }
 
 export async function loader(args: LoaderFunctionArgs) {
-  // Start fetching non-critical data without blocking time to first byte
-  const deferredData = loadDeferredData(args);
-
-  // Await the critical data required to render initial state of the page
-  const criticalData = await loadCriticalData(args);
-
-  const {storefront, env} = args.context;
+  // Simplified loader to get the site working first
+  const {env, cart, customerAccount} = args.context;
+  
+  console.log('Using minimal root loader - Shopify queries disabled');
 
   return {
-    ...deferredData,
-    ...criticalData,
-    publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
-    shop: getShopAnalytics({
-      storefront,
-      publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
-    }),
+    header: null,
+    footer: null,
+    cart: cart.get(), // Return promise like expected
+    isLoggedIn: customerAccount.isLoggedIn(), // Return promise like expected
+    publicStoreDomain: env.PUBLIC_STORE_DOMAIN || 'demo-store.myshopify.com',
+    shop: null,
     consent: {
-      checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
-      storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
+      checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN || '',
+      storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN || '',
       withPrivacyBanner: false,
-      // localize the privacy banner
-      country: args.context.storefront.i18n.country,
-      language: args.context.storefront.i18n.language,
+      country: 'US',
+      language: 'EN',
     },
   };
 }
@@ -102,17 +97,13 @@ export async function loader(args: LoaderFunctionArgs) {
 async function loadCriticalData({context}: LoaderFunctionArgs) {
   const {storefront} = context;
 
-  const [header] = await Promise.all([
-    storefront.query(HEADER_QUERY, {
-      cache: storefront.CacheLong(),
-      variables: {
-        headerMenuHandle: 'main-menu', // Adjust to your header menu handle
-      },
-    }),
-    // Add other queries here, so that they are loaded in parallel
-  ]);
+  // Temporarily disable Shopify queries to get site working
+  console.log('Skipping header query - no Shopify credentials available');
+  const header = null;
 
-  return {header};
+  return {
+    header,
+  };
 }
 
 /**
@@ -123,19 +114,10 @@ async function loadCriticalData({context}: LoaderFunctionArgs) {
 function loadDeferredData({context}: LoaderFunctionArgs) {
   const {storefront, customerAccount, cart} = context;
 
-  // defer the footer query (below the fold)
-  const footer = storefront
-    .query(FOOTER_QUERY, {
-      cache: storefront.CacheLong(),
-      variables: {
-        footerMenuHandle: 'footer', // Adjust to your footer menu handle
-      },
-    })
-    .catch((error) => {
-      // Log query errors, but don't throw them so the page can still render
-      console.error(error);
-      return null;
-    });
+  // Temporarily disable footer query to get site working
+  console.log('Skipping footer query - no Shopify credentials available');
+  const footer = null;
+
   return {
     cart: cart.get(),
     isLoggedIn: customerAccount.isLoggedIn(),
@@ -204,7 +186,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
             }
           }
         `}} />
-                    <link rel="stylesheet" href={`${tailwindCss}?v=${Date.now()}&force=${Math.random()}&bust=${Date.now()}&nocache=${Math.random()}&reload=${Date.now()}&fresh=${Math.random()}&final=${Date.now()}&snapscroll=${Math.random()}`}></link>
+                    <link rel="stylesheet" href={tailwindCss}></link>
         <link rel="stylesheet" href={resetStyles}></link>
         <link rel="stylesheet" href={appStyles}></link>
         <Meta />
