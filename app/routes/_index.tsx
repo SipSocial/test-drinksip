@@ -5,6 +5,7 @@ import {HeroCarousel} from '~/components/HeroCarousel';
 import {ProductCard} from '~/components/ProductCard';
 import {ProductShowcaseCarousel} from '~/components/ProductShowcaseCarousel';
 import {AutoPlayProductCarousel} from '~/components/AutoPlayProductCarousel';
+import {MobileKillerShowcase} from '~/components/MobileKillerShowcase';
 import {shopQuery} from '~/lib/shopify.server';
 import {HOME_QUERY} from '~/graphql/queries';
 import {getAccentHexForProduct, getSeriesFromProduct} from '~/lib/accents';
@@ -161,14 +162,15 @@ export default function Index() {
   
   // Create epic hero slides with real images and video
   const heroSlides = [
-    // 1. Wake Up Happy - Hazy IPA Banner (no text overlay)
+    // 1. Wake Up Happy - Responsive Hero Images (Desktop + Mobile)
     {
       id: 'wake-up-happy',
       handle: 'hazy-ipa',
       title: '', // No text overlay as requested
       subtitle: '',
       color: '#E8B122',
-      image: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Hazy-IPA-Banner-07-black-08.png?v=1759017186',
+      image: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Hero-image-mobile_15d950fd-4497-4bcf-81b0-86f9bf315149.png?v=1759551257', // Mobile image
+      desktopImage: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Hero-image-desktop.png?v=1759551395', // Desktop image
       type: 'image'
     },
     // 2. Refresher Series - Trio of Cans (Bigger text)
@@ -189,7 +191,7 @@ export default function Index() {
       title: 'DeMarcus Lawrence chooses DrinkSip',
       subtitle: 'Professional Athletes Trust DrinkSip',
       color: '#000',
-      video: 'https://cdn.shopify.com/videos/c/o/v/cb8b68033e45443988124dfe36610ac8.mov',
+      video: 'https://cdn.shopify.com/videos/c/o/v/bdb0eceb57d04d56823c2dc8b1be034a.mp4',
       type: 'video'
     }
   ];
@@ -200,7 +202,7 @@ export default function Index() {
     {
       id: 'showcase-hazy-ipa',
       handle: 'hazy-ipa',
-      title: 'DrinkSip Hazy IPA',
+      title: 'Hazy IPA',
       subtitle: 'Core Series',
       description: 'Our flagship non-alcoholic beer with bold hop flavor and crisp finish.',
       features: ['Real Beer Taste', 'Contains Less Than 0.5% ABV', 'Lower Calories', 'Natural Ingredients'],
@@ -211,7 +213,7 @@ export default function Index() {
     {
       id: 'showcase-watermelon',
       handle: 'watermelon-refresher',
-      title: 'DrinkSip Watermelon Refresher',
+      title: 'Watermelon',
       subtitle: 'Refresher Series',
       description: 'Light and refreshing with real watermelon extract.',
       features: ['Real Fruit Extract', 'Contains Less Than 0.5% ABV', 'Crisp & Refreshing', 'Natural Flavors'],
@@ -221,7 +223,7 @@ export default function Index() {
     {
       id: 'showcase-lemon-lime',
       handle: 'lemon-lime-refresher',
-      title: 'DrinkSip Lemon Lime Refresher',
+      title: 'Lemon Lime',
       subtitle: 'Refresher Series',
       description: 'Crisp and refreshing with real citrus extract.',
       features: ['Real Citrus Extract', 'Contains Less Than 0.5% ABV', 'Crisp & Clean', 'Natural Flavors'],
@@ -231,7 +233,7 @@ export default function Index() {
     {
       id: 'showcase-blood-orange',
       handle: 'blood-orange-refresher',
-      title: 'DrinkSip Blood Orange Refresher',
+      title: 'Blood Orange',
       subtitle: 'Refresher Series',
       description: 'Citrusy and bright with real blood orange extract.',
       features: ['Real Blood Orange Extract', 'Contains Less Than 0.5% ABV', 'Citrusy & Bright', 'Natural Flavors'],
@@ -242,7 +244,7 @@ export default function Index() {
     {
       id: 'showcase-311',
       handle: '311-hazy-ipa',
-      title: 'DrinkSip x 311 Hazy IPA',
+      title: '311 Hazy IPA',
       subtitle: 'Artist Series',
       description: 'Limited collaboration with 311 featuring bold hop character.',
       features: ['Limited Edition', 'Artist Collaboration', 'Contains Less Than 0.5% ABV', 'Premium Quality'],
@@ -252,7 +254,7 @@ export default function Index() {
     {
       id: 'showcase-deftones',
       handle: 'deftones-tone-zero-lager',
-      title: 'DrinkSip x Deftones Tone Zero Lager',
+      title: 'Deftones Tone Zero',
       subtitle: 'Artist Series',
       description: 'Smooth lager collaboration with Deftones.',
       features: ['Limited Edition', 'Artist Collaboration', 'Contains Less Than 0.5% ABV', 'Smooth Lager'],
@@ -266,8 +268,29 @@ export default function Index() {
       {/* Hero Carousel - BodyArmor Style - Full Viewport */}
       <HeroCarousel slides={heroSlides} />
 
-      {/* SICK Full-Width Product Showcase Carousel */}
-      <ProductShowcaseCarousel products={showcaseProducts} />
+      {/* KILLER Mobile-Only Showcase - Next Level Design */}
+      <MobileKillerShowcase products={showcaseProducts} />
+
+      {/* Desktop Product Showcase Carousel - Hidden on Mobile */}
+      <div className="desktop-showcase">
+        <ProductShowcaseCarousel products={showcaseProducts} />
+      </div>
+
+      {/* CSS to control mobile/desktop display */}
+      <style>
+        {`
+          /* Show desktop showcase only on desktop */
+          .desktop-showcase {
+            display: block;
+          }
+          
+          @media (max-width: 767px) {
+            .desktop-showcase {
+              display: none !important;
+            }
+          }
+        `}
+      </style>
 
       {/* Artist Series Spotlight - Limited Edition */}
       {artistProducts.length > 0 && (
@@ -371,51 +394,130 @@ export default function Index() {
         </section>
       )}
 
-      {/* Collection Header - BodyArmor Style */}
+      {/* Collection Header - MOBILE OPTIMIZED */}
       <section style={{
-        padding: '2.5rem 2rem 1.5rem', // Tightened header padding for cleaner look
+        padding: '2.5rem 2rem 1.5rem', // Desktop padding
         background: '#000',
-        textAlign: 'center'
+        textAlign: 'center',
+        position: 'relative' // For controls positioning
       }}>
         <div style={{
           maxWidth: '1400px',
           margin: '0 auto'
         }}>
-          <h1 style={{
-            fontSize: 'clamp(4rem, 8vw, 6rem)', // BodyArmor bigger header size
-            fontWeight: 900,
-            textTransform: 'uppercase',
-            letterSpacing: '-0.03em',
-            lineHeight: 0.9,
-            color: '#fff',
-            marginBottom: '1rem'
-          }}>
+          <h1 
+            className="you-may-like-header"
+            style={{
+              fontSize: 'clamp(4rem, 8vw, 6rem)', // Desktop size
+              fontWeight: 900,
+              textTransform: 'uppercase',
+              letterSpacing: '-0.03em',
+              lineHeight: 0.9,
+              color: '#fff',
+              marginBottom: '1rem'
+            }}
+          >
             You May Like
           </h1>
-          <p style={{
-            fontSize: '1.3rem', // BodyArmor bigger subtitle
-            color: '#888',
-            maxWidth: '600px',
-            margin: '0 auto',
-            lineHeight: 1.5
-          }}>
+          <p 
+            className="you-may-like-description"
+            style={{
+              fontSize: '1.3rem', // Desktop size
+              color: '#888',
+              maxWidth: '600px',
+              margin: '0 auto',
+              lineHeight: 1.5
+            }}
+          >
             Our complete range of premium non-alcoholic beers.
           </p>
         </div>
+        
+        {/* Mobile Controls - BETWEEN HEADER AND CARDS */}
+        <div 
+          className="carousel-controls-container"
+          style={{
+            position: 'absolute',
+            top: '80%', // Position at bottom of header section
+            right: '2rem',
+            display: 'none', // Hidden by default, shown on mobile
+            alignItems: 'center',
+            gap: '0.5rem',
+            zIndex: 100
+          }}
+        >
+          <button 
+            className="carousel-control carousel-control-left"
+            style={{
+              width: '44px',
+              height: '44px',
+              border: 'none',
+              borderRadius: '50%',
+              background: 'rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
+              color: '#fff',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.2rem',
+              fontWeight: 300,
+              transition: 'all 0.2s ease',
+              WebkitTapHighlightColor: 'transparent'
+            }}
+            aria-label="Previous products"
+          >
+            ‹
+          </button>
+          
+          <button 
+            className="carousel-control carousel-control-right"
+            style={{
+              width: '44px',
+              height: '44px',
+              border: 'none',
+              borderRadius: '50%',
+              background: 'rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
+              color: '#fff',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.2rem',
+              fontWeight: 300,
+              transition: 'all 0.2s ease',
+              WebkitTapHighlightColor: 'transparent'
+            }}
+            aria-label="Next products"
+          >
+            ›
+          </button>
+        </div>
       </section>
 
-       {/* BodyArmor JUMBO Product Carousel */}
-       <section style={{
-         padding: 'clamp(1rem, 3vw, 2rem) 0', 
-         background: '#000',
-         overflow: 'hidden'
-       }}>
-         <div style={{
-           display: 'flex',
-           animation: 'scroll 25s linear infinite',
-           gap: 'clamp(1rem, 3vw, 2rem)',
-           width: 'fit-content'
-         }}>
+       {/* MOBILE JUMBO Product Carousel with Controls */}
+       <section 
+         className="product-carousel-section"
+         style={{
+           padding: 'clamp(3rem, 8vw, 4rem) 0 clamp(1rem, 3vw, 2rem) 0', // More top padding to prevent overlap
+           background: '#000',
+           overflow: 'hidden',
+           position: 'relative'
+         }}
+       >
+         {/* Carousel Container */}
+         <div 
+           className="product-carousel-container"
+           style={{
+             display: 'flex',
+             animation: 'scroll 25s linear infinite',
+             gap: 'clamp(1rem, 3vw, 2rem)',
+             width: 'fit-content'
+           }}
+         >
            {[
              // Core Series
              { id: '1', handle: 'hazy-ipa', title: 'DrinkSip Hazy IPA', tags: ['core-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Hazy_IPA_0645f5ce-2ec5-4fda-87ee-fb36a4ee4295.png?v=1759017824' }, metafields: [] },
@@ -437,11 +539,15 @@ export default function Index() {
              { id: 'dup-5', handle: '311-hazy-ipa', title: 'DrinkSip x 311 Hazy IPA', tags: ['artist-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/311_Hazy_IPA_607644d9-92cb-4a02-af68-0eb18d34063a.png?v=1759017824' }, metafields: [] },
              { id: 'dup-6', handle: 'deftones-tone-zero-lager', title: 'DrinkSip x Deftones Tone Zero Lager', tags: ['artist-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Deftones_Tone_Zero_Lager_dcc52426-36ee-42ee-a3b5-b49f7d2d7480.png?v=1759017824' }, metafields: [] }
            ].map((product: any) => (
-             <div key={product.id} style={{ 
-               flex: '0 0 clamp(200px, 28vw, 400px)',
-               display: 'flex',
-               justifyContent: 'center'
-             }}>
+             <div 
+               key={product.id} 
+               className="product-card-wrapper"
+               style={{ 
+                 flex: '0 0 clamp(200px, 28vw, 400px)', // Desktop sizing
+                 display: 'flex',
+                 justifyContent: 'center'
+               }}
+             >
                <ProductCard
                  id={product.id}
                  handle={product.handle}
@@ -452,8 +558,78 @@ export default function Index() {
            ))}
          </div>
          
+         {/* MOBILE & DESKTOP STYLES */}
          <style>
            {`
+             /* DESKTOP & MOBILE - You May Like Section */
+             .you-may-like-header {
+               font-size: 32px !important; /* 32px on mobile by default */
+               margin-bottom: 2rem !important; /* More space below header */
+             }
+             
+             /* Hide description on both desktop and mobile */
+             .you-may-like-description {
+               display: none !important;
+             }
+             
+             /* Show controls on both desktop and mobile */
+             .carousel-controls-container {
+               display: flex !important;
+               top: 85% !important; /* More space above controls */
+             }
+             
+             /* Desktop specific styling */
+             @media (min-width: 768px) {
+               /* Desktop header size: 62.62px */
+               .you-may-like-header {
+                 font-size: 62.62px !important;
+               }
+               
+               /* Better spacing on desktop */
+               .product-carousel-section {
+                 padding: 3rem 0 2rem 0 !important; /* Good spacing for desktop */
+               }
+               
+               /* Desktop product cards - slight overlapping */
+               .product-card-wrapper {
+                 margin-right: -1.4rem !important; /* Slight overlapping with more breathing room */
+               }
+               
+               /* Control hover effects on desktop */
+               .carousel-control:hover {
+                 background: rgba(255, 255, 255, 0.3) !important;
+                 transform: scale(1.05) !important;
+               }
+             }
+             
+             /* MOBILE ONLY - Additional mobile-specific styles */
+             @media (max-width: 767px) {
+               /* JUMBO Product Cards - 2.5x larger, almost full viewport */
+               .product-card-wrapper {
+                 flex: 0 0 calc(85vw - 2rem) !important; /* Almost full viewport with padding */
+                 min-width: 280px !important;
+                 max-width: 350px !important;
+                 margin-right: 0.5rem !important; /* Tighter spacing on mobile too */
+               }
+               
+               /* Better spacing on mobile - MORE SPACE BELOW CONTROLS */
+               .product-carousel-section {
+                 padding: 3rem 0 1rem 0 !important; /* Even more top padding for space below controls */
+               }
+               
+               /* Control active effects on mobile */
+               .carousel-control:active {
+                 background: rgba(255, 255, 255, 0.3) !important;
+                 transform: scale(0.95) !important;
+               }
+             }
+             
+             /* Keep auto-play on both desktop and mobile */
+             .product-carousel-container {
+               animation: scroll 25s linear infinite !important;
+             }
+             
+             /* Animation keyframes */
              @keyframes scroll {
                0% { transform: translateX(0); }
                100% { transform: translateX(-50%); }
