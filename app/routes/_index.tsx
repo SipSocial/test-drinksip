@@ -6,6 +6,7 @@ import {ProductCard} from '~/components/ProductCard';
 import {ProductShowcaseCarousel} from '~/components/ProductShowcaseCarousel';
 import {AutoPlayProductCarousel} from '~/components/AutoPlayProductCarousel';
 import {MobileKillerShowcase} from '~/components/MobileKillerShowcase';
+import {AnimatedSection, FadeInOnScroll, SlideUpOnScroll} from '~/components/AnimatedSection';
 import {shopQuery} from '~/lib/shopify.server';
 import {HOME_QUERY} from '~/graphql/queries';
 import {getAccentHexForProduct, getSeriesFromProduct} from '~/lib/accents';
