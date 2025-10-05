@@ -1,0 +1,489 @@
+/**
+ * DrinkSip Design Tokens
+ * Comprehensive design system for responsive, high-performance website
+ * Version: 1.0.0
+ */
+
+:root {
+  /* ============================================================================
+     COLORS
+     ============================================================================ */
+  
+  /* Brand Colors */
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-gray-light: #888888;
+  --color-gray-dark: #111111;
+  --color-gray-medium: #333333;
+  
+  /* Product Accent Colors */
+  --color-hazy-ipa: #E8B122;
+  --color-watermelon: #F05757;
+  --color-lemon-lime: #77C14A;
+  --color-blood-orange: #ED5335;
+  --color-311-blue: #4A90E2;
+  --color-deftones-red: #C41E3A;
+  
+  /* ============================================================================
+     TYPOGRAPHY
+     ============================================================================ */
+  
+  /* Font Families */
+  --font-primary: 'Peridot', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --font-display: 'Peridot Black', 'Peridot', sans-serif;
+  
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --font-weight-black: 900;
+  
+  /* Font Sizes - Responsive with clamp */
+  --text-display: clamp(3rem, 8vw, 8rem);
+  --text-h1: clamp(2.5rem, 6vw, 6rem);
+  --text-h2: clamp(2rem, 5vw, 4rem);
+  --text-h3: clamp(1.5rem, 3vw, 2.5rem);
+  --text-h4: clamp(1.25rem, 2.5vw, 2rem);
+  --text-body-lg: 1.25rem;
+  --text-body: 1rem;
+  --text-body-sm: 0.875rem;
+  --text-caption: 0.75rem;
+  --text-tiny: 0.625rem;
+  
+  /* Letter Spacing */
+  --ls-tight: -0.04em;
+  --ls-normal: -0.02em;
+  --ls-base: 0;
+  --ls-wide: 0.05em;
+  --ls-wider: 0.1em;
+  --ls-widest: 0.15em;
+  
+  /* Line Heights */
+  --lh-tight: 1;
+  --lh-snug: 1.2;
+  --lh-normal: 1.4;
+  --lh-relaxed: 1.6;
+  --lh-loose: 1.8;
+  
+  /* ============================================================================
+     SPACING
+     ============================================================================ */
+  
+  /* Container */
+  --container-max: 1400px;
+  --container-padding: 2rem;
+  --container-padding-tablet: 1rem;
+  --container-padding-mobile: 0.75rem;
+  
+  /* Spacing Scale */
+  --space-xs: 0.5rem;     /* 8px */
+  --space-sm: 1rem;       /* 16px */
+  --space-md: 2rem;       /* 32px */
+  --space-lg: 4rem;       /* 64px */
+  --space-xl: 6rem;       /* 96px */
+  --space-2xl: 8rem;      /* 128px */
+  --space-3xl: 12rem;     /* 192px */
+  
+  /* Component Spacing */
+  --header-height: 80px;
+  --header-height-tablet: 70px;
+  --header-height-mobile: 60px;
+  
+  /* ============================================================================
+     ANIMATION
+     ============================================================================ */
+  
+  /* Easing Curves */
+  --ease-apple: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  
+  /* Duration */
+  --duration-fast: 0.2s;
+  --duration-normal: 0.4s;
+  --duration-slow: 0.6s;
+  --duration-slower: 1.0s;
+  
+  /* ============================================================================
+     LAYOUT
+     ============================================================================ */
+  
+  /* Z-Index Scale */
+  --z-base: 1;
+  --z-content: 10;
+  --z-sticky: 100;
+  --z-header: 1000;
+  --z-modal: 2000;
+  --z-toast: 3000;
+  
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+  
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.4);
+  
+  /* ============================================================================
+     BREAKPOINTS (for reference in media queries)
+     ============================================================================ */
+  --breakpoint-xs: 360px;
+  --breakpoint-sm: 480px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1440px;
+  --breakpoint-2xl: 1920px;
+}
+
+/* ============================================================================
+   TABLET ADJUSTMENTS
+   ============================================================================ */
+@media (max-width: 1024px) {
+  :root {
+    --container-padding: var(--container-padding-tablet);
+    --header-height: var(--header-height-tablet);
+  }
+}
+
+/* ============================================================================
+   MOBILE ADJUSTMENTS
+   ============================================================================ */
+@media (max-width: 768px) {
+  :root {
+    --container-padding: var(--container-padding-mobile);
+    --header-height: var(--header-height-mobile);
+    --space-lg: 3rem;
+    --space-xl: 4rem;
+    --space-2xl: 6rem;
+  }
+}
+
+/* ============================================================================
+   ANIMATION KEYFRAMES
+   ============================================================================ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes scaleOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+/* Hero Title Animation - Slides from center, moves up-left */
+@keyframes heroTitleEntrance {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.9);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translate(0, 0) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+/* Can Image Animation - Slides from left */
+@keyframes canImageEntrance {
+  from {
+    opacity: 0;
+    transform: translateX(-100px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* Content Fade In - Sequential */
+@keyframes contentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ============================================================================ */
+
+/* Animation Utilities */
+.animate-fade-in {
+  animation: fadeIn var(--duration-slow) var(--ease-apple) forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp var(--duration-slow) var(--ease-apple) forwards;
+}
+
+.animate-slide-from-left {
+  animation: slideFromLeft var(--duration-slow) var(--ease-apple) forwards;
+}
+
+.animate-slide-from-right {
+  animation: slideFromRight var(--duration-slow) var(--ease-apple) forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn var(--duration-slow) var(--ease-apple) forwards;
+}
+
+/* Animation Delays */
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
+.delay-600 { animation-delay: 0.6s; }
+.delay-700 { animation-delay: 0.7s; }
+.delay-800 { animation-delay: 0.8s; }
+.delay-900 { animation-delay: 0.9s; }
+.delay-1000 { animation-delay: 1.0s; }
+
+/* Transition Utilities */
+.transition-fast {
+  transition: all var(--duration-fast) var(--ease-apple);
+}
+
+.transition-normal {
+  transition: all var(--duration-normal) var(--ease-apple);
+}
+
+.transition-slow {
+  transition: all var(--duration-slow) var(--ease-apple);
+}
+
+/* Typography Utilities */
+.font-display {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-black);
+  letter-spacing: var(--ls-tight);
+  line-height: var(--lh-tight);
+}
+
+.font-heading {
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--ls-normal);
+  line-height: var(--lh-snug);
+}
+
+.font-body {
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-normal);
+  letter-spacing: var(--ls-base);
+  line-height: var(--lh-normal);
+}
+
+.font-nav {
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+.font-button {
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+/* Layout Utilities */
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--container-padding);
+  padding-right: var(--container-padding);
+}
+
+.full-width {
+  width: 100vw;
+  margin-left: calc(-1 * var(--container-padding));
+  margin-right: calc(-1 * var(--container-padding));
+}
+
+/* Flexbox Utilities */
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Product Color Backgrounds */
+.bg-hazy-ipa { background-color: var(--color-hazy-ipa); }
+.bg-watermelon { background-color: var(--color-watermelon); }
+.bg-lemon-lime { background-color: var(--color-lemon-lime); }
+.bg-blood-orange { background-color: var(--color-blood-orange); }
+.bg-311-blue { background-color: var(--color-311-blue); }
+.bg-deftones-red { background-color: var(--color-deftones-red); }
+
+/* Hardware Acceleration */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Smooth Scroll */
+.smooth-scroll {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide Scrollbar */
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Aspect Ratios */
+.aspect-square {
+  aspect-ratio: 1 / 1;
+}
+
+.aspect-video {
+  aspect-ratio: 16 / 9;
+}
+
+.aspect-portrait {
+  aspect-ratio: 3 / 4;
+}
+
+/* Text Utilities */
+.text-balance {
+  text-wrap: balance;
+}
+
+.text-pretty {
+  text-wrap: pretty;
+}
+
+/* Performance Optimizations */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+/* Remove will-change after animation */
+@media (prefers-reduced-motion: no-preference) {
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-slide-from-left,
+  .animate-slide-from-right,
+  .animate-scale-in {
+    animation-fill-mode: forwards;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
