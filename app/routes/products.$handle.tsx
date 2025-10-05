@@ -2,7 +2,7 @@ import {Link, useLoaderData} from 'react-router';
 import {type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import {ProductCard} from '~/components/ProductCard';
 import {WhiteHeader} from '~/components/WhiteHeader';
-import {useState, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 
 export async function loader({params}: LoaderFunctionArgs) {
   const handle = params.handle!;
@@ -500,6 +500,20 @@ function Reviews({ product }: { product: any }) {
 export default function ProductPage() {
     const {product, recommendations} = useLoaderData<typeof loader>();
 
+  // Set header color to match product color on mobile
+  React.useEffect(() => {
+    const header = document.querySelector('header');
+    if (header && window.innerWidth < 768) {
+      header.style.background = product.color;
+    }
+    
+    return () => {
+      if (header) {
+        header.style.background = '';
+      }
+    };
+  }, [product.color]);
+
   return (
     <div className="pdp-page-container" style={{
       background: '#000',
@@ -615,10 +629,10 @@ export default function ProductPage() {
             .pdp-hero .pdp-hero-container {
               display: flex !important;
               flex-direction: column !important;
-              justify-content: flex-start !important;
+              justify-content: center !important;
               align-items: center !important;
               text-align: center !important;
-              padding: 4rem 1rem 2rem !important;
+              padding: 2rem 1rem 2rem !important;
               gap: 0 !important;
               min-height: 100vh !important;
               position: relative !important;
@@ -627,7 +641,7 @@ export default function ProductPage() {
             
             .pdp-hero .pdp-hero-text {
               position: absolute !important;
-              top: 28% !important;
+              top: 50% !important;
               left: 50% !important;
               transform: translate(-50%, -50%) !important;
               width: 100% !important;
@@ -641,7 +655,7 @@ export default function ProductPage() {
             }
             
             .pdp-hero .pdp-title-animate {
-              font-size: clamp(3.5rem, 12vw, 5rem) !important;
+              font-size: clamp(3.5rem, 13vw, 5.5rem) !important;
               line-height: 0.85 !important;
               margin: 0 !important;
               padding: 0 1rem !important;
@@ -651,7 +665,7 @@ export default function ProductPage() {
               width: 100% !important;
               display: block !important;
               text-transform: uppercase !important;
-              letter-spacing: -0.02em !important;
+              letter-spacing: -0.03em !important;
               animation: titleSlideFromCenter 0.8s cubic-bezier(0.23, 1, 0.32, 1) 0.2s both !important;
             }
             
@@ -668,7 +682,7 @@ export default function ProductPage() {
               justify-content: center !important;
               align-items: center !important;
               padding: 0 !important;
-              margin-top: 8vh !important;
+              margin-top: 0 !important;
               animation: canSlideInFromLeft 0.8s cubic-bezier(0.23, 1, 0.32, 1) 1.0s both !important;
             }
             
@@ -679,9 +693,9 @@ export default function ProductPage() {
             }
             
             .pdp-hero .pdp-hero-image img {
-              max-width: 65vw !important;
+              max-width: 55vw !important;
               height: auto !important;
-              max-height: 45vh !important;
+              max-height: 50vh !important;
               object-fit: contain !important;
             }
             
@@ -697,7 +711,7 @@ export default function ProductPage() {
             /* Product chips in single horizontal row */
             .pdp-hero .pdp-chips-animate {
               position: absolute !important;
-              bottom: 26vh !important;
+              bottom: 22vh !important;
               left: 50% !important;
               transform: translateX(-50%) !important;
               display: flex !important;
@@ -733,7 +747,7 @@ export default function ProductPage() {
             /* Buttons at the bottom but within viewport */
             .pdp-hero .pdp-buttons-animate {
               position: absolute !important;
-              bottom: 12vh !important;
+              bottom: 8vh !important;
               left: 50% !important;
               transform: translateX(-50%) !important;
               display: flex !important;
@@ -793,25 +807,17 @@ export default function ProductPage() {
           
           /* Extra small screens (iPhone SE, etc.) - Better spacing */
           @media (max-width: 390px) {
-            .pdp-hero .pdp-hero-text {
-              top: 25% !important;
-            }
-            
             .pdp-hero .pdp-title-animate {
-              font-size: clamp(3rem, 11vw, 4.5rem) !important;
-            }
-            
-            .pdp-hero .pdp-hero-image {
-              margin-top: 6vh !important;
+              font-size: clamp(3rem, 12vw, 4.5rem) !important;
             }
             
             .pdp-hero .pdp-hero-image img {
-              max-width: 60vw !important;
-              max-height: 40vh !important;
+              max-width: 50vw !important;
+              max-height: 45vh !important;
             }
             
             .pdp-hero .pdp-chips-animate {
-              bottom: 24vh !important;
+              bottom: 20vh !important;
               gap: 0.4rem !important;
             }
             
@@ -821,7 +827,7 @@ export default function ProductPage() {
             }
             
             .pdp-hero .pdp-buttons-animate {
-              bottom: 10vh !important;
+              bottom: 6vh !important;
               gap: 0.6rem !important;
             }
             
