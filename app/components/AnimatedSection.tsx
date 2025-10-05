@@ -1,5 +1,5 @@
+import React from 'react';
 import { useScrollAnimation } from '~/hooks/useScrollAnimation';
-import type { CSSProperties } from 'react';
 
 interface AnimatedSectionProps {
   children: React.ReactNode;
@@ -9,7 +9,7 @@ interface AnimatedSectionProps {
   threshold?: number;
   triggerOnce?: boolean;
   className?: string;
-  style?: CSSProperties;
+  style?: React.CSSProperties;
   as?: keyof JSX.IntrinsicElements;
 }
 
@@ -58,12 +58,12 @@ export function AnimatedSection({
 
   const animationClass = isVisible ? `animate-${animation}` : '';
   
-  const combinedStyle: CSSProperties = {
+  const combinedStyle = {
     ...style,
     opacity: isVisible ? undefined : 0,
     animationDelay: delay ? `${delay}ms` : undefined,
     animationDuration: duration ? `${duration}ms` : undefined
-  };
+  } as React.CSSProperties;
 
   return (
     <Component
@@ -107,7 +107,7 @@ export function StaggeredAnimation({
   threshold?: number;
   className?: string;
 }) {
-  const childrenArray = Array.isArray(children) ? children : [children];
+  const childrenArray = React.Children.toArray(children);
 
   return (
     <>
