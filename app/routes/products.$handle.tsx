@@ -501,7 +501,7 @@ export default function ProductPage() {
     const {product, recommendations} = useLoaderData<typeof loader>();
 
   return (
-    <div style={{
+    <div className="pdp-page-container" style={{
       background: '#000',
       color: '#fff',
       // scrollSnapType: 'y mandatory', // DISABLED - No more snap scroll
@@ -510,6 +510,7 @@ export default function ProductPage() {
       overflowY: 'auto',
       margin: '0',
       padding: '0',
+      paddingTop: '203px', // Add padding for fixed desktop header
       // position: 'fixed', // REMOVED - This was causing scrolling issues
       // top: '0',
       // left: '0',
@@ -517,6 +518,19 @@ export default function ProductPage() {
     }}>
       <style>
         {`
+            /* Responsive padding for fixed header */
+            @media (max-width: 767px) {
+              .pdp-page-container {
+                padding-top: 120px !important;
+              }
+            }
+            
+            @media (min-width: 768px) {
+              .pdp-page-container {
+                padding-top: 203px !important;
+              }
+            }
+            
             /* Desktop PDP Title Animation - Comes up from bottom */
             @keyframes titleSlideUp {
               0% {
