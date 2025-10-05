@@ -104,8 +104,22 @@ export default function CollectionHandle() {
       minHeight: '100vh',
       paddingTop: '0px' // No padding below header
     }}>
+      <style>
+        {`
+          @media (max-width: 767px) {
+            .collection-header {
+              padding-top: 140px !important;
+            }
+            
+            .collection-grid {
+              grid-template-columns: 1fr !important;
+              gap: 2rem !important;
+            }
+          }
+        `}
+      </style>
       {/* Collection Header - BodyArmor Style */}
-      <section style={{
+      <section className="collection-header" style={{
         padding: '15px 2rem 0.5rem', // 15px top padding
         background: '#000',
         textAlign: 'center'
@@ -146,7 +160,7 @@ export default function CollectionHandle() {
         display: 'flex',
         justifyContent: 'center'
       }}>
-        <div style={{
+        <div className="collection-grid" style={{
           display: 'grid',
           // ALWAYS 3 jumbo cards - responsive scaling to fit screen
           gridTemplateColumns: 'repeat(3, 1fr)', // 3 equal columns always

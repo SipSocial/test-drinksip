@@ -80,7 +80,7 @@ export function MobileBodyArmorHeader({ cart, isLoggedIn, publicStoreDomain }: M
       <header 
         className="mobile-bodyarmor-header"
         style={{
-          position: 'fixed',
+          position: 'absolute',
           top: 0,
           left: 0,
           right: 0,
@@ -109,13 +109,13 @@ export function MobileBodyArmorHeader({ cart, isLoggedIn, publicStoreDomain }: M
           }}
         >
           <img 
-            src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Logo-20.png?v=1735858463"
+            src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/DrinkSip_Logo_SVG.svg?v=1759624477"
             alt="DrinkSip"
             className="mobile-header-logo"
             style={{
-              height: '96px', // 3x bigger (32px * 3)
+              height: '48px', // 50% smaller (96px / 2)
               width: 'auto',
-              maxWidth: '360px', // 3x bigger (120px * 3)
+              maxWidth: '180px', // 50% smaller (360px / 2)
               filter: 'drop-shadow(0 2px 10px rgba(0, 0, 0, 0.5))'
             }}
           />
@@ -275,7 +275,7 @@ export function MobileBodyArmorHeader({ cart, isLoggedIn, publicStoreDomain }: M
           right: 0
         }}>
           <img 
-            src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Logo-20.png?v=1735858463"
+            src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/DrinkSip_Logo_SVG.svg?v=1759624477"
             alt="DrinkSip"
             className="mobile-menu-logo"
             style={{

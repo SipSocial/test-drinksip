@@ -29,7 +29,7 @@ export function GlassHeader() {
           textDecoration: 'none'
         }}>
           <img 
-            src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Logo-20.png?v=1735858463"
+            src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/DrinkSip_Logo_SVG.svg?v=1759624477"
             alt="DrinkSip Logo"
             style={{
               height: '120px', // Bigger logo
