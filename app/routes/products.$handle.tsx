@@ -618,7 +618,7 @@ export default function ProductPage() {
               justify-content: flex-start !important;
               align-items: center !important;
               text-align: center !important;
-              padding: 6rem 1rem 1rem !important;
+              padding: 4rem 1rem 2rem !important;
               gap: 0 !important;
               min-height: 100vh !important;
               position: relative !important;
@@ -627,7 +627,7 @@ export default function ProductPage() {
             
             .pdp-hero .pdp-hero-text {
               position: absolute !important;
-              top: 35% !important;
+              top: 28% !important;
               left: 50% !important;
               transform: translate(-50%, -50%) !important;
               width: 100% !important;
@@ -641,7 +641,7 @@ export default function ProductPage() {
             }
             
             .pdp-hero .pdp-title-animate {
-              font-size: clamp(4rem, 14vw, 6rem) !important;
+              font-size: clamp(3.5rem, 12vw, 5rem) !important;
               line-height: 0.85 !important;
               margin: 0 !important;
               padding: 0 1rem !important;
@@ -668,7 +668,7 @@ export default function ProductPage() {
               justify-content: center !important;
               align-items: center !important;
               padding: 0 !important;
-              margin-top: 0 !important;
+              margin-top: 8vh !important;
               animation: canSlideInFromLeft 0.8s cubic-bezier(0.23, 1, 0.32, 1) 1.0s both !important;
             }
             
@@ -679,9 +679,9 @@ export default function ProductPage() {
             }
             
             .pdp-hero .pdp-hero-image img {
-              max-width: 70vw !important;
+              max-width: 65vw !important;
               height: auto !important;
-              max-height: 60vh !important;
+              max-height: 45vh !important;
               object-fit: contain !important;
             }
             
@@ -697,7 +697,7 @@ export default function ProductPage() {
             /* Product chips in single horizontal row */
             .pdp-hero .pdp-chips-animate {
               position: absolute !important;
-              bottom: 32vh !important;
+              bottom: 26vh !important;
               left: 50% !important;
               transform: translateX(-50%) !important;
               display: flex !important;
@@ -733,12 +733,12 @@ export default function ProductPage() {
             /* Buttons at the bottom but within viewport */
             .pdp-hero .pdp-buttons-animate {
               position: absolute !important;
-              bottom: 16vh !important;
+              bottom: 12vh !important;
               left: 50% !important;
               transform: translateX(-50%) !important;
               display: flex !important;
               flex-direction: column !important;
-              gap: 1rem !important;
+              gap: 0.75rem !important;
               width: 100% !important;
               max-width: 320px !important;
               z-index: 4 !important;
@@ -749,7 +749,7 @@ export default function ProductPage() {
             /* Shop Now Button - White with product color text */
             .pdp-hero .pdp-buttons-animate .shop-now-btn {
               width: 140% !important;
-              padding: 0.8rem 2rem !important;
+              padding: 0.75rem 1.5rem !important;
               text-align: center !important;
               border-radius: 50px !important;
               font-weight: 700 !important;
@@ -788,6 +788,46 @@ export default function ProductPage() {
               text-decoration: none !important;
               display: block !important;
               margin-top: 0 !important;
+            }
+          }
+          
+          /* Extra small screens (iPhone SE, etc.) - Better spacing */
+          @media (max-width: 390px) {
+            .pdp-hero .pdp-hero-text {
+              top: 25% !important;
+            }
+            
+            .pdp-hero .pdp-title-animate {
+              font-size: clamp(3rem, 11vw, 4.5rem) !important;
+            }
+            
+            .pdp-hero .pdp-hero-image {
+              margin-top: 6vh !important;
+            }
+            
+            .pdp-hero .pdp-hero-image img {
+              max-width: 60vw !important;
+              max-height: 40vh !important;
+            }
+            
+            .pdp-hero .pdp-chips-animate {
+              bottom: 24vh !important;
+              gap: 0.4rem !important;
+            }
+            
+            .pdp-hero .product-chip {
+              padding: 0.7rem 1rem !important;
+              font-size: 0.75rem !important;
+            }
+            
+            .pdp-hero .pdp-buttons-animate {
+              bottom: 10vh !important;
+              gap: 0.6rem !important;
+            }
+            
+            .pdp-hero .pdp-buttons-animate .shop-now-btn {
+              padding: 0.7rem 1.25rem !important;
+              font-size: 0.9rem !important;
             }
           }
            
