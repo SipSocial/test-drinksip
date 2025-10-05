@@ -7,11 +7,9 @@ import type {
 } from 'storefrontapi.generated';
 import {Aside} from '~/components/Aside';
 import {Footer} from '~/components/Footer';
-import {DrinkSipFooter} from '~/components/DrinkSipFooter';
+import {UnifiedFooter} from '~/components/UnifiedFooter';
 import {Header, HeaderMenu} from '~/components/Header';
-import {GlassHeader} from '~/components/GlassHeader';
-import {WhiteHeader} from '~/components/WhiteHeader';
-import {MobileBodyArmorHeader} from '~/components/MobileBodyArmorHeader';
+import {UnifiedHeader} from '~/components/UnifiedHeader';
 import {CartMain} from '~/components/CartMain';
 import {
   SEARCH_ENDPOINT,
@@ -39,41 +37,36 @@ export function PageLayout({
   const location = useLocation();
   const isHomepage = location.pathname === '/';
 
+  // Determine header background color based on route
+  const getHeaderBackground = () => {
+    if (isHomepage) return undefined; // Transparent for homepage
+    // For other pages, default to black
+    return '#000';
+  };
+
   return (
     <Aside.Provider>
       <CartAside cart={cart} />
       <SearchAside />
       <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
       
-      {/* Desktop Headers - Hidden on Mobile */}
-      <div style={{ display: 'block' }} className="desktop-only-header">
-        {isHomepage ? <GlassHeader /> : <WhiteHeader />}
-      </div>
-      
-      {/* Mobile BODYARMOR-Style Header - Hidden on Desktop */}
-      <MobileBodyArmorHeader 
-        cart={cart} 
-        isLoggedIn={isLoggedIn} 
-        publicStoreDomain={publicStoreDomain} 
+      {/* Unified Responsive Header */}
+      <UnifiedHeader 
+        backgroundColor={getHeaderBackground()}
+        isTransparent={isHomepage}
       />
       
-      <main style={{ paddingTop: '0' }}>{children}</main>
-      <DrinkSipFooter />
+      <main style={{ 
+        paddingTop: '0',
+        minHeight: '100vh',
+        width: '100%',
+        maxWidth: '100vw',
+        overflowX: 'hidden'
+      }}>
+        {children}
+      </main>
       
-      {/* CSS to control mobile/desktop header display */}
-      <style>
-        {`
-          .desktop-only-header {
-            display: block;
-          }
-          
-          @media (max-width: 767px) {
-            .desktop-only-header {
-              display: none !important;
-            }
-          }
-        `}
-      </style>
+      <UnifiedFooter />
     </Aside.Provider>
   );
 }
