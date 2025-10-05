@@ -632,13 +632,14 @@ export default function ProductPage() {
               justify-content: center !important;
               align-items: center !important;
               text-align: center !important;
-              padding: 2rem 1rem 2rem !important;
+              padding: 0 1rem !important;
               gap: 0 !important;
               min-height: 100vh !important;
               position: relative !important;
               overflow: visible !important;
             }
             
+            /* Title behind can - perfectly centered with can */
             .pdp-hero .pdp-hero-text {
               position: absolute !important;
               top: 50% !important;
@@ -647,6 +648,7 @@ export default function ProductPage() {
               width: 100% !important;
               z-index: 1 !important;
               pointer-events: none !important;
+              margin-top: -2vh !important;
             }
             
             /* Hide series label on mobile - it will be in the next section */
@@ -674,6 +676,7 @@ export default function ProductPage() {
               display: none !important;
             }
             
+            /* Can image - centered, on top of title */
             .pdp-hero .pdp-hero-image {
               position: relative !important;
               width: 100% !important;
@@ -682,7 +685,7 @@ export default function ProductPage() {
               justify-content: center !important;
               align-items: center !important;
               padding: 0 !important;
-              margin-top: 0 !important;
+              margin: 0 !important;
               animation: canSlideInFromLeft 0.8s cubic-bezier(0.23, 1, 0.32, 1) 1.0s both !important;
             }
             
@@ -693,9 +696,9 @@ export default function ProductPage() {
             }
             
             .pdp-hero .pdp-hero-image img {
-              max-width: 55vw !important;
+              max-width: 50vw !important;
               height: auto !important;
-              max-height: 50vh !important;
+              max-height: 55vh !important;
               object-fit: contain !important;
             }
             
@@ -708,20 +711,18 @@ export default function ProductPage() {
               display: block !important;
             }
             
-            /* Product chips in single horizontal row */
+            /* Product chips - tight spacing below can like BodyArmor */
             .pdp-hero .pdp-chips-animate {
-              position: absolute !important;
-              bottom: 22vh !important;
-              left: 50% !important;
-              transform: translateX(-50%) !important;
+              position: relative !important;
               display: flex !important;
               gap: 0.5rem !important;
               justify-content: center !important;
               flex-wrap: nowrap !important;
-              z-index: 4 !important;
+              z-index: 11 !important;
               width: 100% !important;
               max-width: 90% !important;
               padding: 0 1rem !important;
+              margin-top: 2rem !important;
               animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) 1.8s both !important;
             }
             
@@ -744,19 +745,17 @@ export default function ProductPage() {
               box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
             }
             
-            /* Buttons at the bottom but within viewport */
+            /* Buttons - tight spacing below chips like BodyArmor */
             .pdp-hero .pdp-buttons-animate {
-              position: absolute !important;
-              bottom: 8vh !important;
-              left: 50% !important;
-              transform: translateX(-50%) !important;
+              position: relative !important;
               display: flex !important;
               flex-direction: column !important;
               gap: 0.75rem !important;
               width: 100% !important;
               max-width: 320px !important;
-              z-index: 4 !important;
+              z-index: 11 !important;
               padding: 0 2rem !important;
+              margin-top: 1.5rem !important;
               animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) 2.0s both !important;
             }
             
@@ -805,19 +804,19 @@ export default function ProductPage() {
             }
           }
           
-          /* Extra small screens (iPhone SE, etc.) - Better spacing */
+          /* Extra small screens (iPhone SE, etc.) - Tighter spacing */
           @media (max-width: 390px) {
             .pdp-hero .pdp-title-animate {
               font-size: clamp(3rem, 12vw, 4.5rem) !important;
             }
             
             .pdp-hero .pdp-hero-image img {
-              max-width: 50vw !important;
-              max-height: 45vh !important;
+              max-width: 48vw !important;
+              max-height: 50vh !important;
             }
             
             .pdp-hero .pdp-chips-animate {
-              bottom: 20vh !important;
+              margin-top: 1.5rem !important;
               gap: 0.4rem !important;
             }
             
@@ -827,7 +826,7 @@ export default function ProductPage() {
             }
             
             .pdp-hero .pdp-buttons-animate {
-              bottom: 6vh !important;
+              margin-top: 1.25rem !important;
               gap: 0.6rem !important;
             }
             
