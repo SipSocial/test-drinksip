@@ -537,3 +537,36 @@ body {
   display: inline-block;
 }
 
+/* ============================================
+   PREMIUM SPLIT PDP LAYOUT
+   Orange Smoothie Style for DrinkSip Beer
+   ============================================ */
+
+/* Desktop Layout ≥ 1024px */
+@media (min-width: 1024px) {
+  .premium-split-desktop {
+    display: block;
+    position: relative;
+    z-index: 2;
+  }
+  
+  .premium-split-mobile {
+    display: none;
+  }
+}
+
+/* Mobile Layout < 1024px */
+@media (max-width: 1023px) {
+  .premium-split-desktop {
+    display: none;
+  }
+  
+  .premium-split-mobile {
+    display: block;
+    position: relative;
+    z-index: 2;
+    min-height: calc(100vh - 203px);
+    padding: 2rem 1.5rem;
+  }
+}
+

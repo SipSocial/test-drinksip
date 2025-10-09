@@ -1,7 +1,9 @@
 import type {MetaFunction, LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import {Link, useLoaderData} from 'react-router';
+import {useState, useEffect} from 'react';
 import {SEO} from '~/components/SEO';
-import {HeroCarousel} from '~/components/HeroCarousel';
+import {BrandIntro} from '~/components/BrandIntro';
+import {HeroCarousel, type HeroSlide} from '~/components/HeroCarousel';
 import {ProductCard} from '~/components/ProductCard';
 import {ProductShowcaseCarousel} from '~/components/ProductShowcaseCarousel';
 import {AutoPlayProductCarousel} from '~/components/AutoPlayProductCarousel';
@@ -155,24 +157,37 @@ export async function loader({context}: LoaderFunctionArgs) {
 
 export default function Index() {
   const {products} = useLoaderData<typeof loader>();
+  const [showBrandIntro, setShowBrandIntro] = useState(true);
+
+  // TEMPORARILY DISABLED - Always show intro for testing
+  // useEffect(() => {
+  //   const seen = sessionStorage.getItem('brandIntroSeen');
+  //   if (seen === 'true') {
+  //     setShowBrandIntro(false);
+  //   }
+  // }, []);
+
+  const handleIntroComplete = () => {
+    setShowBrandIntro(false);
+    // sessionStorage.setItem('brandIntroSeen', 'true');
+  };
   
   // Create hero slides from real product data - ensure we include all series
   const coreProducts = products.filter(p => p.tags.includes('core-series') || p.handle.includes('hazy'));
   const refresherProducts = products.filter(p => p.tags.includes('refresher-series') || p.handle.includes('refresher'));
   const artistProducts = products.filter(p => p.tags.includes('artist-series') || p.handle.includes('311') || p.handle.includes('deftones'));
   
-  // Create epic hero slides with real images and video
-  const heroSlides = [
-    // 1. Wake Up Happy - Responsive Hero Images (Desktop + Mobile)
+  // Create epic hero slides with real images and video (removed brand statement slide)
+  const heroSlides: HeroSlide[] = [
+    // 1. Wake Up Happy - Custom HTML Hero with Animations
     {
       id: 'wake-up-happy',
       handle: 'hazy-ipa',
-      title: '', // No text overlay as requested
+      title: 'Wake Up Happy',
       subtitle: '',
-      color: '#E8B122',
-      image: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Hero-image-mobile_15d950fd-4497-4bcf-81b0-86f9bf315149.png?v=1759551257', // Mobile image
-      desktopImage: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Hero-image-desktop.png?v=1759551395', // Desktop image
-      type: 'image'
+      color: '#000000',
+      image: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Hero-image-desktop_a8e04c13-e818-4bda-894f-c3239dfc7f67.png?v=1759723506',
+      type: 'custom-html'
     },
     // 2. Refresher Series - Trio of Cans (Bigger text)
     {
@@ -265,9 +280,17 @@ export default function Index() {
   ];
 
   return (
-    <div data-rebuild={`HOT-RELOAD-TEST-v13-${Date.now()}-${Math.random()}-ALL-PRODUCTS-${Date.now()}`} style={{background: '#000', color: '#fff', minHeight: '100vh', margin: 0, padding: 0, width: '100%', overflow: 'hidden'}}>
-      {/* Hero Carousel - BodyArmor Style - Full Viewport */}
-      <HeroCarousel slides={heroSlides} />
+    <>
+      {/* Brand Intro - Entry/Loading Screen */}
+      {showBrandIntro && (
+        <BrandIntro onComplete={handleIntroComplete} />
+      )}
+      
+      {/* Only show main content after intro completes */}
+      {!showBrandIntro && (
+        <div data-rebuild={`HOT-RELOAD-TEST-v13-${Date.now()}-${Math.random()}-ALL-PRODUCTS-${Date.now()}`} style={{background: '#000', color: '#fff', minHeight: '100vh', margin: 0, padding: 0, width: '100%', overflow: 'hidden'}}>
+          {/* Hero Carousel - BodyArmor Style - Full Viewport */}
+          <HeroCarousel slides={heroSlides} />
 
       {/* KILLER Mobile-Only Showcase - Next Level Design */}
       <MobileKillerShowcase products={showcaseProducts} />
@@ -397,7 +420,7 @@ export default function Index() {
 
       {/* Collection Header - MOBILE OPTIMIZED */}
       <section style={{
-        padding: '2.5rem 2rem 1.5rem', // Desktop padding
+        padding: '15.7rem 2rem 1.5rem', // 203px header height + 2.5rem spacing
         background: '#000',
         textAlign: 'center',
         position: 'relative' // For controls positioning
@@ -638,6 +661,8 @@ export default function Index() {
            `}
          </style>
        </section>
-    </div>
+        </div>
+      )}
+    </>
   );
 }

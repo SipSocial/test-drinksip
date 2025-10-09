@@ -1,1659 +1,778 @@
-import {Link, useLoaderData} from 'react-router';
+import React from 'react';
 import {type LoaderFunctionArgs} from '@shopify/remix-oxygen';
-import {ProductCard} from '~/components/ProductCard';
+import {useLoaderData, Link} from 'react-router';
+import {PDPHero1920} from '~/components/PDPHero1920';
 import {WhiteHeader} from '~/components/WhiteHeader';
-import React, {useState, useEffect} from 'react';
+import {ProductCard} from '~/components/ProductCard';
 
-export async function loader({params}: LoaderFunctionArgs) {
-  const handle = params.handle!;
+// Helper function to adjust color lightness
+function adjustColorLightness(color: string, adjustment: number): string {
+  const hex = color.replace('#', '');
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
   
-  // Mock product data to avoid GraphQL errors
-  const mockProducts: Record<string, any> = {
+  const adjustComponent = (component: number) => {
+    const adjusted = component + (adjustment * 2.55);
+    return Math.max(0, Math.min(255, Math.round(adjusted)));
+  };
+  
+  const newR = adjustComponent(r).toString(16).padStart(2, '0');
+  const newG = adjustComponent(g).toString(16).padStart(2, '0');
+  const newB = adjustComponent(b).toString(16).padStart(2, '0');
+  
+  return `#${newR}${newG}${newB}`;
+}
+
+export async function loader(args: LoaderFunctionArgs) {
+  return {
+    product: getMockProduct(args),
+    recommendations: getMockRecommendations(),
+    allProducts: getAllProducts(), // Add all products for dynamic thumbnails
+  };
+}
+
+function getMockProduct(args: LoaderFunctionArgs) {
+  const {handle} = args.params;
+  
+  const productMap: Record<string, any> = {
     'hazy-ipa': {
-      id: '1',
+      id: 'gid://shopify/Product/1',
       title: 'Hazy IPA',
       handle: 'hazy-ipa',
       description: 'Our flagship non-alcoholic beer with bold hop flavor and crisp finish.',
       color: '#E8B122',
-      series: 'Core Series',
-      features: [
-        'Real Beer Taste',
-        '≤ 0.5% ABV',
-        'Crisp & Refreshing',
-        'Lower Calories',
-        'Natural Ingredients'
-      ]
+      series: 'CORE SERIES',
+      features: ['≤ 0.5% ABV', 'Natural Flavors', 'No Artificial Dyes', 'Real Ingredients', 'Premium Quality', 'Craft Brewed'],
     },
     'watermelon-refresher': {
-      id: '2',
+      id: 'gid://shopify/Product/2',
       title: 'Watermelon Refresher',
       handle: 'watermelon-refresher',
-      description: 'Light and refreshing with real watermelon extract.',
+      description: 'Light and refreshing with natural watermelon flavor.',
       color: '#F05757',
-      series: 'Refresher Series',
-      features: [
-        'Real Watermelon Extract',
-        '≤ 0.5% ABV',
-        'Light & Refreshing',
-        'Lower Calories',
-        'Natural Flavors'
-      ]
+      series: 'REFRESHER SERIES',
+      features: ['≤ 0.5% ABV', 'Natural Flavors', 'No Artificial Dyes', 'Real Ingredients', 'Premium Quality', 'Craft Brewed'],
     },
-    'blood-orange-refresher': {
-      id: '3',
+    'blood-orange': {
+      id: 'gid://shopify/Product/3',
       title: 'Blood Orange Refresher',
       handle: 'blood-orange-refresher',
-      description: 'Citrusy and bright with real blood orange extract.',
+      description: 'Vibrant citrus with a bold orange taste.',
       color: '#ED5335',
-      series: 'Refresher Series',
-      features: [
-        'Real Blood Orange Extract',
-        '≤ 0.5% ABV',
-        'Citrusy & Bright',
-        'Lower Calories',
-        'Natural Flavors'
-      ]
+      series: 'REFRESHER SERIES',
+      features: ['≤ 0.5% ABV', 'Natural Flavors', 'No Artificial Dyes', 'Real Ingredients', 'Premium Quality', 'Craft Brewed'],
     },
-    'lemon-lime-refresher': {
-      id: '4',
+    'blood-orange-refresher': {
+      id: 'gid://shopify/Product/3',
+      title: 'Blood Orange Refresher',
+      handle: 'blood-orange-refresher',
+      description: 'Vibrant citrus with a bold orange taste.',
+      color: '#ED5335',
+      series: 'REFRESHER SERIES',
+      features: ['≤ 0.5% ABV', 'Natural Flavors', 'No Artificial Dyes', 'Real Ingredients', 'Premium Quality', 'Craft Brewed'],
+    },
+    'lemon-lime': {
+      id: 'gid://shopify/Product/4',
       title: 'Lemon Lime Refresher',
       handle: 'lemon-lime-refresher',
-      description: 'Classic citrus combination with a crisp finish.',
+      description: 'Zesty lemon lime refreshment.',
       color: '#77C14A',
-      series: 'Refresher Series',
-      features: [
-        'Real Lemon-Lime Extract',
-        '≤ 0.5% ABV',
-        'Crisp & Refreshing',
-        'Lower Calories',
-        'Natural Flavors'
-      ]
+      series: 'REFRESHER SERIES',
+      features: ['≤ 0.5% ABV', 'Natural Flavors', 'No Artificial Dyes', 'Real Ingredients', 'Premium Quality', 'Craft Brewed'],
+    },
+    'lemon-lime-refresher': {
+      id: 'gid://shopify/Product/4',
+      title: 'Lemon Lime Refresher',
+      handle: 'lemon-lime-refresher',
+      description: 'Zesty lemon lime refreshment.',
+      color: '#77C14A',
+      series: 'REFRESHER SERIES',
+      features: ['≤ 0.5% ABV', 'Natural Flavors', 'No Artificial Dyes', 'Real Ingredients', 'Premium Quality', 'Craft Brewed'],
     },
     '311-hazy-ipa': {
-      id: '5',
-      title: '311 Hazy IPA',
+      id: 'gid://shopify/Product/5',
+      title: 'DrinkSip x 311 Hazy IPA',
       handle: '311-hazy-ipa',
-      description: 'Limited collaboration with 311 featuring bold hop character.',
-      color: '#1E3A8A', // Deep blue for 311 can
-      series: 'Artist Series',
-      features: [
-        'Limited Edition',
-        '≤ 0.5% ABV',
-        'Bold Hop Character',
-        'Artist Collaboration',
-        'Premium Quality'
-      ]
+      description: 'Limited collaboration with 311.',
+      color: '#1E3A8A',
+      series: 'ARTIST SERIES',
+      features: ['≤ 0.5% ABV', 'Natural Flavors', 'No Artificial Dyes', 'Real Ingredients', 'Premium Quality', 'Craft Brewed'],
     },
     'deftones-tone-zero-lager': {
-      id: '6',
-      title: 'Deftones Tone Zero Lager',
-      handle: 'deftones-tone-zero',
+      id: 'gid://shopify/Product/6',
+      title: 'DrinkSip x Deftones Tone Zero Lager',
+      handle: 'deftones-tone-zero-lager',
       description: 'Smooth lager collaboration with Deftones.',
-      color: '#000000', // Black for Deftones
-      series: 'Artist Series',
-      features: [
-        'Limited Edition',
-        '≤ 0.5% ABV',
-        'Smooth Lager',
-        'Artist Collaboration',
-        'Premium Quality'
-      ]
+      color: '#2D2D2D',
+      series: 'ARTIST SERIES',
+      features: ['≤ 0.5% ABV', 'Natural Flavors', 'No Artificial Dyes', 'Real Ingredients', 'Premium Quality', 'Craft Brewed'],
     },
-    // Alias for Deftones (both handles should work)
-    'deftones-tone-zero': {
-      id: '6',
-      title: 'Deftones Tone Zero Lager',
-      handle: 'deftones-tone-zero',
+  };
+
+  return productMap[handle || 'hazy-ipa'] || productMap['hazy-ipa'];
+}
+
+function getMockRecommendations() {
+  return [
+    {
+      id: 'gid://shopify/Product/1',
+      title: 'Hazy IPA',
+      handle: 'hazy-ipa',
+    },
+    {
+      id: 'gid://shopify/Product/2',
+      title: 'Watermelon Refresher',
+      handle: 'watermelon-refresher',
+    },
+    {
+      id: 'gid://shopify/Product/3',
+      title: 'Blood Orange Refresher',
+      handle: 'blood-orange-refresher',
+    },
+    {
+      id: 'gid://shopify/Product/4',
+      title: 'Lemon Lime Refresher',
+      handle: 'lemon-lime-refresher',
+    },
+    {
+      id: 'gid://shopify/Product/5',
+      title: 'DrinkSip x 311 Hazy IPA',
+      handle: '311-hazy-ipa',
+    },
+    {
+      id: 'gid://shopify/Product/6',
+      title: 'DrinkSip x Deftones Tone Zero Lager',
+      handle: 'deftones-tone-zero-lager',
+    },
+  ];
+}
+
+function getProductImage(handle: string): string {
+  const imageMap: Record<string, string> = {
+    'hazy-ipa': 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Hazy_IPA_0645f5ce-2ec5-4fda-87ee-fb36a4ee4295.png?v=1759017824',
+    'watermelon-refresher': 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/box-mockup-refresher-watermelon-no-bottom.png?v=1759862531',
+    'blood-orange': 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Blood_Orange_Refresher_82f1cfff-dfdd-44c5-bb02-6f8e74183f36.png?v=1759017824',
+    'blood-orange-refresher': 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Blood_Orange_Refresher_82f1cfff-dfdd-44c5-bb02-6f8e74183f36.png?v=1759017824',
+    'lemon-lime': 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Lemon_Lime_Refresher_9565ca39-8832-48ab-8c6b-bcd0899f87e9.png?v=1759017824',
+    'lemon-lime-refresher': 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Lemon_Lime_Refresher_9565ca39-8832-48ab-8c6b-bcd0899f87e9.png?v=1759017824',
+    '311-hazy-ipa': 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/311_Hazy_IPA_607644d9-92cb-4a02-af68-0eb18d34063a.png?v=1759017824',
+    'deftones-tone-zero-lager': 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Deftones_Tone_Zero_Lager_dcc52426-36ee-42ee-a3b5-b49f7d2d7480.png?v=1759017824',
+  };
+  return imageMap[handle] || 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Hazy_IPA_0645f5ce-2ec5-4fda-87ee-fb36a4ee4295.png?v=1759017824';
+}
+
+function getAllProducts() {
+  return [
+    {
+      id: 'gid://shopify/Product/1',
+      title: 'Hazy IPA',
+      handle: 'hazy-ipa',
+      description: 'Our flagship non-alcoholic beer with bold hop flavor and crisp finish.',
+      color: '#E8B122',
+      series: 'CORE SERIES',
+    },
+    {
+      id: 'gid://shopify/Product/2',
+      title: 'Watermelon Refresher',
+      handle: 'watermelon-refresher',
+      description: 'Light and refreshing with natural watermelon flavor.',
+      color: '#F05757',
+      series: 'REFRESHER SERIES',
+    },
+    {
+      id: 'gid://shopify/Product/3',
+      title: 'Blood Orange Refresher',
+      handle: 'blood-orange-refresher',
+      description: 'Vibrant citrus with a bold orange taste.',
+      color: '#ED5335',
+      series: 'REFRESHER SERIES',
+    },
+    {
+      id: 'gid://shopify/Product/4',
+      title: 'Lemon Lime Refresher',
+      handle: 'lemon-lime-refresher',
+      description: 'Zesty lemon lime refreshment.',
+      color: '#77C14A',
+      series: 'REFRESHER SERIES',
+    },
+    {
+      id: 'gid://shopify/Product/5',
+      title: 'DrinkSip x 311 Hazy IPA',
+      handle: '311-hazy-ipa',
+      description: 'Limited collaboration with 311.',
+      color: '#1E3A8A',
+      series: 'ARTIST SERIES',
+    },
+    {
+      id: 'gid://shopify/Product/6',
+      title: 'DrinkSip x Deftones Tone Zero Lager',
+      handle: 'deftones-tone-zero-lager',
       description: 'Smooth lager collaboration with Deftones.',
-      color: '#000000', // Black for Deftones
-      series: 'Artist Series',
-      features: [
-        'Limited Edition',
-        '≤ 0.5% ABV',
-        'Smooth Lager',
-        'Artist Collaboration',
-        'Premium Quality'
-      ]
-    }
-  };
-
-  const product = mockProducts[handle];
-  if (!product) {
-    throw new Response('Product not found', { status: 404 });
-  }
-
-  // Mock recommendations
-  const recommendations = Object.values(mockProducts)
-    .filter(p => p.handle !== handle)
-    .slice(0, 3);
-
-  return { product, recommendations };
+      color: '#2D2D2D',
+      series: 'ARTIST SERIES',
+    },
+  ];
 }
 
-// Product-specific chips based on flavor profiles
 function getProductChips(handle: string): string[] {
-  const chipMap: Record<string, string[]> = {
-    'hazy-ipa': ['Hoppy', 'Hazy', 'Delicious'],
-    'watermelon-refresher': ['Tart', 'Refreshing', 'Delicious'],
-    'blood-orange-refresher': ['Citrusy', 'Bright', 'Delicious'],
-    'lemon-lime-refresher': ['Crisp', 'Zesty', 'Delicious'],
-    '311-hazy-ipa': ['Bold', 'Limited', 'Hoppy'],
-    'deftones-tone-zero-lager': ['Smooth', 'Limited', 'Premium']
+  const chipsMap: Record<string, string[]> = {
+    'hazy-ipa': ['HOPPY', 'HAZY', 'DELICIOUS', 'CRISP', 'CRAFT', 'BOLD'],
+    'watermelon-refresher': ['REFRESHING', 'FRUITY', 'LIGHT', 'SWEET', 'NATURAL', 'CRISP'],
+    'blood-orange': ['CITRUS', 'BOLD', 'TANGY', 'ZESTY', 'VIBRANT', 'FRESH'],
+    'blood-orange-refresher': ['CITRUS', 'BOLD', 'TANGY', 'ZESTY', 'VIBRANT', 'FRESH'],
+    'lemon-lime': ['ZESTY', 'CRISP', 'BRIGHT', 'TANGY', 'REFRESHING', 'CLEAN'],
+    'lemon-lime-refresher': ['ZESTY', 'CRISP', 'BRIGHT', 'TANGY', 'REFRESHING', 'CLEAN'],
+    '311-hazy-ipa': ['LIMITED', '311', 'BOLD', 'HOPPY', 'EXCLUSIVE', 'CRAFT'],
+    'deftones-tone-zero-lager': ['SMOOTH', 'DEFTONES', 'CRAFT', 'PREMIUM', 'EXCLUSIVE', 'BOLD'],
   };
-  
-  return chipMap[handle] || ['Refreshing', 'Premium', 'Delicious'];
-}
-
-// Product Tabs Component - BodyArmor Style
-function ProductTabs({ product }: { product: any }) {
-  const [activeTab, setActiveTab] = useState('details');
-
-  const tabs = [
-    { id: 'details', label: 'Details' },
-    { id: 'nutrition', label: 'Nutrition' },
-    { id: 'ingredients', label: 'Ingredients' },
-    { id: 'reviews', label: 'Reviews' }
-  ];
-
-  return (
-    <div style={{ 
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      minHeight: '0',
-      transition: 'none !important',
-      animation: 'none !important'
-    }} className="pdp-tabs-container">
-      {/* Tab Navigation - Clean style with underline on selected */}
-      <div className="pdp-tab-navigation" style={{
-        display: 'flex',
-        justifyContent: 'flex-start',
-        marginBottom: '2rem',
-        flexWrap: 'nowrap',
-        gap: '2.5rem',
-        flexShrink: 0,
-        overflowX: 'auto',
-        overflowY: 'hidden'
-      }}>
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            style={{
-              background: 'none',
-              border: 'none',
-              padding: '0.5rem 0',
-              fontSize: '0.9rem',
-              fontWeight: activeTab === tab.id ? 900 : 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              cursor: 'pointer',
-              color: activeTab === tab.id ? '#fff' : 'rgba(255, 255, 255, 0.5)',
-              borderBottom: activeTab === tab.id ? '3px solid #fff' : 'none',
-              transition: 'all 0.3s ease',
-              position: 'relative'
-            }}
-            onMouseEnter={(e) => {
-              if (activeTab !== tab.id) {
-                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (activeTab !== tab.id) {
-                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.5)';
-              }
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Tab Content - Fixed height to prevent shift */}
-      <div style={{ 
-        maxWidth: '100%',
-        height: '350px',
-        overflowY: 'auto',
-        position: 'relative'
-      }}>
-        <div style={{ 
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          opacity: activeTab === 'details' ? 1 : 0,
-          pointerEvents: activeTab === 'details' ? 'auto' : 'none',
-          transition: 'none'
-        }}>
-          <ProductDetails product={product} />
-        </div>
-
-        <div style={{ 
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          opacity: activeTab === 'nutrition' ? 1 : 0,
-          pointerEvents: activeTab === 'nutrition' ? 'auto' : 'none',
-          transition: 'none'
-        }}>
-          <NutritionFacts product={product} />
-        </div>
-
-        <div style={{ 
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          opacity: activeTab === 'ingredients' ? 1 : 0,
-          pointerEvents: activeTab === 'ingredients' ? 'auto' : 'none',
-          transition: 'none'
-        }}>
-          <Ingredients product={product} />
-        </div>
-
-        <div style={{ 
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          opacity: activeTab === 'reviews' ? 1 : 0,
-          pointerEvents: activeTab === 'reviews' ? 'auto' : 'none',
-          transition: 'none'
-        }}>
-          <Reviews product={product} />
-        </div>
-      </div>
-      
-      {/* Custom Scrollbar */}
-      <style>
-        {`
-          .pdp-tabs-container,
-          .pdp-tabs-container *,
-          .pdp-desktop-tabs-right,
-          .pdp-desktop-tabs-right * {
-            transition: none !important;
-            animation: none !important;
-          }
-          
-          .pdp-desktop-tabs-right div::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-          }
-          
-          .pdp-desktop-tabs-right div::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-          }
-          
-          .pdp-desktop-tabs-right div::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 3px;
-          }
-          
-          .pdp-desktop-tabs-right div::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.5);
-          }
-          
-          /* Hide scrollbar for tab navigation */
-          .pdp-tabs-container > div:first-of-type::-webkit-scrollbar {
-            display: none;
-          }
-        `}
-      </style>
-    </div>
-  );
-}
-
-// Product Details Component
-function ProductDetails({ product }: { product: any }) {
-  const features = [
-    '≤ 0.5% ABV',
-    'NATURAL FLAVORS & SWEETENERS', 
-    'NO ARTIFICIAL DYES',
-    'REAL INGREDIENTS',
-    'PREMIUM QUALITY',
-    'CRAFT BREWED'
-  ];
-
-  return (
-    <div style={{ maxWidth: '100%', width: '100%' }}>
-      <ul style={{
-        listStyle: 'none',
-        padding: 0,
-        margin: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.4rem'
-      }}>
-        {features.map((feature, index) => (
-          <li key={index} style={{
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            fontSize: '1.05rem',
-            letterSpacing: '0.02em',
-            borderBottom: index === features.length - 1 ? 'none' : '1px solid rgba(255, 255, 255, 1)',
-            paddingBottom: '0.6rem',
-            color: '#fff'
-          }}>
-            {feature}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-// Nutrition Facts Component
-function NutritionFacts({ product }: { product: any }) {
-  const nutritionData = [
-    { label: 'Serving Size', value: '1 Can (12 fl oz)' },
-    { label: 'Calories', value: '60' },
-    { label: 'Total Fat', value: '0g' },
-    { label: 'Sodium', value: '10mg' },
-    { label: 'Total Carbohydrate', value: '12g' },
-    { label: 'Sugars', value: '10g' },
-    { label: 'Protein', value: '0g' }
-  ];
-
-  return (
-    <div style={{ padding: 0, margin: 0 }}>
-      <ul style={{
-        listStyle: 'none',
-        padding: 0,
-        margin: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.6rem'
-      }}>
-        {nutritionData.map((item, index) => (
-          <li key={index} style={{
-            fontWeight: 900,
-            textTransform: 'uppercase',
-            fontSize: '0.9rem',
-            letterSpacing: '0.08em',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-            paddingBottom: '0.6rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            color: '#fff'
-          }}>
-            <span>{item.label}</span>
-            <span>{item.value}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-// Ingredients Component
-function Ingredients({ product }: { product: any }) {
-  return (
-    <div style={{ padding: 0, margin: 0 }}>
-      <p style={{ 
-        fontSize: '0.95rem', 
-        lineHeight: 1.6, 
-        color: 'rgba(255, 255, 255, 0.95)',
-        margin: 0,
-        padding: 0
-      }}>
-        Water, Malted Barley, Hops, Yeast, Natural Flavors. Contains less than 0.5% alcohol by volume.
-      </p>
-    </div>
-  );
-}
-
-// Reviews Component
-function Reviews({ product }: { product: any }) {
-  const reviews = {
-    average: 4.6,
-    total: 104,
-    breakdown: [
-      { stars: 5, count: 86 },
-      { stars: 4, count: 7 },
-      { stars: 3, count: 2 },
-      { stars: 2, count: 1 },
-      { stars: 1, count: 8 }
-    ]
-  };
-
-  return (
-    <div style={{ padding: 0, margin: 0 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', gap: '2px' }}>
-          {[...Array(5)].map((_, i) => (
-            <span key={i} style={{ 
-              color: i < Math.floor(reviews.average) ? '#FFD700' : 'rgba(255, 255, 255, 0.3)',
-              fontSize: '1.1rem'
-            }}>
-              ★
-            </span>
-          ))}
-        </div>
-        <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#fff' }}>
-          {reviews.average}/5
-        </div>
-        <div style={{ fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.8)' }}>
-          ({reviews.total} reviews)
-        </div>
-      </div>
-
-      <div style={{ marginBottom: '1rem' }}>
-        {reviews.breakdown.map((item) => (
-          <div key={item.stars} style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '0.6rem', 
-            marginBottom: '0.5rem'
-          }}>
-            <span style={{ minWidth: '45px', color: '#fff', fontSize: '0.8rem', fontWeight: 600 }}>{item.stars} ★</span>
-            <div style={{ 
-              flex: 1, 
-              height: '5px', 
-              backgroundColor: 'rgba(255, 255, 255, 0.2)', 
-              borderRadius: '2.5px',
-              overflow: 'hidden'
-            }}>
-              <div style={{ 
-                width: `${(item.count / reviews.total) * 100}%`,
-                height: '100%',
-                backgroundColor: '#fff',
-                transition: 'width 0.3s ease'
-              }} />
-            </div>
-            <span style={{ minWidth: '45px', fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.8)', textAlign: 'right' }}>
-              {item.count}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      <button style={{
-        background: '#fff',
-        color: product.color,
-        border: '3px solid #fff',
-        padding: '0.8rem 1.6rem',
-        borderRadius: '8px',
-        fontSize: '0.8rem',
-        fontWeight: 900,
-        textTransform: 'uppercase',
-        cursor: 'pointer',
-        transition: 'all 0.3s ease',
-        letterSpacing: '0.1em'
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.background = 'transparent';
-        e.currentTarget.style.color = '#fff';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.background = '#fff';
-        e.currentTarget.style.color = product.color;
-      }}>
-        Write a Review
-      </button>
-    </div>
-  );
+  return chipsMap[handle] || ['PREMIUM', 'CRAFT', 'QUALITY', 'NATURAL', 'BOLD', 'FRESH'];
 }
 
 export default function ProductPage() {
-    const {product, recommendations} = useLoaderData<typeof loader>();
+  const {product, recommendations, allProducts} = useLoaderData<typeof loader>();
+  const [currentColor, setCurrentColor] = React.useState(product.color);
+  
 
-  // Set header color to match product color on mobile
+  const handleColorChange = (newColor: string) => {
+    setCurrentColor(newColor);
+  };
+
+  // Set document background color immediately to prevent flash
   React.useEffect(() => {
-    const header = document.querySelector('header');
-    if (header && window.innerWidth < 768) {
-      header.style.background = product.color;
-    }
-    
+    document.body.style.background = currentColor;
     return () => {
-      if (header) {
-        header.style.background = '';
-      }
+      document.body.style.background = '';
     };
-  }, [product.color]);
+  }, [currentColor]);
 
   return (
-    <div className="pdp-page-container" style={{
-      background: '#000',
-      color: '#fff',
-      // scrollSnapType: 'y mandatory', // DISABLED - No more snap scroll
-      minHeight: '100vh',
-      width: '100vw',
-      overflowY: 'auto',
-      margin: '0',
-      padding: '0',
-      paddingTop: '203px', // Add padding for fixed desktop header
-      // position: 'fixed', // REMOVED - This was causing scrolling issues
-      // top: '0',
-      // left: '0',
-      // zIndex: 10
-    }}>
+    <>
+      {/* BODY STYLES - LET COMPONENT HANDLE BACKGROUND */}
       <style>
         {`
-            /* Responsive padding for fixed header */
-            @media (max-width: 767px) {
-              .pdp-page-container {
-                padding-top: 120px !important;
-              }
-            }
-            
-            @media (min-width: 768px) {
-              .pdp-page-container {
-                padding-top: 203px !important;
-              }
-            }
-            
-            /* Desktop PDP Title Animation - Comes up from bottom */
-            @keyframes titleSlideUp {
-              0% {
-                opacity: 0;
-                transform: translate(-50%, 20%);
-              }
-              100% {
-                opacity: 1;
-                transform: translate(-50%, -50%);
-              }
-            }
-            
-            /* Desktop PDP Can Animation - Slides in from left with power */
-            @keyframes canSlideInLeft {
-              0% {
-                opacity: 0;
-                transform: translateX(-150px) scale(0.9);
-              }
-              60% {
-                transform: translateX(10px) scale(1.02);
-              }
-              100% {
-                opacity: 1;
-                transform: translateX(0) scale(1);
-              }
-            }
-            
-            /* Desktop PDP Content Animation - Fade in after can */
-            @keyframes contentFadeIn {
-              0% {
-                opacity: 0;
-                transform: translateY(20px);
-              }
-              100% {
-                opacity: 1;
-                transform: translateY(0);
-              }
-            }
-            
-            /* Mobile PDP Title Animation */
-            @keyframes titleSlideFromCenter {
-              0% {
-                opacity: 0;
-                transform: translateY(20vh) scale(0.8);
-              }
-              100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-              }
-            }
-            
-            /* Mobile PDP Can Animation - Slides in from left */
-            @keyframes canSlideInFromLeft {
-              0% {
-                opacity: 0;
-                transform: translateX(-100px);
-              }
-              100% {
-                opacity: 1;
-                transform: translateX(0);
-              }
-            }
-            
-            /* Mobile PDP Chips & Buttons Animation - Fade in from bottom */
-            @keyframes fadeInUp {
-              0% {
-                opacity: 0;
-                transform: translateY(20px);
-              }
-              100% {
-                opacity: 1;
-                transform: translateY(0);
-              }
-            }
-          
-          .product-image-hover {
-            position: relative;
+          html, body {
+            background: transparent !important;
+            margin: 0;
+            padding: 0;
+            transition: background 0.6s cubic-bezier(0.4, 0, 0.2, 1);
           }
-
-          /* Mobile-optimized layout - BodyArmor style with overlapping title - PRODUCT PAGES ONLY */
-          @media (max-width: 767px) {
-            .pdp-hero .pdp-hero-container {
-              display: flex !important;
-              flex-direction: column !important;
-              justify-content: center !important;
-              align-items: center !important;
-              text-align: center !important;
-              padding: 0 1rem !important;
-              gap: 0 !important;
-              min-height: 100vh !important;
-              position: relative !important;
-              overflow: visible !important;
-            }
-            
-            /* Title behind can - perfectly centered with can */
-            .pdp-hero .pdp-hero-text {
-              position: absolute !important;
-              top: 50% !important;
-              left: 50% !important;
-              transform: translate(-50%, -50%) !important;
-              width: 100% !important;
-              z-index: 1 !important;
-              pointer-events: none !important;
-              margin-top: -2vh !important;
-            }
-            
-            /* Hide series label on mobile - it will be in the next section */
-            .pdp-hero .pdp-series-animate {
-              display: none !important;
-            }
-            
-            .pdp-hero .pdp-title-animate {
-              font-size: clamp(3.5rem, 13vw, 5.5rem) !important;
-              line-height: 0.85 !important;
-              margin: 0 !important;
-              padding: 0 1rem !important;
-              font-weight: 900 !important;
-              color: #fff !important;
-              text-align: center !important;
-              width: 100% !important;
-              display: block !important;
-              text-transform: uppercase !important;
-              letter-spacing: -0.03em !important;
-              animation: titleSlideFromCenter 0.8s cubic-bezier(0.23, 1, 0.32, 1) 0.2s both !important;
-            }
-            
-            /* Hide description on mobile */
-            .pdp-hero .pdp-description-animate {
-              display: none !important;
-            }
-            
-            /* Can image - centered, on top of title */
-            .pdp-hero .pdp-hero-image {
-              position: relative !important;
-              width: 100% !important;
-              z-index: 10 !important;
-              display: flex !important;
-              justify-content: center !important;
-              align-items: center !important;
-              padding: 0 !important;
-              margin: 0 !important;
-              animation: canSlideInFromLeft 0.8s cubic-bezier(0.23, 1, 0.32, 1) 1.0s both !important;
-            }
-            
-            .pdp-hero .pdp-hero-image > div {
-              width: 100% !important;
-              display: flex !important;
-              justify-content: center !important;
-            }
-            
-            .pdp-hero .pdp-hero-image img {
-              max-width: 50vw !important;
-              height: auto !important;
-              max-height: 55vh !important;
-              object-fit: contain !important;
-            }
-            
-            /* Mobile: Show single can, hide multiple cans */
-            .desktop-product-image {
-              display: none !important;
-            }
-            
-            .mobile-product-image {
-              display: block !important;
-            }
-            
-            /* Product chips - tight spacing below can like BodyArmor */
-            .pdp-hero .pdp-chips-animate {
-              position: relative !important;
-              display: flex !important;
-              gap: 0.5rem !important;
-              justify-content: center !important;
-              flex-wrap: nowrap !important;
-              z-index: 11 !important;
-              width: 100% !important;
-              max-width: 90% !important;
-              padding: 0 1rem !important;
-              margin-top: 2rem !important;
-              animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) 1.8s both !important;
-            }
-            
-            .pdp-hero .product-chip {
-              background: rgba(255, 255, 255, 0.9) !important;
-              backdrop-filter: blur(10px) !important;
-              -webkit-backdrop-filter: blur(10px) !important;
-              padding: 0.8rem 1.2rem !important;
-              border-radius: 25px !important;
-              font-size: 0.8rem !important;
-              font-weight: 600 !important;
-              text-transform: uppercase !important;
-              letter-spacing: 0.05em !important;
-              border: none !important;
-              opacity: 1 !important;
-              white-space: nowrap !important;
-              flex-shrink: 0 !important;
-              flex: 1 !important;
-              text-align: center !important;
-              box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
-            }
-            
-            /* Buttons - tight spacing below chips like BodyArmor */
-            .pdp-hero .pdp-buttons-animate {
-              position: relative !important;
-              display: flex !important;
-              flex-direction: column !important;
-              gap: 0.75rem !important;
-              width: 100% !important;
-              max-width: 320px !important;
-              z-index: 11 !important;
-              padding: 0 2rem !important;
-              margin-top: 1.5rem !important;
-              animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) 2.0s both !important;
-            }
-            
-            /* Shop Now Button - White with product color text */
-            .pdp-hero .pdp-buttons-animate .shop-now-btn {
-              width: 140% !important;
-              padding: 0.75rem 1.5rem !important;
-              text-align: center !important;
-              border-radius: 50px !important;
-              font-weight: 700 !important;
-              font-size: 1rem !important;
-              text-transform: uppercase !important;
-              letter-spacing: 0.1em !important;
-              background: rgba(255, 255, 255, 0.95) !important;
-              border: none !important;
-              box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
-              opacity: 1 !important;
-              cursor: pointer !important;
-              backdrop-filter: blur(10px) !important;
-              -webkit-backdrop-filter: blur(10px) !important;
-              position: relative !important;
-              left: 50% !important;
-              margin-left: -70% !important;
-            }
-            
-            /* Find Near Me Link - Simple text styling */
-            .pdp-hero .pdp-buttons-animate .find-near-me-btn {
-              width: 100% !important;
-              padding: 0.5rem 0 !important;
-              text-align: center !important;
-              border-radius: 0 !important;
-              font-weight: 500 !important;
-              font-size: 0.85rem !important;
-              text-transform: uppercase !important;
-              letter-spacing: 0.1em !important;
-              background: transparent !important;
-              color: rgba(255, 255, 255, 0.8) !important;
-              border: none !important;
-              box-shadow: none !important;
-              backdrop-filter: none !important;
-              -webkit-backdrop-filter: none !important;
-              opacity: 1 !important;
-              text-decoration: none !important;
-              display: block !important;
-              margin-top: 0 !important;
-            }
-          }
-          
-          /* Extra small screens (iPhone SE, etc.) - Tighter spacing */
-          @media (max-width: 390px) {
-            .pdp-hero .pdp-title-animate {
-              font-size: clamp(3rem, 12vw, 4.5rem) !important;
-            }
-            
-            .pdp-hero .pdp-hero-image img {
-              max-width: 48vw !important;
-              max-height: 50vh !important;
-            }
-            
-            .pdp-hero .pdp-chips-animate {
-              margin-top: 1.5rem !important;
-              gap: 0.4rem !important;
-            }
-            
-            .pdp-hero .product-chip {
-              padding: 0.7rem 1rem !important;
-              font-size: 0.75rem !important;
-            }
-            
-            .pdp-hero .pdp-buttons-animate {
-              margin-top: 1.25rem !important;
-              gap: 0.6rem !important;
-            }
-            
-            .pdp-hero .pdp-buttons-animate .shop-now-btn {
-              padding: 0.7rem 1.25rem !important;
-              font-size: 0.9rem !important;
-            }
-          }
-           
-           /* Desktop - PRODUCT PAGES ONLY */
-           @media (min-width: 768px) {
-             .pdp-hero .pdp-hero-container {
-               /* Responsive padding handled by inline clamp() */
-             }
-             
-             /* Desktop: Show split-screen layout with tabs */
-             .pdp-desktop-image-left {
-               display: flex !important;
-               transform: translateX(-25%) translateY(-8rem) !important;
-             }
-             
-             .pdp-desktop-tabs-right {
-               display: grid !important;
-               animation: contentFadeIn 0.6s ease 1.1s both !important;
-             }
-             
-             /* Desktop: Show chips */
-             .pdp-desktop-chips {
-               display: flex !important;
-               animation: contentFadeIn 0.6s ease 1.1s both !important;
-             }
-             
-             /* Desktop: Hide mobile content */
-             .pdp-mobile-content {
-               display: none !important;
-             }
-             
-             /* Desktop: Show multiple cans, hide single can */
-             .desktop-product-image {
-               display: block !important;
-             }
-             
-             .mobile-product-image {
-               display: none !important;
-             }
-             
-             /* Desktop Animations */
-             @keyframes fadeInLeft {
-               from {
-                 opacity: 0;
-                 transform: translateX(-40px);
-               }
-               to {
-                 opacity: 1;
-                 transform: translateX(0);
-               }
-             }
-             
-             @keyframes fadeInRight {
-               from {
-                 opacity: 0;
-                 transform: translateX(40px);
-               }
-               to {
-                 opacity: 1;
-                 transform: translateX(0);
-               }
-             }
-             
-             /* Desktop Product Image - No hover effects */
-             .pdp-desktop-image-left .product-image-hover {
-               pointer-events: none;
-             }
-           }
-           
-           /* Mobile - PRODUCT PAGES ONLY */
-           @media (max-width: 767px) {
-             /* Override grid layout on mobile */
-             .pdp-hero .pdp-hero-container {
-               display: block !important;
-               position: relative !important;
-               padding: 0 !important;
-               grid-template-columns: none !important;
-               gap: 0 !important;
-             }
-             
-             /* Hide desktop layout on mobile */
-             .pdp-desktop-image-left {
-               display: none !important;
-             }
-             
-             .pdp-desktop-tabs-right {
-               display: none !important;
-             }
-             
-             /* Show mobile content */
-             .pdp-mobile-content {
-               display: flex !important;
-               flex-direction: column !important;
-               justify-content: flex-start !important;
-               align-items: center !important;
-               position: relative !important;
-               width: 100% !important;
-               min-height: 100vh !important;
-               padding: 6rem 1rem 1rem !important;
-             }
-             
-             /* Remove border from hero section */
-             .pdp-hero {
-               border: none !important;
-               border-bottom: none !important;
-               margin-bottom: 0 !important;
-               padding-bottom: 0 !important;
-             }
-             
-             /* Show mobile tabs section */
-             .pdp-mobile-tabs-section {
-               display: block !important;
-               border: none !important;
-               border-top: none !important;
-               margin-top: 0 !important;
-               padding-top: 0 !important;
-             }
-             
-             .pdp-mobile-tabs-section *,
-             .pdp-hero * {
-               border-top: none !important;
-               border-bottom: none !important;
-             }
-             
-             /* Mobile tabs styling */
-             .pdp-mobile-tabs-section .pdp-tabs-container {
-               width: 100%;
-             }
-             
-             .pdp-mobile-tabs-section .pdp-tab-navigation {
-               gap: 1rem !important;
-               overflow-x: visible !important;
-               margin-bottom: 1.25rem !important;
-               margin-top: 0 !important;
-               padding-top: 0 !important;
-             }
-             
-             .pdp-mobile-tabs-section > div > div > div:first-child {
-               gap: 1rem !important;
-               overflow-x: visible !important;
-               margin-bottom: 1.25rem !important;
-               margin-top: 0 !important;
-               padding-top: 0 !important;
-             }
-             
-             .pdp-mobile-tabs-section .pdp-tabs-container {
-               margin-top: 0 !important;
-               padding-top: 0 !important;
-               margin: 0 !important;
-               padding: 0 !important;
-             }
-             
-             .pdp-mobile-tabs-section .pdp-tabs-container > * {
-               margin-top: 0 !important;
-               padding-top: 0 !important;
-             }
-             
-             .pdp-mobile-tabs-section > div > div {
-               margin-top: 0 !important;
-               padding-top: 0 !important;
-             }
-             
-             .pdp-mobile-tabs-section > div > div > * {
-               margin-top: 0 !important;
-               padding-top: 0 !important;
-             }
-             
-             .pdp-mobile-tabs-section button {
-               font-size: 0.7rem !important;
-               padding: 0.5rem 0 !important;
-               white-space: nowrap !important;
-               flex-shrink: 0 !important;
-               letter-spacing: 0.05em !important;
-             }
-             
-             .pdp-mobile-tabs-section h2,
-             .pdp-mobile-tabs-section h3 {
-               font-size: 1.1rem !important;
-             }
-             
-             .pdp-mobile-tabs-section p,
-             .pdp-mobile-tabs-section li {
-               font-size: 0.9rem !important;
-             }
-             
-             /* Mobile tab content - auto height */
-             .pdp-mobile-tabs-section > div > div > div:nth-child(2) {
-               height: auto !important;
-               min-height: 0 !important;
-               padding-top: 0 !important;
-               overflow: visible !important;
-             }
-             
-             /* Make sure reviews are visible */
-             .pdp-mobile-tabs-section > div > div > div:nth-child(2) > div {
-               position: relative !important;
-               padding-top: 0 !important;
-               margin-top: 0 !important;
-             }
-             
-             /* Remove extra spacing from tab content */
-             .pdp-mobile-tabs-section > div > div > div:nth-child(2) > div > div,
-             .pdp-mobile-tabs-section > div > div > div:nth-child(2) > div > p,
-             .pdp-mobile-tabs-section > div > div > div:nth-child(2) > div > ul {
-               margin-top: 0 !important;
-               padding-top: 0 !important;
-             }
-           }
-          
         `}
       </style>
 
-      {/* Hero Section */}
-      <section className="pdp-hero" style={{
-        background: product.color,
-        // scrollSnapAlign: 'start', // DISABLED - No more snap scroll
-        display: 'flex',
-        alignItems: 'center',
-        position: 'relative',
-        minHeight: '100vh',
-        width: '100vw',
-        margin: '0',
-        padding: '0'
+      {/* HEADER WITH PRODUCT COLOR */}
+    <div style={{ 
+        position: 'fixed',
+          top: 0,
+          left: 0,
+        right: 0,
+        zIndex: 1000,
+        background: '#000', // Header back to black
+        transition: 'background 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+        boxShadow: '0 2px 20px rgba(0, 0, 0, 0.1)'
       }}>
-        <div 
-          className="pdp-hero-container"
+        <WhiteHeader forceWhiteText={true} productColor={currentColor} />
+        </div>
+
+      {/* PAGE CONTAINER - LET COMPONENT HANDLE BACKGROUND */}
+    <div className="pdp-page-container" style={{
+        background: 'transparent', // Let PDPHero1920 handle the two-tone background
+      color: '#fff',
+      minHeight: '100vh',
+      width: '100vw',
+      overflowY: 'auto',
+        margin: '0',
+        padding: '0',
+        position: 'relative',
+        zIndex: 1
+      }}>
+        {/* Ultra-Luxury PDP Hero - 1920x1080 Layout */}
+        <PDPHero1920
+          product={product}
+          productImage={getProductImage(product.handle)}
+          onColorChange={handleColorChange}
+          allProducts={allProducts}
+        />
+
+        {/* WORLD CLASS CRAFT EXCELLENCE SECTION - CHOMPS INSPIRED */}
+        <section 
           style={{
-          maxWidth: '1400px',
-          margin: '0 auto',
-          padding: 'clamp(8rem, 12vh, 12rem) clamp(2rem, 4vw, 4rem) clamp(4rem, 8vh, 8rem)',
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: 'clamp(3rem, 6vw, 8rem)',
-          alignItems: 'flex-start',
-          width: '100%',
-          position: 'relative',
-          zIndex: 2,
-          minHeight: 'calc(100vh - 140px)'
-        }}>
-          {/* Left: Product Image - DESKTOP ONLY */}
-          <div className="pdp-desktop-image-left" style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'flex-start',
-            alignItems: 'center',
+            background: currentColor, // This section keeps the product color
+            color: '#fff',
+            padding: 'clamp(4rem, 8vw, 8rem) 0',
             position: 'relative',
-            transform: 'translateX(-25%) translateY(-8rem)',
-            isolation: 'isolate',
-            gap: '2rem'
-          }}>
-            {/* Background Title - Behind Can */}
-            <div style={{
+            overflow: 'hidden'
+          }}
+        >
+          {/* ANIMATED BACKGROUND ELEMENTS */}
+          <div 
+            className="craft-bg-elements"
+            style={{
               position: 'absolute',
-              left: '50%',
-              top: '45%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: -1,
-              pointerEvents: 'none',
-              textAlign: 'center',
-              animation: 'titleSlideUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both'
-            }}>
-              <h2 style={{
-                fontSize: 'clamp(5rem, 12vw, 8rem)',
-                fontWeight: 900,
-                textTransform: 'uppercase',
-                lineHeight: 0.9,
-                letterSpacing: '-0.02em',
-                color: 'rgba(255, 255, 255, 1)',
-                margin: 0,
-                whiteSpace: 'nowrap'
-              }}>
-                {product.title.replace(/\s*Refresher\s*/gi, '')}
-              </h2>
-            </div>
-
-            {product.handle === 'watermelon-refresher' && (
-              <div style={{
-                position: 'relative',
-                width: '100%',
-                maxWidth: '600px',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                zIndex: 1,
-                animation: 'canSlideInLeft 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both'
-              }}>
-                <img 
-                  src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/two-watermelon-cans.png?v=1759269017"
-                  alt="DrinkSip Watermelon Refresher"
-                  className="product-image-hover"
-                  style={{
-                    width: '100%',
-                    height: 'auto',
-                    maxHeight: '700px',
-                    objectFit: 'contain',
-                    filter: 'drop-shadow(0 30px 60px rgba(0, 0, 0, 0.4))',
-                    transition: 'all 1s ease',
-                    transform: 'scale(1.1)',
-                    position: 'relative'
-                  }}
-                />
-              </div>
-            )}
-
-            {product.handle === 'hazy-ipa' && (
-              <div style={{
-                position: 'relative',
-                width: '100%',
-                maxWidth: '600px',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                zIndex: 1,
-                animation: 'canSlideInLeft 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both'
-              }}>
-                {/* Desktop: Multiple cans */}
-                <img 
-                  src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/hazy-cans.png?v=1759269017"
-                  alt="DrinkSip Hazy IPA"
-                  className="product-image-hover desktop-product-image"
-                  style={{
-                    width: '100%',
-                    maxWidth: '500px',
-                    height: 'auto',
-                    filter: 'drop-shadow(0 30px 60px rgba(0, 0, 0, 0.4))',
-                    transition: 'all 1s ease',
-                    transform: 'scale(1.1)'
-                  }}
-                />
-                {/* Mobile: Single can */}
-                <img 
-                  src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Hazy_IPA_0645f5ce-2ec5-4fda-87ee-fb36a4ee4295.png?v=1759017824"
-                  alt="DrinkSip Hazy IPA"
-                  className="product-image-hover mobile-product-image"
-                  style={{
-                    width: '100%',
-                    maxWidth: '600px',
-                    height: 'auto',
-                    filter: 'drop-shadow(0 30px 60px rgba(0, 0, 0, 0.4))',
-                    cursor: 'pointer',
-                    transition: 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)',
-                    display: 'none'
-                  }}
-                />
-              </div>
-            )}
-
-            {product.handle === 'blood-orange-refresher' && (
-              <div>
-                <img 
-                  src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Blood_Orange_Refresher_82f1cfff-dfdd-44c5-bb02-6f8e74183f36.png?v=1759017824"
-                  alt="DrinkSip Blood Orange Refresher"
-                  className="product-image-hover"
-                  style={{
-                    width: '100%',
-                    maxWidth: '500px',
-                    height: 'auto',
-                    filter: 'drop-shadow(0 30px 60px rgba(0, 0, 0, 0.4))',
-                    cursor: 'pointer',
-                    transition: 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)'
-                  }}
-                />
-              </div>
-            )}
-
-            {product.handle === 'lemon-lime-refresher' && (
-              <div>
-                <img 
-                  src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Lemon_Lime_Refresher_9565ca39-8832-48ab-8c6b-bcd0899f87e9.png?v=1759017824"
-                  alt="DrinkSip Lemon Lime Refresher"
-                  className="product-image-hover"
-                  style={{
-                    width: '100%',
-                    maxWidth: '500px',
-                    height: 'auto',
-                    filter: 'drop-shadow(0 30px 60px rgba(0, 0, 0, 0.4))',
-                    cursor: 'pointer',
-                    transition: 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)'
-                  }}
-                />
-              </div>
-            )}
-
-            {product.handle === '311-hazy-ipa' && (
-              <div>
-                <img 
-                  src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/311_Hazy_IPA_607644d9-92cb-4a02-af68-0eb18d34063a.png?v=1759017824"
-                  alt="DrinkSip x 311 Hazy IPA"
-                  className="product-image-hover"
-                  style={{
-                    width: '100%',
-                    maxWidth: '500px',
-                    height: 'auto',
-                    filter: 'drop-shadow(0 30px 60px rgba(0, 0, 0, 0.4))',
-                    cursor: 'pointer',
-                    transition: 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)'
-                  }}
-                />
-              </div>
-            )}
-
-            {(product.handle === 'deftones-tone-zero' || product.handle === 'deftones-tone-zero-lager') && (
-              <div>
-                <img 
-                  src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Deftones_Tone_Zero_Lager_dcc52426-36ee-42ee-a3b5-b49f7d2d7480.png?v=1759017824"
-                  alt="DrinkSip x Deftones Tone Zero Lager"
-                  className="product-image-hover"
-                  style={{
-                    width: '100%',
-                    maxWidth: '500px',
-                    height: 'auto',
-                    filter: 'drop-shadow(0 30px 60px rgba(0, 0, 0, 0.4))',
-                    cursor: 'pointer',
-                    transition: 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)'
-                  }}
-                />
-              </div>
-            )}
-
-            {/* Desktop Chips - Centered below the can */}
-            <div className="pdp-desktop-chips" style={{
-              display: 'flex',
-              gap: '0.5rem',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-              zIndex: 10,
-              animation: 'contentFadeIn 0.6s ease 1.1s both'
-            }}>
-              {getProductChips(product.handle).map((chip) => (
-                <span key={chip} style={{
-                  background: 'rgba(255, 255, 255, 0.9)',
-                  backdropFilter: 'blur(10px)',
-                  WebkitBackdropFilter: 'blur(10px)',
-                  padding: '0.8rem 1.2rem',
-                  borderRadius: '25px',
-                  fontSize: '0.75rem',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  color: product.color,
-                  border: 'none',
-                  whiteSpace: 'nowrap',
-                  boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
-                }}>
-                  {chip}
-                </span>
-              ))}
-            </div>
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              opacity: 0.1,
+              pointerEvents: 'none'
+            }}
+          >
+            <div 
+              className="hop-element animate-float-left"
+              style={{
+                position: 'absolute',
+                top: '10%',
+                left: '-10%',
+                width: '120px',
+                height: '120px',
+                backgroundImage: `url("data:image/svg+xml,${encodeURIComponent('<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="none" stroke="white" stroke-width="2" opacity="0.3"/><path d="M30 50 Q50 30 70 50 Q50 70 30 50" fill="white" opacity="0.2"/></svg>')}")`,
+                backgroundSize: 'contain'
+              }}
+            />
+            <div 
+              className="barley-element animate-float-right"
+              style={{
+                position: 'absolute',
+                top: '60%',
+                right: '-10%',
+                width: '100px',
+                height: '100px',
+                backgroundImage: `url("data:image/svg+xml,${encodeURIComponent('<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="45" y="20" width="10" height="60" fill="white" opacity="0.3"/><circle cx="50" cy="25" r="5" fill="white" opacity="0.2"/><circle cx="50" cy="35" r="4" fill="white" opacity="0.2"/><circle cx="50" cy="45" r="4" fill="white" opacity="0.2"/></svg>')}")`,
+                backgroundSize: 'contain'
+              }}
+            />
           </div>
 
-          {/* Right: Product Content with Tabs - DESKTOP ONLY - Homepage Style */}
-          <div className="pdp-desktop-tabs-right" style={{
-            display: 'grid',
-            gridTemplateRows: 'auto auto 1fr auto',
-            gap: 'clamp(1rem, 2vh, 2rem)',
-            minHeight: '500px',
-            maxWidth: '600px',
-            padding: '0',
-            paddingLeft: 'clamp(2rem, 4vw, 6rem)',
-            position: 'relative',
-            zIndex: 5,
-            animation: 'contentFadeIn 0.6s ease 1.1s both'
-          }}>
-            {/* DrinkSip Logo */}
-            <div style={{
-              marginBottom: '0.5rem',
-              marginTop: '0',
-              lineHeight: 0,
-              marginLeft: '0'
-            }}>
-              <img 
-                src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/DrinkSip_Logo_SVG.svg?v=1759624477"
-                alt="DrinkSip Logo"
+          <div 
+            style={{
+              maxWidth: '1400px',
+              margin: '0 auto',
+              padding: '0 clamp(2rem, 4vw, 4rem)'
+            }}
+          >
+            {/* HERO HEADLINE - NIKE INSPIRED */}
+            <div style={{ textAlign: 'center', marginBottom: 'clamp(4rem, 8vw, 6rem)' }}>
+              <h2 
                 style={{
-                  height: '120px',
-                  width: 'auto',
-                  objectFit: 'contain',
-                  display: 'block'
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 'clamp(2.5rem, 6vw, 4rem)',
+                  fontWeight: '900',
+                  textTransform: 'uppercase',
+                  letterSpacing: '-0.02em',
+                  margin: '0 0 1rem 0',
+                  textShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
+                }}
+              >
+                CRAFT EXCELLENCE REDEFINED
+              </h2>
+              <div 
+                style={{
+                  width: '80px',
+                  height: '3px',
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  margin: '0 auto'
                 }}
               />
             </div>
 
-            {/* Series Label - Anchored to Logo */}
-            <div style={{
-              fontSize: '1rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.15em',
-              opacity: 0.9,
-              fontWeight: 600,
-              marginTop: '0',
-              marginBottom: '0.5rem'
-            }}>
-              {product.series}
-            </div>
+            {/* MAIN CONTENT GRID */}
+            <div 
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 'clamp(4rem, 8vw, 8rem)',
+                alignItems: 'center',
+                minHeight: '60vh'
+              }}
+              className="craft-excellence-grid"
+            >
+              {/* LEFT: PREMIUM BENEFITS */}
+              <div 
+                className="benefits-section animate-slide-left"
+                style={{
+                  animation: 'slideInLeft 1s cubic-bezier(0.4, 0, 0.2, 1) forwards'
+                }}
+              >
+                <h3 
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
+                    fontWeight: '800',
+                    margin: '0 0 clamp(2rem, 4vw, 3rem) 0',
+                    textTransform: 'uppercase',
+                    letterSpacing: '-0.01em'
+                  }}
+                >
+                  PREMIUM CRAFT BREWING
+                </h3>
 
-            {/* Tabs Component - Integrated into the flow */}
-            <div style={{ width: '100%' }}>
-              <ProductTabs product={product} />
-            </div>
+                {/* BENEFITS GRID */}
+                <div 
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: 'clamp(1.5rem, 3vw, 2.5rem)',
+                    marginBottom: 'clamp(3rem, 5vw, 4rem)'
+                  }}
+                >
+                  {[
+                    { 
+                      icon: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 2h8v2h-1v14c0 1.1-.9 2-2 2h-4c-1.1 0-2-.9-2-2V4H6V2z" fill="currentColor"/><path d="M9 6h6v10H9z" fill="none" stroke="currentColor"/></svg>`, 
+                      title: '≤0.5% ABV', 
+                      desc: 'NON-ALCOHOLIC' 
+                    },
+                    { 
+                      icon: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/></svg>`, 
+                      title: 'NATURAL', 
+                      desc: 'REAL INGREDIENTS' 
+                    },
+                    { 
+                      icon: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="currentColor"/></svg>`, 
+                      title: 'CRAFT', 
+                      desc: 'PREMIUM QUALITY' 
+                    },
+                    { 
+                      icon: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><line x1="15" y1="9" x2="9" y2="15" stroke="currentColor" stroke-width="2"/><line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" stroke-width="2"/></svg>`, 
+                      title: 'NO DYES', 
+                      desc: 'CLEAN FORMULA' 
+                    },
+                    { 
+                      icon: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.85-2.5h8.88l.85 2.5 1.89-.66C15.1 16.17 13 10 17 8zm-4.5 9c-.83 0-1.5-.67-1.5-1.5S11.67 14 12.5 14s1.5.67 1.5 1.5S13.33 17 12.5 17z" fill="currentColor"/></svg>`, 
+                      title: 'ORGANIC', 
+                      desc: 'SUSTAINABLE' 
+                    },
+                    { 
+                      icon: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 11H7v9a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9h-2M15 4V2a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v8M8 11l8-4" stroke="currentColor" stroke-width="2"/></svg>`, 
+                      title: 'FRESH', 
+                      desc: 'BOLD FLAVOR' 
+                    }
+                  ].map((benefit, index) => (
+                    <div 
+                      key={benefit.title}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem',
+                        padding: '1rem',
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        borderRadius: '8px',
+                        backdropFilter: 'blur(10px)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        animationDelay: `${index * 0.1}s`
+                      }}
+                      className="benefit-card"
+                    >
+                      <div 
+                        style={{
+                          width: '40px',
+                          height: '40px',
+                          background: 'rgba(255, 255, 255, 0.2)',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#fff'
+                        }}
+                        dangerouslySetInnerHTML={{ __html: benefit.icon }}
+                      />
+                      <div>
+                        <div 
+                          style={{
+                            fontFamily: 'var(--font-primary)',
+                            fontSize: '0.9rem',
+                            fontWeight: '700',
+                            marginBottom: '0.25rem'
+                          }}
+                        >
+                          {benefit.title}
+                        </div>
+                        <div 
+                          style={{
+                            fontFamily: 'var(--font-primary)',
+                            fontSize: '0.75rem',
+                            opacity: 0.8,
+                            fontWeight: '500'
+                          }}
+                        >
+                          {benefit.desc}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
 
-            {/* Action Buttons */}
-            <div style={{
-              display: 'flex',
-              gap: '1.5rem',
-              flexWrap: 'wrap',
-              alignItems: 'center'
-            }}>
-              <button style={{
-                padding: '1.2rem 2.5rem',
-                border: '3px solid #fff',
-                background: '#fff',
-                color: product.color,
-                textDecoration: 'none',
-                fontWeight: 900,
-                textTransform: 'uppercase',
-                fontSize: '0.9rem',
-                letterSpacing: '0.1em',
-                borderRadius: '8px',
-                transition: 'all 0.3s ease',
-                cursor: 'pointer'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = '#fff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#fff';
-                e.currentTarget.style.color = product.color;
-              }}>
-                Shop Now
-              </button>
-              <Link to="/pages/where-to-buy" style={{
-                padding: '1.2rem 2.5rem',
-                border: '3px solid #fff',
-                background: 'transparent',
-                color: '#fff',
-                textDecoration: 'none',
-                fontWeight: 900,
-                textTransform: 'uppercase',
-                fontSize: '0.9rem',
-                letterSpacing: '0.1em',
-                borderRadius: '8px',
-                transition: 'all 0.3s ease',
-                display: 'inline-block',
-                textAlign: 'center'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#fff';
-                e.currentTarget.style.color = product.color;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = '#fff';
-              }}>
-                Find It Near Me
-              </Link>
-            </div>
-          </div>
-
-          {/* Mobile Layout - Keep existing mobile structure */}
-          <div className="pdp-mobile-content" style={{ display: 'none' }}>
-            {/* Mobile title overlay */}
-            <div className="pdp-hero-text">
-              <div className="pdp-series-animate" style={{
-                fontSize: '1rem',
-                textTransform: 'uppercase',
-                letterSpacing: '0.15em',
-                marginBottom: '1rem',
-                fontWeight: 600
-              }}>
-                {product.series}
+                {/* INGREDIENTS LIST */}
+                <div>
+                  <h4 
+                    style={{
+                      fontFamily: 'var(--font-primary)',
+                      fontSize: 'clamp(1rem, 2vw, 1.2rem)',
+                      fontWeight: '700',
+                      margin: '0 0 1.5rem 0',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em'
+                    }}
+                  >
+                    REAL INGREDIENTS FOR REAL HUMANS
+                  </h4>
+                  
+                  {/* INGREDIENT ITEMS */}
+                  {[
+                    'PREMIUM MALTED BARLEY',
+                    'NATURAL HOP EXTRACTS',
+                    'PURE FILTERED WATER',
+                    'CRAFT BREWING YEAST',
+                    'NATURAL FLAVORS',
+                    'CITRIC ACID'
+                  ].map((ingredient, index) => (
+                    <div 
+                      key={ingredient}
+                      style={{
+                        fontFamily: 'var(--font-display)',
+                        fontSize: 'clamp(1.2rem, 2.5vw, 1.6rem)',
+                        fontWeight: '800',
+                        margin: '0 0 0.8rem 0',
+                        textTransform: 'uppercase',
+                        letterSpacing: '-0.01em',
+                        animationDelay: `${0.5 + index * 0.1}s`
+                      }}
+                      className="ingredient-item"
+                    >
+                      {ingredient}
+                    </div>
+                  ))}
+                </div>
               </div>
-              <h1 className="pdp-title-animate" style={{
-                fontSize: 'clamp(4rem, 8vw, 6.5rem)',
-                fontWeight: 900,
-                textTransform: 'uppercase',
-                lineHeight: 0.9,
-                letterSpacing: '-0.02em',
-                marginBottom: '2rem',
-                color: '#fff'
-              }}>
-                {product.title}
-              </h1>
-              <p className="pdp-description-animate" style={{
-                fontSize: '1.3rem',
-                lineHeight: 1.5,
-                marginBottom: '3rem',
-                maxWidth: '500px'
-              }}>
-                {product.description}
-              </p>
-            </div>
 
-            {/* Product Chips - Mobile - OUTSIDE pdp-hero-text */}
-            <div className="pdp-chips-animate">
-              {getProductChips(product.handle).map((chip) => (
-                <span key={chip} className="product-chip" style={{ color: product.color }}>
-                  {chip}
-                </span>
-              ))}
-            </div>
+              {/* RIGHT: ANIMATED PRODUCT SHOWCASE */}
+              <div 
+                className="product-showcase animate-slide-right"
+                style={{
+                  position: 'relative',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  animation: 'slideInRight 1s cubic-bezier(0.4, 0, 0.2, 1) forwards'
+                }}
+              >
+                {/* MAIN PRODUCT IMAGE */}
+                <img
+                  src={getProductImage(product.handle)}
+                  alt={product.title}
+                  style={{
+                    width: 'clamp(280px, 35vw, 400px)',
+                    height: 'auto',
+                    objectFit: 'contain',
+                    filter: 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3))',
+                    zIndex: 2,
+                    position: 'relative'
+                  }}
+                  className="hero-product-image"
+                />
 
-            {/* Buttons - Mobile - OUTSIDE pdp-hero-text */}
-            <div className="pdp-buttons-animate">
-              <button className="shop-now-btn" style={{
-                background: '#fff',
-                color: product.color,
-                padding: '1.2rem 2.5rem',
-                border: '3px solid #fff',
-                textDecoration: 'none',
-                fontWeight: 900,
-                textTransform: 'uppercase',
-                fontSize: '0.9rem',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
-              }}>
-                Shop Now
-              </button>
-              <Link className="find-near-me-btn" to="/pages/where-to-buy" style={{
-                border: '3px solid #fff',
-                background: 'transparent',
-                color: '#fff',
-                padding: '1.2rem 2.5rem',
-                textDecoration: 'none',
-                fontWeight: 900,
-                textTransform: 'uppercase',
-                fontSize: '0.9rem',
-                borderRadius: '8px',
-                transition: 'all 0.3s ease',
-                display: 'inline-block'
-              }}>
-                FIND IT NEAR ME →
-              </Link>
-            </div>
+                {/* FLOATING BEER INGREDIENTS - ANIMATED SVG */}
+                <div 
+                  className="floating-ingredient hop-floating"
+                  style={{
+                    position: 'absolute',
+                    top: '15%',
+                    left: '10%',
+                    width: '60px',
+                    height: '60px',
+                    background: 'rgba(255, 255, 255, 0.15)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    animation: 'float 3s ease-in-out infinite',
+                    animationDelay: '0s',
+                    color: '#fff'
+                  }}
+                  dangerouslySetInnerHTML={{ 
+                    __html: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 2L8 6v6c0 3.31 2.69 6 6 6s6-2.69 6-6V6l-4-4h-4z" fill="currentColor" opacity="0.8"/>
+                      <circle cx="10" cy="10" r="1" fill="currentColor"/>
+                      <circle cx="14" cy="10" r="1" fill="currentColor"/>
+                      <circle cx="12" cy="13" r="1" fill="currentColor"/>
+                    </svg>` 
+                  }}
+                />
 
-            {/* Mobile product image */}
-            <div className="pdp-hero-image" style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              position: 'relative',
-              height: '100%'
-            }}>
-              {product.handle === 'hazy-ipa' && (
-                <img 
-                  src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Hazy_IPA_0645f5ce-2ec5-4fda-87ee-fb36a4ee4295.png?v=1759017824"
-                  alt="DrinkSip Hazy IPA"
-                  className="product-image-hover mobile-product-image"
+                <div 
+                  className="floating-ingredient barley-floating"
                   style={{
-                    width: '100%',
-                    maxWidth: '600px',
-                    height: 'auto',
-                    filter: 'drop-shadow(0 30px 60px rgba(0, 0, 0, 0.4))',
-                    cursor: 'pointer',
-                    transition: 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)'
+                    position: 'absolute',
+                    top: '60%',
+                    right: '15%',
+                    width: '50px',
+                    height: '50px',
+                    background: 'rgba(255, 255, 255, 0.15)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    animation: 'float 3s ease-in-out infinite',
+                    animationDelay: '1s',
+                    color: '#fff'
+                  }}
+                  dangerouslySetInnerHTML={{ 
+                    __html: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="11" y="2" width="2" height="20" fill="currentColor" opacity="0.8"/>
+                      <ellipse cx="12" cy="5" rx="3" ry="1.5" fill="currentColor"/>
+                      <ellipse cx="12" cy="8" rx="2.5" ry="1" fill="currentColor"/>
+                      <ellipse cx="12" cy="11" rx="2.5" ry="1" fill="currentColor"/>
+                      <ellipse cx="12" cy="14" rx="2.5" ry="1" fill="currentColor"/>
+                    </svg>` 
                   }}
                 />
-              )}
-              {product.handle === 'watermelon-refresher' && (
-                <img 
-                  src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Watermelon_Refresher_e64ca8fe-8af8-43b5-8b3a-d20dc04152c2.png?v=1759017823"
-                  alt="DrinkSip Watermelon Refresher"
-                  className="product-image-hover"
+
+                <div 
+                  className="floating-ingredient water-floating"
                   style={{
-                    width: '100%',
-                    maxWidth: '600px',
-                    height: 'auto',
-                    filter: 'drop-shadow(0 30px 60px rgba(0, 0, 0, 0.4))',
-                    cursor: 'pointer',
-                    transition: 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)'
+                    position: 'absolute',
+                    bottom: '20%',
+                    left: '20%',
+                    width: '45px',
+                    height: '45px',
+                    background: 'rgba(255, 255, 255, 0.15)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    animation: 'float 3s ease-in-out infinite',
+                    animationDelay: '2s',
+                    color: '#fff'
+                  }}
+                  dangerouslySetInnerHTML={{ 
+                    __html: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 2C9.5 4 8 7 8 10c0 2.21 1.79 4 4 4s4-1.79 4-4c0-3-1.5-6-4-8z" fill="currentColor" opacity="0.8"/>
+                      <path d="M10 12c0 1.1.9 2 2 2s2-.9 2-2" fill="none" stroke="currentColor" stroke-width="1"/>
+                    </svg>` 
                   }}
                 />
-              )}
-              {product.handle === 'blood-orange-refresher' && (
-                <img 
-                  src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Blood_Orange_Refresher_82f1cfff-dfdd-44c5-bb02-6f8e74183f36.png?v=1759017824"
-                  alt="DrinkSip Blood Orange Refresher"
-                  className="product-image-hover"
-                  style={{
-                    width: '100%',
-                    maxWidth: '600px',
-                    height: 'auto',
-                    filter: 'drop-shadow(0 30px 60px rgba(0, 0, 0, 0.4))',
-                    cursor: 'pointer',
-                    transition: 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)'
-                  }}
-                />
-              )}
-              {product.handle === 'lemon-lime-refresher' && (
-                <img 
-                  src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Lemon_Lime_Refresher_9565ca39-8832-48ab-8c6b-bcd0899f87e9.png?v=1759017824"
-                  alt="DrinkSip Lemon Lime Refresher"
-                  className="product-image-hover"
-                  style={{
-                    width: '100%',
-                    maxWidth: '600px',
-                    height: 'auto',
-                    filter: 'drop-shadow(0 30px 60px rgba(0, 0, 0, 0.4))',
-                    cursor: 'pointer',
-                    transition: 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)'
-                  }}
-                />
-              )}
-              {product.handle === '311-hazy-ipa' && (
-                <img 
-                  src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/311_Hazy_IPA_607644d9-92cb-4a02-af68-0eb18d34063a.png?v=1759017824"
-                  alt="DrinkSip x 311 Hazy IPA"
-                  className="product-image-hover"
-                  style={{
-                    width: '100%',
-                    maxWidth: '600px',
-                    height: 'auto',
-                    filter: 'drop-shadow(0 30px 60px rgba(0, 0, 0, 0.4))',
-                    cursor: 'pointer',
-                    transition: 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)'
-                  }}
-                />
-              )}
-              {(product.handle === 'deftones-tone-zero' || product.handle === 'deftones-tone-zero-lager') && (
-                <img 
-                  src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Deftones_Tone_Zero_Lager_dcc52426-36ee-42ee-a3b5-b49f7d2d7480.png?v=1759017824"
-                  alt="DrinkSip x Deftones Tone Zero Lager"
-                  className="product-image-hover"
-                  style={{
-                    width: '100%',
-                    maxWidth: '600px',
-                    height: 'auto',
-                    filter: 'drop-shadow(0 30px 60px rgba(0, 0, 0, 0.4))',
-                    cursor: 'pointer',
-                    transition: 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)'
-                  }}
-                />
-              )}
+              </div>
             </div>
           </div>
-          </div>
+
+          {/* ANIMATION STYLES */}
+          <style>{`
+            @keyframes slideInLeft {
+              from {
+                transform: translateX(-100px);
+                opacity: 0;
+              }
+              to {
+                transform: translateX(0);
+                opacity: 1;
+              }
+            }
+
+            @keyframes slideInRight {
+              from {
+                transform: translateX(100px);
+                opacity: 0;
+              }
+              to {
+                transform: translateX(0);
+                opacity: 1;
+              }
+            }
+
+            @keyframes float {
+              0%, 100% {
+                transform: translateY(0px);
+              }
+              50% {
+                transform: translateY(-10px);
+              }
+            }
+
+            @keyframes fadeInUp {
+              from {
+                transform: translateY(30px);
+                opacity: 0;
+              }
+              to {
+                transform: translateY(0);
+                opacity: 1;
+              }
+            }
+
+            .benefit-card {
+              animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+              opacity: 0;
+            }
+
+            .ingredient-item {
+              animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+              opacity: 0;
+            }
+
+            @media (max-width: 768px) {
+              .craft-excellence-grid {
+                grid-template-columns: 1fr !important;
+                gap: 3rem !important;
+              }
+              
+              .benefits-section {
+                order: 2;
+              }
+              
+              .product-showcase {
+                order: 1;
+              }
+            }
+          `}</style>
         </section>
 
-        {/* Mobile Tabs Section - Below PDP Hero */}
-        <section className="pdp-mobile-tabs-section" style={{
-          background: product.color,
-          padding: '0 1.5rem 2rem',
-          display: 'none',
-          borderTop: 'none',
-          marginTop: 0
-        }}>
-          <img 
-            src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/DrinkSip_Logo_SVG.svg?v=1759624477"
-            alt="DrinkSip"
-            style={{
-              height: '80px',
-              width: 'auto',
-              marginBottom: '0.5rem',
-              display: 'block'
-            }}
-          />
-          <div style={{
-            fontSize: '0.9rem',
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.15em',
-            color: '#fff',
-            marginBottom: '1rem',
-            lineHeight: 1
-          }}>
-            {product.title.includes('Refresher') ? 'Refresher Series' : 
-             product.title.includes('311') || product.title.includes('Deftones') ? 'Artist Series' : 
-             'Core Series'}
-          </div>
-          
-          <ProductTabs product={product} />
-        </section>
- 
-        {/* You May Like Section - Copied from Homepage */}
+        {/* You May Like Section - Seamless with Hero */}
       <section style={{
-        padding: '2.5rem 2rem 1.5rem', // Desktop padding
-        background: '#000',
+          padding: '4rem 2rem 2rem',
+          background: '#000',
         textAlign: 'center',
-        position: 'relative' // For controls positioning
+          position: 'relative'
       }}>
-        <div style={{
-          maxWidth: '1400px',
-          margin: '0 auto'
-        }}>
+          <div style={{ marginBottom: '2rem' }}>
           <h1 
             className="you-may-like-header"
             style={{
-              fontSize: 'clamp(4rem, 8vw, 6rem)', // Desktop size
-              fontWeight: 900,
-              textTransform: 'uppercase',
-              letterSpacing: '-0.03em',
-              lineHeight: 0.9,
+                fontSize: 'clamp(3.5rem, 7vw, 5.5rem)',
+              fontWeight: 700,
+              fontFamily: 'var(--font-display)',
+              textTransform: 'none',
+              letterSpacing: '-0.02em',
+              lineHeight: 1.1,
               color: '#fff',
-              marginBottom: '1rem'
+              marginBottom: '1.5rem',
+              textShadow: '0 4px 20px rgba(0, 0, 0, 0.5)'
             }}
           >
-            You May Like
+            You May Also Like
           </h1>
           <p 
             className="you-may-like-description"
             style={{
-              fontSize: '1.3rem', // Desktop size
-              color: '#888',
-              maxWidth: '600px',
+                fontSize: '1.3rem',
+              fontFamily: 'var(--font-primary)',
+              color: 'rgba(255, 255, 255, 0.85)',
+              maxWidth: '650px',
               margin: '0 auto',
-              lineHeight: 1.5
+              lineHeight: 1.7,
+              fontWeight: 300
             }}
           >
-            Our complete range of premium non-alcoholic beers.
+            Discover our complete collection of premium craft beverages.
             </p>
           </div>
         
-        {/* Mobile Controls - BETWEEN HEADER AND CARDS */}
+          {/* Mobile Controls */}
         <div 
           className="carousel-controls-container"
           style={{
             position: 'absolute',
-            top: '80%', // Position at bottom of header section
+              top: '80%',
             right: '2rem',
-            display: 'none', // Hidden by default, shown on mobile
+              display: 'none',
         alignItems: 'center',
             gap: '0.5rem',
             zIndex: 100
@@ -1662,22 +781,23 @@ export default function ProductPage() {
           <button 
             className="carousel-control carousel-control-left"
             style={{
-              width: '44px',
-              height: '44px',
-              border: 'none',
+              width: '50px',
+              height: '50px',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
                       borderRadius: '50%',
-              background: 'rgba(255, 255, 255, 0.2)',
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
+              background: 'rgba(255, 255, 255, 0.25)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
               color: '#fff',
               cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
             justifyContent: 'center',
-              fontSize: '1.2rem',
-              fontWeight: 300,
-              transition: 'all 0.2s ease',
-              WebkitTapHighlightColor: 'transparent'
+              fontSize: '1.4rem',
+              fontWeight: 400,
+              transition: 'all 0.3s ease',
+              WebkitTapHighlightColor: 'transparent',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)'
             }}
             aria-label="Previous products"
           >
@@ -1687,22 +807,23 @@ export default function ProductPage() {
           <button 
             className="carousel-control carousel-control-right"
             style={{
-              width: '44px',
-              height: '44px',
-              border: 'none',
+              width: '50px',
+              height: '50px',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
               borderRadius: '50%',
-              background: 'rgba(255, 255, 255, 0.2)',
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
+              background: 'rgba(255, 255, 255, 0.25)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
               color: '#fff',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '1.2rem',
-              fontWeight: 300,
-              transition: 'all 0.2s ease',
-              WebkitTapHighlightColor: 'transparent'
+              fontSize: '1.4rem',
+              fontWeight: 400,
+              transition: 'all 0.3s ease',
+              WebkitTapHighlightColor: 'transparent',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)'
             }}
             aria-label="Next products"
           >
@@ -1711,17 +832,16 @@ export default function ProductPage() {
         </div>
       </section>
 
-       {/* MOBILE JUMBO Product Carousel with Controls */}
+        {/* Product Carousel - Seamless */}
        <section 
          className="product-carousel-section"
          style={{
-           padding: 'clamp(3rem, 8vw, 4rem) 0 clamp(1rem, 3vw, 2rem) 0', // More top padding to prevent overlap
-        background: '#000',
+            padding: 'clamp(2rem, 6vw, 3rem) 0 clamp(4rem, 8vw, 6rem) 0',
+            background: '#000',
            overflow: 'hidden',
            position: 'relative'
          }}
        >
-         {/* Carousel Container */}
          <div 
            className="product-carousel-container"
            style={{
@@ -1732,124 +852,97 @@ export default function ProductPage() {
            }}
          >
            {[
-             // Core Series
-             { id: '1', handle: 'hazy-ipa', title: 'DrinkSip Hazy IPA', tags: ['core-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Hazy_IPA_0645f5ce-2ec5-4fda-87ee-fb36a4ee4295.png?v=1759017824' }, metafields: [] },
-             
-             // Refresher Series
-             { id: '2', handle: 'watermelon-refresher', title: 'DrinkSip Watermelon Refresher', tags: ['refresher-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Watermelon_Refresher_e64ca8fe-8af8-43b5-8b3a-d20dc04152c2.png?v=1759017823' }, metafields: [] },
-             { id: '3', handle: 'blood-orange-refresher', title: 'DrinkSip Blood Orange Refresher', tags: ['refresher-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Blood_Orange_Refresher_82f1cfff-dfdd-44c5-bb02-6f8e74183f36.png?v=1759017824' }, metafields: [] },
-             { id: '4', handle: 'lemon-lime-refresher', title: 'DrinkSip Lemon Lime Refresher', tags: ['refresher-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Lemon_Lime_Refresher_9565ca39-8832-48ab-8c6b-bcd0899f87e9.png?v=1759017824' }, metafields: [] },
-             
-             // Artist Series
-             { id: '5', handle: '311-hazy-ipa', title: 'DrinkSip x 311 Hazy IPA', tags: ['artist-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/311_Hazy_IPA_607644d9-92cb-4a02-af68-0eb18d34063a.png?v=1759017824' }, metafields: [] },
-             { id: '6', handle: 'deftones-tone-zero-lager', title: 'DrinkSip x Deftones Tone Zero Lager', tags: ['artist-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Deftones_Tone_Zero_Lager_dcc52426-36ee-42ee-a3b5-b49f7d2d7480.png?v=1759017824' }, metafields: [] },
-             
-             // Duplicate set for seamless loop
-             { id: 'dup-1', handle: 'hazy-ipa', title: 'DrinkSip Hazy IPA', tags: ['core-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Hazy_IPA_0645f5ce-2ec5-4fda-87ee-fb36a4ee4295.png?v=1759017824' }, metafields: [] },
-             { id: 'dup-2', handle: 'watermelon-refresher', title: 'DrinkSip Watermelon Refresher', tags: ['refresher-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Watermelon_Refresher_e64ca8fe-8af8-43b5-8b3a-d20dc04152c2.png?v=1759017823' }, metafields: [] },
-             { id: 'dup-3', handle: 'blood-orange-refresher', title: 'DrinkSip Blood Orange Refresher', tags: ['refresher-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Blood_Orange_Refresher_82f1cfff-dfdd-44c5-bb02-6f8e74183f36.png?v=1759017824' }, metafields: [] },
-             { id: 'dup-4', handle: 'lemon-lime-refresher', title: 'DrinkSip Lemon Lime Refresher', tags: ['refresher-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Lemon_Lime_Refresher_9565ca39-8832-48ab-8c6b-bcd0899f87e9.png?v=1759017824' }, metafields: [] },
-             { id: 'dup-5', handle: '311-hazy-ipa', title: 'DrinkSip x 311 Hazy IPA', tags: ['artist-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/311_Hazy_IPA_607644d9-92cb-4a02-af68-0eb18d34063a.png?v=1759017824' }, metafields: [] },
-             { id: 'dup-6', handle: 'deftones-tone-zero-lager', title: 'DrinkSip x Deftones Tone Zero Lager', tags: ['artist-series'], featuredImage: { url: 'https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Deftones_Tone_Zero_Lager_dcc52426-36ee-42ee-a3b5-b49f7d2d7480.png?v=1759017824' }, metafields: [] }
-           ].map((product: any) => (
-             <div 
-               key={product.id} 
+              ...recommendations,
+              ...recommendations
+            ].map((rec: any, index: number) => (
+              <div 
+                key={`${rec.id}-${index}`}
                className="product-card-wrapper"
                style={{ 
-                 flex: '0 0 clamp(200px, 28vw, 400px)', // Desktop sizing
+                  flex: '0 0 clamp(200px, 28vw, 400px)',
                  display: 'flex',
                  justifyContent: 'center'
                }}
              >
                <ProductCard
-                 id={product.id}
-                 handle={product.handle}
-                 title={product.title}
-                 image={product.featuredImage.url}
+                  id={rec.id}
+                  handle={rec.handle}
+                  title={rec.title}
+                  image={getProductImage(rec.handle)}
                />
               </div>
             ))}
           </div>
 
-         {/* MOBILE & DESKTOP STYLES */}
+          {/* Styles */}
          <style>
            {`
-             /* DESKTOP & MOBILE - You May Like Section */
+              @keyframes scroll {
+                0% {
+                  transform: translateX(0);
+                }
+                100% {
+                  transform: translateX(calc(-50%));
+                }
+              }
+
              .you-may-like-header {
-               font-size: 32px !important; /* 32px on mobile by default */
-               margin-bottom: 2rem !important; /* More space below header */
+                font-size: 34px !important;
+                margin-bottom: 2rem !important;
+                font-family: var(--font-display) !important;
+                font-weight: 700 !important;
+                text-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
              }
              
-             /* Hide description on both desktop and mobile */
              .you-may-like-description {
                display: none !important;
              }
              
-             /* Show controls on both desktop and mobile */
              .carousel-controls-container {
                display: flex !important;
-               top: 85% !important; /* More space above controls */
+                top: 85% !important;
              }
              
-             /* Desktop specific styling */
              @media (min-width: 768px) {
-               /* Desktop header size: 62.62px */
                .you-may-like-header {
                  font-size: 62.62px !important;
                }
                
-               /* Better spacing on desktop */
                .product-carousel-section {
-                 padding: 3rem 0 2rem 0 !important; /* Good spacing for desktop */
+                  padding: 3rem 0 2rem 0 !important;
                }
                
-               /* Desktop product cards - slight overlapping */
                .product-card-wrapper {
-                 margin-right: -1.4rem !important; /* Slight overlapping with more breathing room */
+                  margin-right: -1.4rem !important;
                }
                
-               /* Control hover effects on desktop */
                .carousel-control:hover {
                  background: rgba(255, 255, 255, 0.3) !important;
                  transform: scale(1.05) !important;
                }
              }
              
-             /* MOBILE ONLY - Additional mobile-specific styles */
              @media (max-width: 767px) {
-               /* JUMBO Product Cards - 2.5x larger, almost full viewport */
                .product-card-wrapper {
-                 flex: 0 0 calc(85vw - 2rem) !important; /* Almost full viewport with padding */
+                  flex: 0 0 calc(85vw - 2rem) !important;
                  min-width: 280px !important;
                  max-width: 350px !important;
-                 margin-right: 0.5rem !important; /* Tighter spacing on mobile too */
+                  margin-right: 0.5rem !important;
                }
                
-               /* Better spacing on mobile - MORE SPACE BELOW CONTROLS */
                .product-carousel-section {
-                 padding: 3rem 0 1rem 0 !important; /* Even more top padding for space below controls */
+                  padding: 3rem 0 1rem 0 !important;
                }
                
-               /* Control active effects on mobile */
                .carousel-control:active {
                  background: rgba(255, 255, 255, 0.3) !important;
                  transform: scale(0.95) !important;
                }
              }
-             
-             /* Keep auto-play on both desktop and mobile */
-             .product-carousel-container {
-               animation: scroll 25s linear infinite !important;
-             }
-             
-             /* Animation keyframes */
-             @keyframes scroll {
-               0% { transform: translateX(0); }
-               100% { transform: translateX(-50%); }
-             }
            `}
          </style>
       </section>
     </div>
+    </>
   );
 }

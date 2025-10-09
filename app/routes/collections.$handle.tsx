@@ -120,7 +120,7 @@ export default function CollectionHandle() {
       </style>
       {/* Collection Header - BodyArmor Style */}
       <section className="collection-header" style={{
-        padding: '15px 2rem 0.5rem', // 15px top padding
+        padding: '218px 2rem 0.5rem', // 203px header height + 15px spacing
         background: '#000',
         textAlign: 'center'
       }}>

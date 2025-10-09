@@ -18,6 +18,10 @@ import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from './components/PageLayout';
 import {SkipToMain, useHighContrastMode, useReducedMotion, useKeyboardNavigation} from './components/AccessibilityUtils';
+import {CartProvider} from './contexts/CartContext';
+import {BuildABoxCartDrawer} from './components/BuildABoxCartDrawer';
+import {FloatingCartButton} from './components/FloatingCartButton';
+import {useCart} from './contexts/CartContext';
 
 export type RootLoader = typeof loader;
 
@@ -63,6 +67,19 @@ export function links() {
       rel: 'preconnect',
       href: 'https://shop.app',
     },
+    {
+      rel: 'preconnect',
+      href: 'https://fonts.googleapis.com',
+    },
+    {
+      rel: 'preconnect',
+      href: 'https://fonts.gstatic.com',
+      crossOrigin: 'anonymous',
+    },
+    {
+      rel: 'stylesheet',
+      href: 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap',
+    },
     {rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg'},
   ];
 }
@@ -70,12 +87,10 @@ export function links() {
 export async function loader(args: LoaderFunctionArgs) {
   // Simplified loader to get the site working first
   const {env, cart, customerAccount} = args.context;
-  
-  console.log('Using minimal root loader - Shopify queries disabled');
 
   return {
-    header: null,
-    footer: null,
+    header: {} as any,
+    footer: Promise.resolve(null),
     cart: cart.get(), // Return promise like expected
     isLoggedIn: customerAccount.isLoggedIn(), // Return promise like expected
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN || 'demo-store.myshopify.com',
@@ -98,7 +113,6 @@ async function loadCriticalData({context}: LoaderFunctionArgs) {
   const {storefront} = context;
 
   // Temporarily disable Shopify queries to get site working
-  console.log('Skipping header query - no Shopify credentials available');
   const header = null;
 
   return {
@@ -115,7 +129,6 @@ function loadDeferredData({context}: LoaderFunctionArgs) {
   const {storefront, customerAccount, cart} = context;
 
   // Temporarily disable footer query to get site working
-  console.log('Skipping footer query - no Shopify credentials available');
   const footer = null;
 
   return {
@@ -201,8 +214,31 @@ export function Layout({children}: {children?: React.ReactNode}) {
   );
 }
 
+function AppContent() {
+  const { items, isDrawerOpen, updateQuantity, removeItem, closeDrawer, totalItems, openDrawer, addItem } = useCart();
+
+  return (
+    <>
+      <Outlet />
+      <FloatingCartButton itemCount={totalItems} onClick={openDrawer} />
+      <BuildABoxCartDrawer
+        isOpen={isDrawerOpen}
+        onClose={closeDrawer}
+        items={items}
+        onUpdateQuantity={updateQuantity}
+        onRemoveItem={removeItem}
+        onAddItem={addItem}
+      />
+    </>
+  );
+}
+
 export default function App() {
-  return <Outlet />;
+  return (
+    <CartProvider>
+      <AppContent />
+    </CartProvider>
+  );
 }
 
 export function ErrorBoundary() {

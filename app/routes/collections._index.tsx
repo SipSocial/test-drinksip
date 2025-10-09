@@ -46,7 +46,7 @@ export default function Collections() {
   const {collections} = useLoaderData<typeof loader>();
 
   return (
-    <div className="collections">
+    <div className="collections" style={{ paddingTop: '203px' }}> {/* Add padding for fixed header */}
       <h1>Collections</h1>
       <PaginatedResourceSection
         connection={collections}

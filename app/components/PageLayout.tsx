@@ -1,5 +1,5 @@
 import {Await, Link, useLocation} from 'react-router';
-import {Suspense, useId} from 'react';
+import {Suspense, useId, useState, useEffect} from 'react';
 import type {
   CartApiQueryFragment,
   FooterQuery,
@@ -36,6 +36,7 @@ export function PageLayout({
 }: PageLayoutProps) {
   const location = useLocation();
   const isHomepage = location.pathname === '/';
+  const isProductPage = location.pathname.startsWith('/products/');
 
   // Determine header background color based on route
   const getHeaderBackground = () => {
@@ -50,11 +51,13 @@ export function PageLayout({
       <SearchAside />
       <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
       
-      {/* Unified Responsive Header */}
-      <UnifiedHeader 
-        backgroundColor={getHeaderBackground()}
-        isTransparent={isHomepage}
-      />
+      {/* Unified Responsive Header - Skip on PDP pages since they have their own WhiteHeader */}
+      {!isProductPage && (
+        <UnifiedHeader 
+          backgroundColor={getHeaderBackground()}
+          isTransparent={isHomepage}
+        />
+      )}
       
       <main style={{ 
         paddingTop: '0',

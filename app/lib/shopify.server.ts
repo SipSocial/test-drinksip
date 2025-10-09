@@ -6,7 +6,6 @@
 // Environment variables - only accessed when functions are called
 function getDomain() {
   const domain = process.env.PUBLIC_STORE_DOMAIN;
-  console.log('Environment check - PUBLIC_STORE_DOMAIN:', domain ? '✓ Found' : '✗ Missing');
   if (!domain) {
     console.warn('PUBLIC_STORE_DOMAIN not found, using fallback');
     return 'drinksip.myshopify.com'; // Fallback domain
@@ -18,8 +17,6 @@ function getTokens() {
   const publicToken = process.env.PUBLIC_STOREFRONT_API_TOKEN;
   const privateToken = process.env.PRIVATE_STOREFRONT_API_TOKEN;
   
-  console.log('Environment check - PUBLIC_STOREFRONT_API_TOKEN:', publicToken ? '✓ Found' : '✗ Missing');
-  console.log('Environment check - PRIVATE_STOREFRONT_API_TOKEN:', privateToken ? '✓ Found' : '✗ Missing');
   
   // For development - gracefully handle missing tokens
   if (!publicToken) {

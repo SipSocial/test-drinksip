@@ -50,7 +50,7 @@ export default function Collection() {
   const {products} = useLoaderData<typeof loader>();
 
   return (
-    <div className="collection">
+    <div className="collection" style={{ paddingTop: '203px' }}> {/* Add padding for fixed header */}
       <h1>Products</h1>
       <PaginatedResourceSection
         connection={products}

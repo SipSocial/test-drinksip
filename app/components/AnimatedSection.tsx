@@ -65,15 +65,13 @@ export function AnimatedSection({
     animationDuration: duration ? `${duration}ms` : undefined
   } as React.CSSProperties;
 
-  return (
-    <Component
-      ref={ref as any}
-      className={`${animationClass} ${className}`.trim()}
-      style={combinedStyle}
-    >
-      {children}
-    </Component>
-  );
+  const elementProps = {
+    ref,
+    className: `${animationClass} ${className}`.trim(),
+    style: combinedStyle
+  };
+
+  return React.createElement(Component, elementProps, children);
 }
 
 /**

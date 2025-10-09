@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router';
 
-interface HeroSlide {
+export interface HeroSlide {
   id: string;
   title: string;
   subtitle: string;
@@ -10,7 +10,7 @@ interface HeroSlide {
   video?: string;
   handle: string;
   color: string;
-  type: 'image' | 'video';
+  type: 'image' | 'video' | 'custom-html' | 'brand-statement';
   emphasizeText?: boolean;
 }
 
@@ -24,6 +24,11 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
   const [videoDuration, setVideoDuration] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Force start at first slide on mount
+  useEffect(() => {
+    setCurrentSlide(0);
+  }, []);
 
   // Mobile detection
   useEffect(() => {
@@ -93,46 +98,277 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
         zIndex: 0
       }} />
 
-      {/* Wake Up Happy Slide - Responsive Images (Desktop + Mobile) */}
+
+      {/* Wake Up Happy Slide - HERITAGE BRAND HERO */}
       {currentProduct.id === 'wake-up-happy' && (
-        <div style={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative',
-          zIndex: 2
-        }}>
-          {/* Mobile Image - Only visible on mobile */}
-          <img 
-            src={currentProduct.image!} 
-            alt="Wake Up Happy - Mobile"
-            className="wake-up-happy-mobile"
+        <div 
+          className="wake-up-hero-container"
+          style={{
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            zIndex: 2,
+            overflow: 'hidden',
+            background: '#E8B122'
+          }}
+        >
+          {/* DESKTOP HERO - CLEAN & SOPHISTICATED */}
+          <div 
+            className="heritage-desktop"
             style={{
               width: '100%',
-              height: '100vh',
-              objectFit: 'cover',
-              objectPosition: 'center',
-              display: 'block'
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '0 8vw',
+              position: 'relative'
             }}
-          />
-          
-          {/* Desktop Image - Only visible on desktop */}
-          {currentProduct.desktopImage && (
-            <img 
-              src={currentProduct.desktopImage} 
-              alt="Wake Up Happy - Desktop"
-              className="wake-up-happy-desktop"
+          >
+            {/* LEFT: TYPOGRAPHY - SIMPLE FADE IN */}
+            <div 
+              className="desktop-text"
               style={{
-                width: '100%',
-                height: '100vh',
-                objectFit: 'cover',
-                objectPosition: 'center',
-                display: 'none'
+                flex: '0 0 45%',
+                zIndex: 2
               }}
-            />
-          )}
+            >
+              <h1 style={{
+                fontFamily: 'Peridot PE, Inter, sans-serif',
+                fontSize: 'clamp(5rem, 10vw, 12rem)',
+                fontWeight: 900,
+                textTransform: 'uppercase',
+                lineHeight: 0.88,
+                letterSpacing: '-0.04em',
+                color: '#FFFFFF',
+                margin: 0,
+                opacity: 0,
+                animation: 'cleanFadeIn 1s ease forwards',
+                textShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+                willChange: 'opacity'
+              }}>
+                WAKE UP HAPPY
+              </h1>
+              <p style={{
+                fontFamily: 'Inter, sans-serif',
+                fontSize: 'clamp(1rem, 1.8vw, 1.4rem)',
+                fontWeight: 500,
+                textTransform: 'uppercase',
+                letterSpacing: '0.25em',
+                color: '#FFFFFF',
+                margin: '2rem 0 0 0',
+                opacity: 0,
+                animation: 'cleanFadeIn 0.8s ease 1.5s forwards'
+              }}>
+                NON-ALCOHOLIC BEER
+              </p>
+            </div>
+
+            {/* RIGHT: CAN - ELEGANT RISE */}
+            <div 
+              className="desktop-can"
+              style={{
+                flex: '0 0 40%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 1
+              }}
+            >
+              <img 
+                src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Hazy_IPA_0645f5ce-2ec5-4fda-87ee-fb36a4ee4295.png?v=1759017824"
+                alt="DrinkSip"
+                style={{
+                  width: 'clamp(300px, 35vw, 600px)',
+                  height: 'auto',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 30px 60px rgba(0, 0, 0, 0.25))',
+                  opacity: 0,
+                  animation: 'happyBoomerang 2s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards',
+                  willChange: 'transform, opacity',
+                  backfaceVisibility: 'hidden'
+                }}
+              />
+            </div>
+          </div>
+
+          {/* MOBILE HERO */}
+          <div 
+            className="heritage-mobile"
+            style={{
+              width: '100%',
+              height: '100%',
+              display: 'none',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '4rem 2rem',
+              textAlign: 'center',
+              position: 'relative'
+            }}
+          >
+            {/* MOBILE TEXT - CLEAN & CENTERED */}
+            <div 
+              className="mobile-text"
+              style={{
+                position: 'absolute',
+                left: '50%',
+                top: '28%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 2,
+                textAlign: 'center',
+                width: '100%',
+                padding: '0 1.5rem'
+              }}
+            >
+              <h1 style={{
+                fontFamily: 'Peridot PE, Inter, sans-serif',
+                fontSize: 'clamp(4rem, 17vw, 8rem)',
+                fontWeight: 900,
+                textTransform: 'uppercase',
+                lineHeight: 0.9,
+                letterSpacing: '-0.05em',
+                color: '#FFFFFF',
+                margin: 0,
+                opacity: 0,
+                animation: 'cleanFadeIn 1s ease forwards',
+                textShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+                WebkitFontSmoothing: 'antialiased',
+                willChange: 'opacity'
+              }}>
+                WAKE UP HAPPY
+              </h1>
+            </div>
+
+            {/* MOBILE CAN - ELEGANT RISE */}
+            <div 
+              className="mobile-can"
+              style={{
+                position: 'absolute',
+                left: '50%',
+                bottom: '8%',
+                transform: 'translateX(-50%)',
+                zIndex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.75rem'
+              }}
+            >
+              <img 
+                src="https://cdn.shopify.com/s/files/1/0407/8580/5468/files/Hazy_IPA_0645f5ce-2ec5-4fda-87ee-fb36a4ee4295.png?v=1759017824"
+                alt="DrinkSip"
+                style={{
+                  width: 'min(75vw, 450px)',
+                  maxHeight: '50vh',
+                  height: 'auto',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 30px 60px rgba(0, 0, 0, 0.3))',
+                  opacity: 0,
+                  animation: 'happyBoomerangMobile 2s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards',
+                  willChange: 'transform, opacity',
+                  backfaceVisibility: 'hidden'
+                }}
+              />
+              <p style={{
+                fontFamily: 'Inter, sans-serif',
+                fontSize: 'clamp(0.75rem, 3vw, 1rem)',
+                fontWeight: 500,
+                textTransform: 'uppercase',
+                letterSpacing: '0.3em',
+                color: '#FFFFFF',
+                margin: 0,
+                opacity: 0,
+                animation: 'cleanFadeIn 0.8s ease 1.8s forwards'
+              }}>
+                NON-ALCOHOLIC BEER
+              </p>
+            </div>
+          </div>
+
+          {/* CLEAN SOPHISTICATED ANIMATIONS */}
+          <style>{`
+            /* SIMPLE FADE IN */
+            @keyframes cleanFadeIn {
+              from { 
+                opacity: 0;
+              }
+              to { 
+                opacity: 1;
+              }
+            }
+
+            /* SMOOTH HAPPY ENTRANCE - DESKTOP */
+            @keyframes happyBoomerang {
+              0% {
+                opacity: 0;
+                transform: scale(0.8) translateY(30px);
+              }
+              60% {
+                opacity: 1;
+                transform: scale(1.05) translateY(-5px);
+              }
+              100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+              }
+            }
+
+            /* SMOOTH HAPPY ENTRANCE - MOBILE */
+            @keyframes happyBoomerangMobile {
+              0% {
+                opacity: 0;
+                transform: scale(0.85) translateY(40px);
+              }
+              60% {
+                opacity: 1;
+                transform: scale(1.06) translateY(-8px);
+              }
+              100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+              }
+            }
+
+            /* WASH AWAY TRANSITION */
+            @keyframes washAway {
+              0% { 
+                opacity: 1; 
+                transform: scale(1); 
+                filter: blur(0px); 
+              }
+              100% { 
+                opacity: 0; 
+                transform: scale(1.1); 
+                filter: blur(20px); 
+              }
+            }
+
+            /* PREVENT HEADER FLASH ON MOBILE */
+            @media (max-width: 767px) {
+              .heritage-desktop { 
+                display: none !important; 
+                visibility: hidden !important;
+                opacity: 0 !important;
+              }
+              .heritage-mobile { 
+                display: flex !important; 
+              }
+            }
+
+            @media (min-width: 768px) {
+              .heritage-desktop { 
+                display: flex !important; 
+              }
+              .heritage-mobile { 
+                display: none !important; 
+                visibility: hidden !important;
+                opacity: 0 !important;
+              }
+            }
+          `}</style>
         </div>
       )}
 
@@ -167,16 +403,13 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
             onLoadedMetadata={() => {
               if (videoRef.current) {
                 setVideoDuration(videoRef.current.duration);
-                console.log('Video loaded, duration:', videoRef.current.duration);
               }
             }}
             onPlay={() => {
               setIsVideoPlaying(true);
-              console.log('Video started playing');
             }}
             onEnded={() => {
               setIsVideoPlaying(false);
-              console.log('Video ended, advancing slide');
               // Auto advance to next slide when video ends
               setTimeout(() => {
                 setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -539,7 +772,6 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
             /* CRITICAL: Ensure desktop refresher animations work properly */
             .refresher-image-animate {
               animation: refreshingSlideInRight 1.4s cubic-bezier(0.23, 1, 0.32, 1) 0.3s forwards !important;
-              opacity: 0 !important;
             }
             
             .refresher-text-animate {
@@ -557,7 +789,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
       </style>
 
       {/* Standard Image Slides - MOBILE FIRST DESIGN - Full Viewport Layout */}
-      {currentProduct.id !== 'wake-up-happy' && currentProduct.id !== 'demarcus-lawrence' && (
+      {currentProduct.id !== 'this-is-drinksip' && currentProduct.id !== 'wake-up-happy' && currentProduct.id !== 'demarcus-lawrence' && (
         <div style={{
           width: '100%',
           height: '100%',
@@ -763,8 +995,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
               key={`text-desktop-${currentProduct.id}-${currentSlide}`}
               className={currentProduct.id === 'refresher-trio' ? 'refresher-text-animate' : ''}
               style={{
-                paddingRight: currentProduct.id === 'refresher-trio' ? 'clamp(1rem, 3vw, 2rem)' : '0', // Responsive padding  
-                opacity: currentProduct.id === 'refresher-trio' ? 0 : 1 // Start hidden for animation
+                paddingRight: currentProduct.id === 'refresher-trio' ? 'clamp(1rem, 3vw, 2rem)' : '0' // Responsive padding  
               }}
             >
               <h1 style={{
@@ -849,8 +1080,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
                 justifyContent: 'center',
                 alignItems: 'center',
                 position: 'relative',
-                paddingLeft: currentProduct.id === 'refresher-trio' ? 'clamp(1rem, 4vw, 3rem)' : '0', // Responsive padding
-                opacity: currentProduct.id === 'refresher-trio' ? 0 : 1 // Start hidden for animation - DESKTOP ANIMATION PRESERVED
+                paddingLeft: currentProduct.id === 'refresher-trio' ? 'clamp(1rem, 4vw, 3rem)' : '0' // Responsive padding
               }}
             >
               <img 
@@ -863,9 +1093,9 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
                     : 'clamp(250px, 70vw, 500px)', // Better mobile scaling for single products
                   height: 'auto',
                   filter: 'drop-shadow(0 30px 60px rgba(0, 0, 0, 0.6))',
-                  transition: 'transform 0.8s ease',
+                  transition: currentProduct.id === 'refresher-trio' ? 'none' : 'transform 0.8s ease',
                   transform: currentProduct.id === 'refresher-trio' 
-                    ? 'scale(1.2)' // CSS clamp for responsive scaling
+                    ? 'none' // Let animation handle transform
                     : 'scale(1.05)'
                 }}
               />
