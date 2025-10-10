@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { AddToBoxButton } from '~/components/AddToBoxButton';
 import { useCart } from '~/contexts/CartContext';
@@ -25,10 +25,40 @@ interface PDPHero1920Props {
  * Designed for ultra-luxury 1% of 1% aesthetic with magazine-style visuals
  */
 export function PDPHero1920({ product, productImage, onColorChange, allProducts = [] }: PDPHero1920Props) {
-  const [activeTab, setActiveTab] = React.useState<'nutrition' | 'details' | 'ingredients' | 'reviews'>('nutrition');
-  const [rippling, setRippling] = React.useState(false);
-  const [selectedProduct, setSelectedProduct] = React.useState(product);
-  const [titleLoaded, setTitleLoaded] = React.useState(false);
+  const [activeTab, setActiveTab] = useState<'nutrition' | 'details' | 'ingredients' | 'reviews'>('nutrition');
+  const [rippling, setRippling] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(product);
+  const [titleLoaded, setTitleLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [hoveredThumbnail, setHoveredThumbnail] = useState<string | null>(null);
+  
+  // Keyboard navigation for tabs
+  const handleTabKeyDown = (event: React.KeyboardEvent, currentTab: string) => {
+    const tabs = ['nutrition', 'details', 'ingredients', 'reviews'] as const;
+    const currentIndex = tabs.indexOf(currentTab as any);
+    
+    switch (event.key) {
+      case 'ArrowLeft':
+        event.preventDefault();
+        const prevIndex = currentIndex > 0 ? currentIndex - 1 : tabs.length - 1;
+        setActiveTab(tabs[prevIndex]);
+        break;
+      case 'ArrowRight':
+        event.preventDefault();
+        const nextIndex = currentIndex < tabs.length - 1 ? currentIndex + 1 : 0;
+        setActiveTab(tabs[nextIndex]);
+        break;
+      case 'Home':
+        event.preventDefault();
+        setActiveTab(tabs[0]);
+        break;
+      case 'End':
+        event.preventDefault();
+        setActiveTab(tabs[tabs.length - 1]);
+        break;
+    }
+  };
   
   // Cart functionality
   const { addItem, totalItems } = useCart();
@@ -46,14 +76,57 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
     });
   };
   
-  // Fade title after component loads
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
+  // Sophisticated entrance animations with staggered timing
+  useEffect(() => {
+    // Initial load animation
+    const loadTimer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 100);
+
+    // Title fade after all elements are loaded
+    const titleTimer = setTimeout(() => {
       setTitleLoaded(true);
-    }, 800); // Wait 800ms then fade to background
+    }, 1200); // Increased for better staging
     
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(loadTimer);
+      clearTimeout(titleTimer);
+    };
   }, []);
+
+  // Advanced image preloading for smooth transitions
+  useEffect(() => {
+    const img = new Image();
+    img.src = getProductImage(selectedProduct.handle);
+    img.onload = () => setImageLoaded(true);
+  }, [selectedProduct.handle]);
+
+  // Preload all product images on component mount for instant switching
+  useEffect(() => {
+    const preloadImages = async () => {
+      const imagePromises = allProducts.map((prod) => {
+        return new Promise<void>((resolve) => {
+          const img = new Image();
+          img.src = getProductImage(prod.handle);
+          img.onload = () => resolve();
+          img.onerror = () => resolve(); // Don't block on errors
+        });
+      });
+      
+      // Load images in batches to avoid overwhelming the network
+      const batchSize = 2;
+      for (let i = 0; i < imagePromises.length; i += batchSize) {
+        const batch = imagePromises.slice(i, i + batchSize);
+        await Promise.all(batch);
+        // Small delay between batches for better performance
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    };
+
+    if (allProducts.length > 0) {
+      preloadImages();
+    }
+  }, [allProducts]);
   
   // Calculate darker color for right side (same color, higher opacity)
   const lighterColor = selectedProduct.color + 'EE'; // EE = ~93% opacity - much darker
@@ -90,31 +163,40 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
     return [cleanTitle]; // Single word
   };
 
-  // Truncate product names for thumbnails (>20 chars)
-  const truncateProductName = (name: string, maxLength: number = 20) => {
-    const cleanName = getCleanTitle(name);
-    if (cleanName.length <= maxLength) return cleanName;
-    return cleanName.substring(0, maxLength - 3) + '...';
+  // Get clean product names for thumbnails (no truncation - show full names)
+  const getCleanProductName = (name: string) => {
+    return getCleanTitle(name); // Return full clean title without truncation
   };
 
-  // Handle product switch with ripple animation
+  // Enhanced product switch with sophisticated animations
   const handleProductSwitch = (newProduct: any) => {
-    setRippling(true);
-    setTitleLoaded(false); // Reset title to full opacity for new product
+    if (newProduct.handle === selectedProduct.handle) return;
     
-    setTimeout(() => {
-      setSelectedProduct(newProduct);
-      if (onColorChange) {
-        onColorChange(newProduct.color);
-      }
+    setRippling(true);
+    setTitleLoaded(false);
+    setImageLoaded(false);
+    
+    // Preload new product image
+    const img = new Image();
+    img.src = getProductImage(newProduct.handle);
+    
+    img.onload = () => {
       setTimeout(() => {
-        setRippling(false);
-        // Start title fade for new product
+        setSelectedProduct(newProduct);
+        if (onColorChange) {
+          onColorChange(newProduct.color);
+        }
+        setImageLoaded(true);
+        
         setTimeout(() => {
-          setTitleLoaded(true);
+          setRippling(false);
+          // Delayed title fade for premium feel
+          setTimeout(() => {
+            setTitleLoaded(true);
+          }, 600);
         }, 400);
-      }, 300);
-    }, 150);
+      }, 200);
+    };
   };
 
   // Get descriptive chips for each product
@@ -147,11 +229,53 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
 
   return (
     <>
-      {/* Keyframes for shimmer animation */}
-      <style jsx>{`
+      {/* Enhanced keyframes for premium animations */}
+      <style>{`
         @keyframes shimmer {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(100%); }
+        }
+        
+        @keyframes fadeInUp {
+          0% { 
+            opacity: 0; 
+            transform: translateY(30px); 
+          }
+          100% { 
+            opacity: 1; 
+            transform: translateY(0); 
+          }
+        }
+        
+        @keyframes slideInLeft {
+          0% { 
+            opacity: 0; 
+            transform: translateX(-40px); 
+          }
+          100% { 
+            opacity: 1; 
+            transform: translateX(0); 
+          }
+        }
+        
+        @keyframes scaleIn {
+          0% { 
+            opacity: 0; 
+            transform: scale(0.9); 
+          }
+          100% { 
+            opacity: 1; 
+            transform: scale(1); 
+          }
+        }
+        
+        @keyframes pulseGlow {
+          0%, 100% { 
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.3); 
+          }
+          50% { 
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.6); 
+          }
         }
       `}</style>
       
@@ -244,7 +368,7 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
             alignItems: 'flex-start'
           }}
         >
-          {/* DESCRIPTIVE CHIPS */}
+          {/* DESCRIPTIVE CHIPS WITH ENTRANCE ANIMATIONS */}
           <div 
             style={{
               display: 'flex',
@@ -256,10 +380,11 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
           >
             {getProductChips(selectedProduct.handle).map((chip, index) => (
               <div
-                key={index}
+                key={`${selectedProduct.handle}-${index}`}
                 style={{
                   background: 'rgba(255, 255, 255, 0.15)',
                   backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
                   border: '1px solid rgba(255, 255, 255, 0.3)',
                   borderRadius: '20px',
                   padding: '0.5rem 1rem',
@@ -269,7 +394,22 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
                   color: '#FFFFFF',
                   textTransform: 'uppercase',
                   letterSpacing: '0.05em',
-                  whiteSpace: 'nowrap'
+                  whiteSpace: 'nowrap',
+                  opacity: isLoaded ? 1 : 0,
+                  transform: isLoaded ? 'translateY(0)' : 'translateY(20px)',
+                  transition: `all 0.8s cubic-bezier(0.4, 0, 0.2, 1) ${index * 0.1}s`,
+                  cursor: 'default',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
                 }}
               >
                 {chip}
@@ -277,8 +417,14 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
             ))}
           </div>
 
-          {/* PRICE */}
-          <div>
+          {/* PRICE WITH ENTRANCE ANIMATION */}
+          <div
+            style={{
+              opacity: isLoaded ? 1 : 0,
+              transform: isLoaded ? 'translateY(0)' : 'translateY(30px)',
+              transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.3s'
+            }}
+          >
             <span 
               style={{
                 fontFamily: 'var(--font-display)',
@@ -286,7 +432,9 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
                 fontWeight: '900',
                 color: '#FFFFFF',
                 lineHeight: 1,
-                letterSpacing: '-0.01em'
+                letterSpacing: '-0.01em',
+                textShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+                display: 'inline-block'
               }}
             >
               $8.99
@@ -303,8 +451,16 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
             </span>
           </div>
 
-          {/* ADD 4-PACK TO BOX BUTTON */}
-          <div style={{ width: '100%', maxWidth: '400px' }}>
+          {/* ENHANCED ADD 4-PACK TO BOX BUTTON */}
+          <div 
+            style={{ 
+              width: '100%', 
+              maxWidth: '400px',
+              opacity: isLoaded ? 1 : 0,
+              transform: isLoaded ? 'translateY(0)' : 'translateY(40px)',
+              transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.5s'
+            }}
+          >
             <button
               onClick={handleAddToBox}
               style={{
@@ -320,36 +476,69 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
                 textTransform: 'uppercase',
                 letterSpacing: '0.15em',
                 cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                textShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                textShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                position: 'relative',
+                overflow: 'hidden',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = '#FFFFFF';
                 e.currentTarget.style.color = selectedProduct.color;
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.2)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = 'transparent';
                 e.currentTarget.style.color = '#FFFFFF';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.1)';
+              }}
+              onMouseDown={(e) => {
+                e.currentTarget.style.transform = 'translateY(0) scale(0.98)';
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px) scale(1)';
               }}
             >
               ADD 4-PACK TO BOX
             </button>
           </div>
 
-          {/* BUILD-A-BOX PROGRESS */}
-          <div style={{ width: '100%', maxWidth: '400px' }}>
+          {/* ENHANCED BUILD-A-BOX PROGRESS */}
+          <div 
+            style={{ 
+              width: '100%', 
+              maxWidth: '400px',
+              opacity: isLoaded ? 1 : 0,
+              transform: isLoaded ? 'translateY(0)' : 'translateY(50px)',
+              transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.7s'
+            }}
+          >
             <div 
               style={{
                 background: 'rgba(255, 255, 255, 0.1)',
                 padding: '1.5rem 2rem 1rem',
-                borderRadius: '8px',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
+                borderRadius: '12px',
+                backdropFilter: 'blur(15px)',
+                WebkitBackdropFilter: 'blur(15px)',
+                border: '1px solid rgba(255, 255, 255, 0.25)',
+                boxShadow: '0 12px 32px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
                 width: '100%',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '1rem'
+                gap: '1rem',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 16px 40px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.15)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
               }}
             >
               {/* Header Row */}
@@ -450,15 +639,22 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
               width: 'clamp(400px, 30vw, 550px)',
               height: 'clamp(600px, 70vh, 800px)', // Back to full size since title is at bottom
               objectFit: 'contain',
-              filter: 'drop-shadow(0 20px 60px rgba(0, 0, 0, 0.3))',
-              transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-              transform: rippling ? 'scale(1.02)' : 'scale(1)',
+              filter: `drop-shadow(0 20px 60px rgba(0, 0, 0, 0.3)) ${!imageLoaded ? 'blur(4px)' : 'blur(0px)'}`,
+              transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+              transform: rippling 
+                ? 'scale(1.02) rotate(0.5deg)' 
+                : imageLoaded 
+                  ? 'scale(1) rotate(0deg)' 
+                  : 'scale(0.95) rotate(0deg)',
+              opacity: imageLoaded ? 1 : 0.7,
               zIndex: 8 // Above background title (zIndex: 5) but below containers (zIndex: 10)
             }}
+            onLoad={() => setImageLoaded(true)}
+            loading="eager" // Prioritize hero image loading
           />
         </div>
 
-         {/* RIGHT SIDE - UNIFIED CONTAINER */}
+         {/* RIGHT SIDE - UNIFIED RESPONSIVE CONTAINER */}
          <div 
            style={{
              display: 'flex',
@@ -466,19 +662,22 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
              justifyContent: 'center',
              padding: 'clamp(2rem, 4vh, 3rem)',
              height: '100%',
-             minWidth: 0,
              width: '100%',
-             boxSizing: 'border-box'
+             boxSizing: 'border-box',
+             // Ensure this entire side behaves as one cohesive responsive unit
+             minWidth: 'clamp(300px, 35vw, 450px)',
+             maxWidth: 'clamp(400px, 45vw, 550px)',
+             flex: '1 1 auto' // Allow the container to grow/shrink proportionally
            }}
          >
-           {/* UNIFIED CONTAINER - DETAILS & THUMBNAILS */}
+           {/* UNIFIED CONTAINER - DETAILS & THUMBNAILS AS ONE COHESIVE SECTION */}
            <div 
              style={{
-               background: `${selectedProduct.color}B3`,
-               backdropFilter: 'blur(10px)',
-               WebkitBackdropFilter: 'blur(10px)',
-               borderRadius: '16px',
-               border: '1px solid rgba(255, 255, 255, 0.2)',
+               background: `linear-gradient(135deg, ${selectedProduct.color}CC 0%, ${selectedProduct.color}99 50%, ${selectedProduct.color}B3 100%)`,
+               backdropFilter: 'blur(20px)',
+               WebkitBackdropFilter: 'blur(20px)',
+               borderRadius: '20px',
+               border: '1px solid rgba(255, 255, 255, 0.25)',
                padding: 'clamp(1.5rem, 3vh, 2rem)',
                width: '100%',
                boxSizing: 'border-box',
@@ -486,7 +685,19 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
                display: 'flex',
                flexDirection: 'column',
                gap: 'clamp(1.5rem, 3vh, 2rem)',
-               height: '100%'
+               height: '100%',
+               // Ensure details and thumbnails always scale together as one unit
+               minHeight: 'clamp(400px, 50vh, 600px)',
+               flex: '1 1 auto', // Responsive scaling as one unified section
+               boxShadow: `
+                 0 20px 40px rgba(0, 0, 0, 0.15),
+                 0 8px 16px rgba(0, 0, 0, 0.1),
+                 inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                 inset 0 -1px 0 rgba(0, 0, 0, 0.1)
+               `,
+               transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+               opacity: isLoaded ? 1 : 0,
+               transform: isLoaded ? 'translateY(0)' : 'translateY(30px)'
              }}
            >
              {/* COMPACT DETAILS PANEL */}
@@ -502,59 +713,97 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
               style={{
                 display: 'flex',
                 marginBottom: 'clamp(1rem, 2vh, 1.5rem)',
-                background: `${selectedProduct.color}99`,
-                borderRadius: '8px',
-                padding: '4px',
-                gap: '2px'
+                background: `linear-gradient(135deg, ${selectedProduct.color}AA 0%, ${selectedProduct.color}77 100%)`,
+                borderRadius: '12px',
+                padding: '6px',
+                gap: '3px',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 4px 12px rgba(0, 0, 0, 0.1)'
               }}
             >
               {(['nutrition', 'details', 'ingredients', 'reviews'] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
+                  role="tab"
+                  aria-selected={activeTab === tab}
+                  aria-controls={`${tab}-panel`}
+                  tabIndex={activeTab === tab ? 0 : -1}
                   style={{
                     flex: 1,
                     padding: 'clamp(8px, 1.5vh, 12px) clamp(4px, 1vh, 8px)',
-                    border: 'none',
-                    borderRadius: '6px',
+                    borderRadius: '8px',
                     background: activeTab === tab 
-                      ? 'rgba(255, 255, 255, 0.9)'
+                      ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%)'
                       : 'transparent',
                     color: activeTab === tab 
                       ? '#333333'
                       : 'rgba(255, 255, 255, 0.8)',
                     fontSize: 'clamp(0.65rem, 1.2vh, 0.75rem)',
-                    fontWeight: activeTab === tab ? '600' : '500',
+                    fontWeight: activeTab === tab ? '700' : '500',
                     fontFamily: 'var(--font-primary)',
                     cursor: 'pointer',
-                    transition: 'all 0.3s ease',
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                     textTransform: 'uppercase',
-                    letterSpacing: '0.03em'
+                    letterSpacing: '0.03em',
+                    boxShadow: activeTab === tab 
+                      ? '0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.3)'
+                      : '0 2px 4px rgba(0, 0, 0, 0.05)',
+                    backdropFilter: activeTab === tab ? 'blur(10px)' : 'none',
+                    WebkitBackdropFilter: activeTab === tab ? 'blur(10px)' : 'none',
+                    border: activeTab === tab ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid transparent'
                   }}
                   onMouseEnter={(e) => {
                     if (activeTab !== tab) {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
                       e.currentTarget.style.color = 'rgba(255, 255, 255, 0.95)';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.1)';
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (activeTab !== tab) {
                       e.currentTarget.style.background = 'transparent';
                       e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
                     }
                   }}
+                  onMouseDown={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0) scale(0.98)';
+                  }}
+                  onMouseUp={(e) => {
+                    e.currentTarget.style.transform = activeTab === tab ? 'translateY(0) scale(1)' : 'translateY(-1px) scale(1)';
+                  }}
+                  onKeyDown={(e) => handleTabKeyDown(e, tab)}
+                  onFocus={(e) => {
+                    if (activeTab !== tab) {
+                      e.currentTarget.style.outline = '2px solid rgba(255, 255, 255, 0.6)';
+                      e.currentTarget.style.outlineOffset = '2px';
+                    }
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.outline = 'none';
+                  }}
                 >
-                  {tab}
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
                 </button>
               ))}
             </div>
 
             {/* Compact Tab Content */}
-            <div style={{ 
-              minHeight: 'clamp(120px, 20vh, 160px)', 
-              width: '100%',
-              overflow: 'visible'
-            }}>
+            <div 
+              role="tabpanel"
+              id={`${activeTab}-panel`}
+              aria-labelledby={`${activeTab}-tab`}
+              style={{ 
+                minHeight: 'clamp(120px, 20vh, 160px)', 
+                width: '100%',
+                overflow: 'visible'
+              }}
+            >
               {activeTab === 'nutrition' && (
                 <div style={{
                   display: 'grid',
@@ -684,17 +933,17 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
             {/* SELECT FLAVOR HEADER */}
             <div style={{
               borderTop: '1px solid rgba(255, 255, 255, 0.15)',
-              paddingTop: 'clamp(1rem, 2vh, 1.5rem)',
-              marginBottom: 'clamp(0.75rem, 1.5vh, 1rem)'
+              paddingTop: 'clamp(0.75rem, 1.5vh, 1rem)', // Reduced padding to save space
+              marginBottom: 'clamp(0.5rem, 1vh, 0.75rem)' // Reduced margin to save space
             }}>
               <h4 style={{
                 fontFamily: 'var(--font-primary)',
-                fontSize: 'clamp(1.1rem, 2.2vh, 1.3rem)',
+                fontSize: 'clamp(0.95rem, 1.8vh, 1.1rem)', // Slightly smaller to fit better
                 fontWeight: '700',
                 color: '#FFFFFF',
                 margin: '0',
                 textTransform: 'uppercase',
-                letterSpacing: '0.12em',
+                letterSpacing: '0.1em', // Slightly reduced letter spacing
                 textAlign: 'center'
               }}>
                 Select Flavor
@@ -705,49 +954,87 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
             <div 
               style={{
                 flex: '0 0 auto',
-                paddingBottom: 'clamp(0.5rem, 1vh, 0.75rem)'
+                paddingBottom: 'clamp(0.25rem, 0.5vh, 0.5rem)' // Reduced bottom padding to prevent overflow
               }}
             >
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(3, 1fr)',
                 gridTemplateRows: 'repeat(2, 1fr)',
-                gap: 'clamp(0.75rem, 1.5vh, 1rem)',
-                width: '100%'
+                gap: 'clamp(0.5rem, 1vh, 0.75rem)', // Reduced gap to prevent overflow
+                width: '100%',
+                boxSizing: 'border-box' // Ensure proper sizing
               }}>
-                {allProducts.slice(0, 6).map((prod) => {
+                {allProducts.slice(0, 6).map((prod, index) => {
                   const isCurrent = prod.handle === selectedProduct.handle;
                   return (
-                    <div
+                    <button
                       key={prod.handle}
                       onClick={() => !isCurrent && handleProductSwitch(prod)}
+                      disabled={isCurrent}
+                      aria-label={`Switch to ${getCleanProductName(prod.title)}`}
+                      aria-current={isCurrent ? 'true' : 'false'}
                       style={{
                         aspectRatio: '0.85',
                         background: isCurrent ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.1)',
                         borderRadius: '8px',
-                        padding: 'clamp(0.75rem, 1.5vh, 1.25rem)',
+                        padding: 'clamp(0.5rem, 1vh, 0.75rem)', // Reduced padding to fit better
                         cursor: isCurrent ? 'default' : 'pointer',
-                        transition: 'all 0.3s ease',
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        gap: 'clamp(0.75rem, 1.5vh, 1rem)',
+                        gap: 'clamp(0.4rem, 0.8vh, 0.6rem)', // Further reduced gap to accommodate larger images
                         border: isCurrent ? '2px solid rgba(255, 255, 255, 0.6)' : '1px solid rgba(255, 255, 255, 0.2)',
                         boxSizing: 'border-box',
                         position: 'relative',
-                        minHeight: 'clamp(140px, 18vh, 160px)'
+                        minHeight: 'clamp(120px, 15vh, 140px)', // Reduced height to fit within container
+                        maxHeight: 'clamp(130px, 16vh, 150px)', // Added max height to prevent overflow
+                        backdropFilter: 'blur(10px)',
+                        WebkitBackdropFilter: 'blur(10px)',
+                        boxShadow: isCurrent 
+                          ? '0 8px 24px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3)' 
+                          : '0 4px 12px rgba(0, 0, 0, 0.1)',
+                        opacity: isLoaded ? 1 : 0,
+                        transform: isLoaded ? 'translateY(0)' : 'translateY(20px)',
+                        animationDelay: `${index * 0.05}s`
                       }}
                       onMouseEnter={(e) => {
                         if (!isCurrent) {
-                          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
-                          e.currentTarget.style.transform = 'scale(1.02)';
+                          setHoveredThumbnail(prod.handle);
+                          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
+                          e.currentTarget.style.transform = 'scale(1.03) translateY(-4px)';
+                          e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2)';
+                          e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)';
                         }
                       }}
                       onMouseLeave={(e) => {
                         if (!isCurrent) {
+                          setHoveredThumbnail(null);
                           e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                          e.currentTarget.style.transform = 'scale(1)';
+                          e.currentTarget.style.transform = 'scale(1) translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                          e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                        }
+                      }}
+                      onFocus={(e) => {
+                        if (!isCurrent) {
+                          e.currentTarget.style.outline = '2px solid rgba(255, 255, 255, 0.8)';
+                          e.currentTarget.style.outlineOffset = '2px';
+                          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
+                        }
+                      }}
+                      onBlur={(e) => {
+                        if (!isCurrent) {
+                          e.currentTarget.style.outline = 'none';
+                          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if ((e.key === 'Enter' || e.key === ' ') && !isCurrent) {
+                          e.preventDefault();
+                          handleProductSwitch(prod);
                         }
                       }}
                     >
@@ -756,32 +1043,40 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
                         alt={prod.title}
                         style={{
                           width: '100%',
-                          height: '50%',
+                          height: '65%', // Increased from 50% to 65% (1.3x bigger)
                           objectFit: 'contain',
                           opacity: isCurrent ? 1 : 0.8,
-                          transition: 'opacity 0.3s ease',
-                          flex: '0 0 50%'
+                          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                          flex: '0 0 65%', // Increased from 50% to 65% to make image 1.5x bigger
+                          filter: hoveredThumbnail === prod.handle 
+                            ? 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2)) brightness(1.1)' 
+                            : 'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1))',
+                          transform: hoveredThumbnail === prod.handle && !isCurrent 
+                            ? 'scale(1.05)' 
+                            : 'scale(1)'
                         }}
+                        loading="lazy" // Optimize thumbnail loading
                       />
                       <div style={{
-                        fontSize: 'clamp(0.8rem, 1.6vh, 0.95rem)',
+                        fontSize: 'clamp(0.75rem, 1.4vh, 0.85rem)', // Slightly smaller font to fit better
                         fontWeight: '600',
                         color: isCurrent ? '#FFFFFF' : 'rgba(255, 255, 255, 0.9)',
                         textAlign: 'center',
                         fontFamily: 'var(--font-primary)',
                         width: '100%',
                         transition: 'color 0.3s ease',
-                        lineHeight: 1.2,
+                        lineHeight: 1.1, // Tighter line height to save space
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: '0.25rem',
-                        flex: '1',
-                        minHeight: '3.5rem'
+                        gap: '0.15rem', // Reduced gap to save space
+                        flex: '1', // Takes remaining space after larger image
+                        minHeight: '2rem', // Further reduced to accommodate larger image
+                        maxHeight: '2.5rem' // Reduced max height to fit with larger image
                       }}>
                         {(() => {
-                          const titleWords = truncateProductName(prod.title, 10).split(' ');
+                          const titleWords = getCleanProductName(prod.title).split(' ');
                           return titleWords.length > 1 ? (
                             titleWords.map((word, index) => (
                               <div key={index} style={{ margin: 0 }}>
@@ -793,7 +1088,7 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
                           );
                         })()}
                       </div>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -819,7 +1114,7 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
           style={{
             fontFamily: 'var(--font-display)',
             fontWeight: '900', // Black weight for Peridot
-            fontSize: 'clamp(8rem, 16vw, 18rem)', // 2x bigger - massive background text
+            fontSize: 'clamp(2.5rem, 8vw + 1rem, 18rem)', // Advanced clamping: starts smaller, scales more aggressively
             lineHeight: '1',
             textTransform: 'uppercase',
             letterSpacing: '-0.02em',
@@ -827,11 +1122,19 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
             margin: '0',
             textAlign: 'center',
             whiteSpace: 'nowrap', // Keep it single line
-            transition: 'all 1.2s cubic-bezier(0.4, 0, 0.2, 1)', // Smooth, slow fade transition
-            transform: rippling ? 'scale(1.02)' : 'scale(1)', // Sync with can animation
-            opacity: titleLoaded ? 0.4 : 1, // Start full white, fade to subtle background
+            transition: 'all 1.4s cubic-bezier(0.4, 0, 0.2, 1)', // Longer, more luxurious transition
+            transform: rippling 
+              ? 'scale(1.02) translateY(-2px)' 
+              : imageLoaded 
+                ? 'scale(1) translateY(0px)' 
+                : 'scale(0.98) translateY(4px)', // Subtle parallax effect
+            opacity: titleLoaded ? 0.35 : imageLoaded ? 0.8 : 1, // More sophisticated fade stages
             userSelect: 'none', // Prevent text selection
-            pointerEvents: 'none' // Don't interfere with interactions
+            pointerEvents: 'none', // Don't interfere with interactions
+            textShadow: titleLoaded 
+              ? '0 8px 32px rgba(0, 0, 0, 0.4)' 
+              : '0 4px 16px rgba(0, 0, 0, 0.6)', // Dynamic shadow based on state
+            willChange: 'transform, opacity' // Optimize for animations
           }}
         >
           {getCleanTitle(selectedProduct.title, selectedProduct.series)}

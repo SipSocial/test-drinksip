@@ -360,7 +360,7 @@ export function UnifiedFooter() {
           </div>
 
           {/* DrinkSip Responsible Message */}
-          <div style={{
+          <div className="footer-bottom-right" style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'flex-end',
@@ -446,7 +446,7 @@ export function UnifiedFooter() {
               text-align: left;
             }
 
-            .footer-bottom > div:last-child {
+            .footer-bottom .footer-bottom-right {
               align-items: flex-start !important;
               text-align: left !important;
             }

@@ -93,8 +93,16 @@ export function useStaggeredAnimation(
   count: number,
   options: UseScrollAnimationOptions = {}
 ) {
-  const items = Array.from({ length: count }, () => useScrollAnimation(options));
-  return items;
+  // Create hooks at the top level (Rules of Hooks compliance)
+  const hook1 = useScrollAnimation(options);
+  const hook2 = useScrollAnimation(options);
+  const hook3 = useScrollAnimation(options);
+  const hook4 = useScrollAnimation(options);
+  const hook5 = useScrollAnimation(options);
+  
+  // Return only the number requested
+  const hooks = [hook1, hook2, hook3, hook4, hook5];
+  return hooks.slice(0, count);
 }
 
 /**

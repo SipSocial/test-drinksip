@@ -1,10 +1,9 @@
 /**
- * GameLikeShoppablePanel - Next-level interactive product selector
- * Game-inspired UI with premium animations and shoppable interface
+ * GameLikeShoppablePanel - Ultra-performance interactive product selector
+ * Optimized with pure CSS animations instead of framer-motion for better performance
  */
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router';
 
 interface Product {
@@ -32,6 +31,13 @@ export function GameLikeShoppablePanel({
 }: GameLikeShoppablePanelProps) {
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
   const [isGridExpanded, setIsGridExpanded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Load animation
+  React.useEffect(() => {
+    const timer = setTimeout(() => setIsLoaded(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Dynamic product image mapping
   const getProductImage = (handle: string): string => {
@@ -59,438 +65,440 @@ export function GameLikeShoppablePanel({
     return title.replace(/\s*Refresher\s*/gi, '').replace(/DrinkSip\s*/gi, '').trim();
   };
 
-  // Handle product selection with animation
+  // Handle product selection
   const handleProductClick = (product: Product) => {
     if (product.handle !== currentProduct.handle) {
       onProductSelect(product);
     }
   };
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0, scale: 0.95 },
-    visible: { 
-      opacity: 1, 
-      scale: 1,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut",
-        staggerChildren: 0.1
-      }
-    }
-  } as const;
-
-  const productVariants = {
-    hidden: { opacity: 0, y: 20, scale: 0.9 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      scale: 1,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut"
-      }
-    },
-    hover: {
-      scale: 1.05,
-      y: -4,
-      transition: {
-        duration: 0.3,
-        ease: "easeOut"
-      }
-    }
-  } as const;
+  const isHovered = (handle: string) => hoveredProduct === handle;
 
   return (
-    <motion.div 
-      className={`game-panel ${className}`}
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      style={{
-        background: 'rgba(255, 255, 255, 0.08)',
-        backdropFilter: 'blur(30px) saturate(1.8)',
-        borderRadius: '24px',
-        border: '1px solid rgba(255, 255, 255, 0.12)',
-        padding: 'clamp(1.5rem, 3vw, 2.2rem)',
-        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
-        position: 'relative',
-        overflow: 'hidden',
-        minWidth: 'clamp(280px, 25vw, 350px)',
-        maxWidth: '380px'
-      }}
-    >
-      {/* Panel Header */}
-      <motion.div 
+    <>
+      {/* Performance-optimized CSS animations */}
+      <style>{`
+        .game-panel {
+          opacity: 0;
+          transform: translateY(20px) scale(0.95);
+          animation: panelFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .game-panel.loaded {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+
+        .product-card {
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          transform-origin: center;
+          will-change: transform, box-shadow;
+        }
+
+        .product-card:hover:not(.current) {
+          transform: translateY(-8px) scale(1.02);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .product-card.current {
+          animation: currentPulse 2s ease-in-out infinite;
+        }
+
+        .product-image {
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          will-change: transform, filter;
+        }
+
+        .product-card:hover .product-image {
+          transform: scale(1.05);
+          filter: brightness(1.1);
+        }
+
+        .expand-arrow {
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .expand-arrow.expanded {
+          transform: rotate(180deg);
+        }
+
+        .current-badge {
+          animation: badgeScale 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .selection-ring {
+          animation: ringPulse 1.5s ease-in-out infinite;
+        }
+
+        .hover-overlay {
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+
+        .product-card:hover .hover-overlay {
+          opacity: 1;
+        }
+
+        @keyframes panelFadeIn {
+          0% {
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        @keyframes currentPulse {
+          0%, 100% {
+            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.3);
+          }
+          50% {
+            box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.1);
+          }
+        }
+
+        @keyframes badgeScale {
+          0% {
+            transform: scale(0);
+            opacity: 0;
+          }
+          100% {
+            transform: scale(1);
+            opacity: 1;
+          }
+        }
+
+        @keyframes ringPulse {
+          0%, 100% {
+            transform: scale(1);
+            opacity: 0.6;
+          }
+          50% {
+            transform: scale(1.05);
+            opacity: 0.8;
+          }
+        }
+
+        .grid-item {
+          opacity: 0;
+          transform: translateY(20px);
+          animation: itemFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .grid-item:nth-child(1) { animation-delay: 0s; }
+        .grid-item:nth-child(2) { animation-delay: 0.1s; }
+        .grid-item:nth-child(3) { animation-delay: 0.2s; }
+        .grid-item:nth-child(4) { animation-delay: 0.3s; }
+        .grid-item:nth-child(5) { animation-delay: 0.4s; }
+        .grid-item:nth-child(6) { animation-delay: 0.5s; }
+
+        @keyframes itemFadeIn {
+          0% {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
+
+      <div 
+        className={`game-panel ${className} ${isLoaded ? 'loaded' : ''}`}
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: 'clamp(1.5rem, 2.5vw, 2rem)',
-          paddingBottom: '1rem',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+          background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.85) 100%)',
+          borderRadius: '16px',
+          padding: 'clamp(1.5rem, 2.5vw, 2rem)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+          position: 'relative',
+          overflow: 'hidden',
+          width: '100%',
+          maxWidth: '400px'
         }}
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
       >
-        <div>
-          <h3 
-            style={{
-              fontFamily: 'Peridot PE, Inter, sans-serif',
-              fontSize: 'clamp(1.1rem, 2vw, 1.3rem)',
-              fontWeight: '900',
-              color: 'rgba(255, 255, 255, 0.95)',
-              margin: '0 0 0.5rem 0',
-              textTransform: 'uppercase',
-              letterSpacing: '-0.02em'
-            }}
-          >
-            SELECT FLAVOR
-          </h3>
-          <p 
-            style={{
-              fontFamily: 'Inter, sans-serif',
-              fontSize: 'clamp(0.75rem, 1.2vw, 0.85rem)',
-              color: 'rgba(255, 255, 255, 0.6)',
-              margin: 0,
-              fontWeight: '500'
-            }}
-          >
-            Choose any flavor to switch
-          </p>
-        </div>
-        
-        {/* Expand/Collapse Button */}
-        <motion.button
-          onClick={() => setIsGridExpanded(!isGridExpanded)}
+        {/* Panel Header */}
+        <div 
           style={{
-            background: 'rgba(255, 255, 255, 0.15)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            borderRadius: '12px',
-            width: '40px',
-            height: '40px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            color: 'rgba(255, 255, 255, 0.8)'
+            justifyContent: 'space-between',
+            marginBottom: 'clamp(1rem, 2vw, 1.5rem)',
+            paddingBottom: '1rem',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
           }}
-          whileHover={{ 
-            background: 'rgba(255, 255, 255, 0.2)',
-            scale: 1.05 
-          }}
-          whileTap={{ scale: 0.95 }}
         >
-          <motion.div
-            animate={{ rotate: isGridExpanded ? 180 : 0 }}
-            transition={{ duration: 0.3 }}
+          <div>
+            <h3 style={{
+              fontSize: 'clamp(1rem, 2vw, 1.2rem)',
+              fontWeight: '700',
+              color: '#FFFFFF',
+              margin: '0 0 0.25rem 0',
+              fontFamily: 'var(--font-primary)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}>
+              Select Flavor
+            </h3>
+            <p style={{
+              fontSize: 'clamp(0.75rem, 1.5vw, 0.85rem)',
+              color: 'rgba(255, 255, 255, 0.7)',
+              margin: '0',
+              fontFamily: 'var(--font-primary)'
+            }}>
+              {allProducts.length} available
+            </p>
+          </div>
+          
+          {/* Expand/Collapse Button */}
+          <button
+            onClick={() => setIsGridExpanded(!isGridExpanded)}
+            style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: '8px',
+              padding: '0.5rem',
+              color: '#FFFFFF',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              lineHeight: 1,
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+            }}
           >
-            ⌄
-          </motion.div>
-        </motion.button>
-      </motion.div>
+            <div className={`expand-arrow ${isGridExpanded ? 'expanded' : ''}`}>
+              ⌄
+            </div>
+          </button>
+        </div>
 
-      {/* Products Grid */}
-      <motion.div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: isGridExpanded ? '1fr 1fr' : '1fr 1fr 1fr',
-          gap: 'clamp(0.8rem, 1.5vw, 1.2rem)',
-          transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
-        }}
-        layout
-      >
-        <AnimatePresence mode="wait">
+        {/* Products Grid */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: isGridExpanded ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
+            gap: 'clamp(0.75rem, 1.5vw, 1rem)',
+            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
+        >
           {allProducts.map((product, index) => {
             const isCurrent = product.handle === currentProduct.handle;
-            const isHovered = hoveredProduct === product.handle;
             
             return (
-              <motion.div
+              <div
                 key={product.handle}
-                variants={productVariants}
-                whileHover="hover"
+                className={`grid-item`}
                 style={{
                   position: 'relative',
-                  cursor: isCurrent ? 'default' : 'pointer',
-                  opacity: isCurrent ? 1 : 0.85
+                  aspectRatio: '0.8',
+                  cursor: isCurrent ? 'default' : 'pointer'
                 }}
-                onHoverStart={() => setHoveredProduct(product.handle)}
-                onHoverEnd={() => setHoveredProduct(null)}
                 onClick={() => handleProductClick(product)}
-                layout
+                onMouseEnter={() => setHoveredProduct(product.handle)}
+                onMouseLeave={() => setHoveredProduct(null)}
               >
                 {/* Product Card */}
-                <motion.div
+                <div
+                  className={`product-card ${isCurrent ? 'current' : ''}`}
                   style={{
                     background: isCurrent 
-                      ? 'rgba(255, 255, 255, 0.25)' 
-                      : 'rgba(255, 255, 255, 0.12)',
-                    borderRadius: '16px',
-                    padding: 'clamp(1rem, 2vw, 1.4rem)',
+                      ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%)'
+                      : 'rgba(255, 255, 255, 0.08)',
+                    borderRadius: '12px',
+                    padding: 'clamp(0.75rem, 1.5vw, 1rem)',
                     border: isCurrent 
-                      ? `2px solid ${product.color}80` 
+                      ? '2px solid rgba(255, 255, 255, 0.4)'
                       : '1px solid rgba(255, 255, 255, 0.1)',
-                    boxShadow: isCurrent 
-                      ? `0 12px 40px ${product.color}20, 0 0 0 1px ${product.color}30` 
-                      : '0 8px 24px rgba(0, 0, 0, 0.1)',
-                    aspectRatio: isGridExpanded ? '3/4' : '1',
+                    height: '100%',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 'clamp(0.6rem, 1.2vw, 0.8rem)',
-                    transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+                    justifyContent: 'space-between',
+                    position: 'relative',
+                    overflow: 'hidden'
                   }}
                 >
                   {/* Current Badge */}
                   {isCurrent && (
-                    <motion.div
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
+                    <div
+                      className="current-badge"
                       style={{
                         position: 'absolute',
-                        top: '8px',
-                        right: '8px',
-                        background: product.color,
-                        color: '#fff',
-                        fontSize: '0.65rem',
+                        top: '0.5rem',
+                        right: '0.5rem',
+                        background: 'rgba(255, 255, 255, 0.9)',
+                        color: '#000',
+                        fontSize: 'clamp(0.6rem, 1vw, 0.7rem)',
                         fontWeight: '700',
-                        padding: '4px 8px',
-                        borderRadius: '8px',
+                        padding: '0.25rem 0.5rem',
+                        borderRadius: '4px',
                         textTransform: 'uppercase',
                         letterSpacing: '0.05em',
-                        fontFamily: 'Inter, sans-serif',
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+                        zIndex: 2
                       }}
                     >
                       CURRENT
-                    </motion.div>
+                    </div>
                   )}
 
                   {/* Product Image */}
-                  <motion.img
+                  <img
+                    className="product-image"
                     src={getProductImage(product.handle)}
                     alt={product.title}
                     style={{
-                      width: isGridExpanded ? 'clamp(50px, 8vw, 70px)' : 'clamp(40px, 6vw, 55px)',
-                      height: isGridExpanded ? 'clamp(65px, 10vw, 85px)' : 'clamp(52px, 8vw, 68px)',
+                      width: '100%',
+                      height: '60%',
                       objectFit: 'contain',
-                      filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2))',
-                      transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+                      marginBottom: '0.5rem'
                     }}
-                    animate={{
-                      scale: isCurrent ? 1.1 : (isHovered ? 1.05 : 1),
-                      filter: isCurrent 
-                        ? 'drop-shadow(0 6px 16px rgba(0, 0, 0, 0.3))' 
-                        : 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2))'
-                    }}
+                    loading="lazy"
                   />
 
                   {/* Product Info */}
-                  <div 
-                    style={{
-                      textAlign: 'center',
-                      width: '100%'
-                    }}
-                  >
-                    {/* Series Badge */}
-                    <div 
-                      style={{
-                        fontSize: 'clamp(0.6rem, 1vw, 0.7rem)',
-                        fontWeight: '600',
-                        color: 'rgba(255, 255, 255, 0.5)',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.08em',
-                        marginBottom: '0.3rem',
-                        fontFamily: 'Inter, sans-serif'
-                      }}
-                    >
-                      {product.series}
-                    </div>
-
-                    {/* Product Name */}
-                    <div 
-                      style={{
-                        fontSize: isGridExpanded 
-                          ? 'clamp(0.75rem, 1.3vw, 0.9rem)' 
-                          : 'clamp(0.65rem, 1.1vw, 0.75rem)',
-                        fontWeight: '700',
-                        color: isCurrent ? '#fff' : 'rgba(255, 255, 255, 0.9)',
-                        lineHeight: 1.2,
-                        fontFamily: 'Inter, sans-serif',
-                        transition: 'all 0.3s ease'
-                      }}
-                    >
+                  <div style={{
+                    textAlign: 'center',
+                    width: '100%'
+                  }}>
+                    <h4 style={{
+                      fontSize: 'clamp(0.7rem, 1.3vw, 0.8rem)',
+                      fontWeight: '600',
+                      color: '#FFFFFF',
+                      margin: '0 0 0.25rem 0',
+                      lineHeight: 1.2,
+                      fontFamily: 'var(--font-primary)'
+                    }}>
                       {getCleanTitle(product.title, product.series)}
-                    </div>
+                    </h4>
+                    <p style={{
+                      fontSize: 'clamp(0.6rem, 1.1vw, 0.7rem)',
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      margin: '0',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em'
+                    }}>
+                      {product.series}
+                    </p>
 
                     {/* Action Indicator */}
                     {!isCurrent && (
-                      <motion.div
+                      <div
                         style={{
                           marginTop: '0.5rem',
-                          fontSize: '0.6rem',
-                          fontWeight: '600',
-                          color: 'rgba(255, 255, 255, 0.4)',
+                          fontSize: 'clamp(0.55rem, 1vw, 0.65rem)',
+                          color: 'rgba(255, 255, 255, 0.6)',
                           textTransform: 'uppercase',
-                          letterSpacing: '0.05em',
-                          fontFamily: 'Inter, sans-serif'
-                        }}
-                        animate={{
-                          opacity: isHovered ? 1 : 0.4,
-                          color: isHovered ? product.color : 'rgba(255, 255, 255, 0.4)'
+                          letterSpacing: '0.1em',
+                          fontWeight: '600'
                         }}
                       >
                         TAP TO SWITCH
-                      </motion.div>
+                      </div>
                     )}
                   </div>
 
                   {/* Hover Overlay */}
-                  <motion.div
+                  <div
+                    className="hover-overlay"
                     style={{
                       position: 'absolute',
                       top: 0,
                       left: 0,
                       right: 0,
                       bottom: 0,
-                      borderRadius: '16px',
-                      background: `linear-gradient(135deg, ${product.color}20 0%, transparent 70%)`,
-                      opacity: 0,
+                      background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
+                      borderRadius: '12px',
                       pointerEvents: 'none'
                     }}
-                    animate={{
-                      opacity: isHovered && !isCurrent ? 0.6 : 0
-                    }}
-                    transition={{ duration: 0.3 }}
                   />
-
-                  {/* Interactive Pulse Effect */}
-                  {isCurrent && (
-                    <motion.div
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        borderRadius: '16px',
-                        background: `radial-gradient(circle, ${product.color}15 0%, transparent 70%)`,
-                        pointerEvents: 'none'
-                      }}
-                      animate={{
-                        scale: [1, 1.02, 1],
-                        opacity: [0.3, 0.6, 0.3]
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        ease: 'easeInOut'
-                      }}
-                    />
-                  )}
-                </motion.div>
+                </div>
 
                 {/* Game-like Selection Ring */}
-                {isHovered && !isCurrent && (
-                  <motion.div
+                {isHovered(product.handle) && !isCurrent && (
+                  <div
+                    className="selection-ring"
                     style={{
                       position: 'absolute',
                       top: '-2px',
                       left: '-2px',
                       right: '-2px',
                       bottom: '-2px',
-                      borderRadius: '18px',
-                      background: `conic-gradient(from 0deg, ${product.color}, transparent, ${product.color})`,
-                      zIndex: -1,
-                      opacity: 0.8
-                    }}
-                    initial={{ rotate: 0 }}
-                    animate={{ rotate: 360 }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: 'linear'
+                      borderRadius: '14px',
+                      border: '2px solid rgba(255, 255, 255, 0.6)',
+                      pointerEvents: 'none',
+                      zIndex: 1
                     }}
                   />
                 )}
-              </motion.div>
+              </div>
             );
           })}
-        </AnimatePresence>
-      </motion.div>
-
-      {/* Panel Footer */}
-      <motion.div
-        style={{
-          marginTop: 'clamp(1.5rem, 2.5vw, 2rem)',
-          paddingTop: '1rem',
-          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-          textAlign: 'center'
-        }}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-      >
-        <div 
-          style={{
-            fontSize: 'clamp(0.7rem, 1.2vw, 0.8rem)',
-            color: 'rgba(255, 255, 255, 0.5)',
-            fontWeight: '500',
-            fontFamily: 'Inter, sans-serif'
-          }}
-        >
-          {allProducts.length} flavors available
         </div>
-        
-        {/* All Products Link */}
-        <Link 
-          to="/products"
+
+        {/* Panel Footer */}
+        <div
           style={{
-            display: 'inline-block',
-            marginTop: '0.8rem',
-            padding: '0.6rem 1.2rem',
-            background: 'rgba(255, 255, 255, 0.15)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            borderRadius: '12px',
-            color: 'rgba(255, 255, 255, 0.9)',
-            textDecoration: 'none',
-            fontSize: 'clamp(0.7rem, 1.2vw, 0.8rem)',
-            fontWeight: '600',
-            fontFamily: 'Inter, sans-serif',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            transition: 'all 0.3s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
-            e.currentTarget.style.transform = 'translateY(-1px)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
-            e.currentTarget.style.transform = 'translateY(0)';
+            marginTop: 'clamp(1.5rem, 2.5vw, 2rem)',
+            paddingTop: '1rem',
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+            textAlign: 'center'
           }}
         >
-          VIEW ALL
-        </Link>
-      </motion.div>
+          <Link
+            to="/collections/all"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.75rem 1.5rem',
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: '8px',
+              color: '#FFFFFF',
+              textDecoration: 'none',
+              fontSize: 'clamp(0.75rem, 1.4vw, 0.85rem)',
+              fontWeight: '600',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+          >
+            VIEW ALL
+          </Link>
+        </div>
 
-      {/* Background Pattern */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: `radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%)`,
-          borderRadius: '24px',
-          pointerEvents: 'none',
-          zIndex: -1
-        }}
-      />
-    </motion.div>
+        {/* Background Pattern */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            opacity: 0.03,
+            backgroundImage: `url("data:image/svg+xml,${encodeURIComponent('<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="white" fill-opacity="0.1"><circle cx="30" cy="30" r="2"/></g></g></svg>')}")`,
+            pointerEvents: 'none'
+          }}
+        />
+      </div>
+    </>
   );
 }

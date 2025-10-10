@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import {useLoaderData, Link} from 'react-router';
-import {PDPHero1920} from '~/components/PDPHero1920';
 import {WhiteHeader} from '~/components/WhiteHeader';
 import {ProductCard} from '~/components/ProductCard';
+import {PDPHero1920} from '~/components/PDPHero1920';
 
 // Helper function to adjust color lightness
 function adjustColorLightness(color: string, adjustment: number): string {
@@ -231,7 +231,7 @@ function getProductChips(handle: string): string[] {
 
 export default function ProductPage() {
   const {product, recommendations, allProducts} = useLoaderData<typeof loader>();
-  const [currentColor, setCurrentColor] = React.useState(product.color);
+  const [currentColor, setCurrentColor] = useState(product.color);
   
 
   const handleColorChange = (newColor: string) => {
@@ -239,7 +239,7 @@ export default function ProductPage() {
   };
 
   // Set document background color immediately to prevent flash
-  React.useEffect(() => {
+  useEffect(() => {
     document.body.style.background = currentColor;
     return () => {
       document.body.style.background = '';
@@ -736,7 +736,7 @@ export default function ProductPage() {
           <h1 
             className="you-may-like-header"
             style={{
-                fontSize: 'clamp(3.5rem, 7vw, 5.5rem)',
+                fontSize: 'clamp(1.8rem, 4vw + 0.5rem, 5.5rem)', // Advanced clamping: much smaller start, better scaling
               fontWeight: 700,
               fontFamily: 'var(--font-display)',
               textTransform: 'none',
@@ -887,7 +887,7 @@ export default function ProductPage() {
               }
 
              .you-may-like-header {
-                font-size: 34px !important;
+                font-size: clamp(1.6rem, 3.5vw + 0.3rem, 2.2rem) !important; /* Advanced mobile clamping */
                 margin-bottom: 2rem !important;
                 font-family: var(--font-display) !important;
                 font-weight: 700 !important;
@@ -905,7 +905,7 @@ export default function ProductPage() {
              
              @media (min-width: 768px) {
                .you-may-like-header {
-                 font-size: 62.62px !important;
+                 font-size: clamp(2.5rem, 5vw + 0.5rem, 5.5rem) !important; /* Advanced desktop clamping */
                }
                
                .product-carousel-section {

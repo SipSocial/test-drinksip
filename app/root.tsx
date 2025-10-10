@@ -18,10 +18,10 @@ import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from './components/PageLayout';
 import {SkipToMain, useHighContrastMode, useReducedMotion, useKeyboardNavigation} from './components/AccessibilityUtils';
-import {CartProvider} from './contexts/CartContext';
+import {CartProvider, useCart} from './contexts/CartContext';
 import {BuildABoxCartDrawer} from './components/BuildABoxCartDrawer';
 import {FloatingCartButton} from './components/FloatingCartButton';
-import {useCart} from './contexts/CartContext';
+import {PortDetector} from './components/PortDetector';
 
 export type RootLoader = typeof loader;
 
@@ -80,7 +80,7 @@ export function links() {
       rel: 'stylesheet',
       href: 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap',
     },
-    {rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg'},
+    {rel: 'icon', type: 'image/svg+xml', href: favicon},
   ];
 }
 
@@ -196,6 +196,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
       </head>
       <body>
         <SkipToMain />
+        <PortDetector />
         {data ? (
           <PageLayout {...data}>
             <main id="main-content" tabIndex={-1}>

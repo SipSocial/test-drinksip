@@ -17,21 +17,38 @@ export default async function handleRequest(
       checkoutDomain: context.env.PUBLIC_CHECKOUT_DOMAIN,
       storeDomain: context.env.PUBLIC_STORE_DOMAIN,
     },
+    // Allow Google Fonts and other stylesheets
+    styleSrc: [
+      "'self'",
+      "'unsafe-inline'",
+      'https://fonts.googleapis.com',
+      'https://cdn.shopify.com',
+      'http://localhost:*'
+    ],
+    // Allow Google Fonts
+    fontSrc: [
+      "'self'",
+      'https://fonts.gstatic.com',
+      'https://cdn.shopify.com'
+    ],
     // Allow DrinkSip CDN images and other necessary resources
     imgSrc: [
-      'self',
+      "'self'",
       'data:',
       'https:',
       'https://cdn.shopify.com',
       'https://via.placeholder.com',
       '*.shopify.com',
-      '*.myshopify.com'
+      '*.myshopify.com',
+      'http://localhost:*'
     ],
     connectSrc: [
-      'self',
+      "'self'",
       'https:',
       '*.shopify.com',
-      '*.myshopify.com'
+      '*.myshopify.com',
+      'ws://localhost:*',
+      'http://localhost:*'
     ]
   });
 
