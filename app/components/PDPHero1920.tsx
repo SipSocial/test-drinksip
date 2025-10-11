@@ -61,7 +61,7 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
   };
   
   // Cart functionality
-  const { addItem, totalItems } = useCart();
+  const { addItem, totalPacks } = useCart();
   
 
   // Handle adding product to cart
@@ -277,6 +277,47 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.6); 
           }
         }
+        
+        /* MOBILE RESPONSIVE STYLES - DO NOT AFFECT DESKTOP */
+        @media (max-width: 768px) {
+          .pdp-hero-1920 {
+            padding-top: 80px !important;
+            min-height: auto !important;
+          }
+          
+          .pdp-split-background {
+            flex-direction: column !important;
+          }
+          
+          .pdp-split-left, .pdp-split-right {
+            width: 100% !important;
+            height: 50% !important;
+          }
+          
+          .pdp-content-grid {
+            grid-template-columns: 1fr !important;
+            gap: 2rem !important;
+            padding: 2rem 1.5rem !important;
+          }
+          
+          .pdp-left-content, .pdp-center-can, .pdp-right-content {
+            grid-column: 1 !important;
+            max-width: 100% !important;
+          }
+          
+          .pdp-center-can {
+            order: -1 !important;
+            padding: 2rem 0 !important;
+          }
+          
+          .pdp-product-thumbnails {
+            display: none !important;
+          }
+          
+          .pdp-massive-title {
+            font-size: clamp(4rem, 15vw, 6rem) !important;
+          }
+        }
       `}</style>
       
       <section 
@@ -292,6 +333,7 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
     >
       {/* TWO-TONE SPLIT BACKGROUND - CLEAR 50/50 SPLIT */}
       <div 
+        className="pdp-split-background"
         style={{
           position: 'absolute',
           top: 0,
@@ -304,7 +346,9 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
         }}
       >
         {/* Left side - Full saturated color */}
-        <div style={{ 
+        <div 
+          className="pdp-split-left"
+          style={{ 
           width: '50%', 
           height: '100%', 
           background: selectedProduct.color,
@@ -312,7 +356,9 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
         }}></div>
         
         {/* Right side - Much lighter/desaturated color with refined white layered shadow */}
-        <div style={{ 
+        <div 
+          className="pdp-split-right"
+          style={{ 
           width: '50%', 
           height: '100%', 
           background: lighterColor,
@@ -343,6 +389,7 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
 
       {/* MAIN CONTENT CONTAINER - EXACT MOCKUP LAYOUT */}
       <div 
+        className="pdp-content-grid"
         style={{
           position: 'relative',
           zIndex: 10,
@@ -358,6 +405,7 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
       >
         {/* LEFT SIDE - CHIPS, PRICE & BUILD-A-BOX */}
         <div 
+          className="pdp-left-content"
           style={{
             display: 'flex',
             flexDirection: 'column',
@@ -399,17 +447,18 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
                   transform: isLoaded ? 'translateY(0)' : 'translateY(20px)',
                   transition: `all 0.8s cubic-bezier(0.4, 0, 0.2, 1) ${index * 0.1}s`,
                   cursor: 'default',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
                   e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
-                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.2)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.15)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0) scale(1)';
                   e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
                 }}
               >
                 {chip}
@@ -433,7 +482,7 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
                 color: '#FFFFFF',
                 lineHeight: 1,
                 letterSpacing: '-0.01em',
-                textShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+                textShadow: '0 4px 16px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2)',
                 display: 'inline-block'
               }}
             >
@@ -477,22 +526,22 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
                 letterSpacing: '0.15em',
                 cursor: 'pointer',
                 transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                textShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                textShadow: '0 2px 8px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.2)',
                 position: 'relative',
                 overflow: 'hidden',
-                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)'
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05)'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = '#FFFFFF';
                 e.currentTarget.style.color = selectedProduct.color;
                 e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.2)';
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.1)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = 'transparent';
                 e.currentTarget.style.color = '#FFFFFF';
                 e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.1)';
+                e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05)';
               }}
               onMouseDown={(e) => {
                 e.currentTarget.style.transform = 'translateY(0) scale(0.98)';
@@ -568,11 +617,11 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
                     letterSpacing: '-0.01em'
                   }}
                 >
-                  {totalItems}<span style={{ 
+                  {totalPacks}<span style={{ 
                     fontSize: '0.6em', 
                     color: 'rgba(255, 255, 255, 0.6)',
                     fontWeight: '900' 
-                  }}>/12</span>
+                  }}>/3 PACKS</span>
                 </div>
               </div>
               
@@ -588,19 +637,19 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
               }}>
                 <div 
                   style={{
-                    width: `${Math.min((totalItems / 12) * 100, 100)}%`,
+                    width: `${Math.min((totalPacks / 3) * 100, 100)}%`,
                     height: '100%',
-                    background: totalItems > 0 
+                    background: totalPacks > 0 
                       ? 'linear-gradient(90deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.9) 50%, rgba(255, 255, 255, 0.6) 100%)'
                       : 'transparent',
                     borderRadius: '3px',
                     transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
                     position: 'relative',
-                    boxShadow: totalItems > 0 ? '0 0 8px rgba(255, 255, 255, 0.3)' : 'none'
+                    boxShadow: totalPacks > 0 ? '0 0 8px rgba(255, 255, 255, 0.3)' : 'none'
                   }}
                 >
                   {/* Animated shimmer effect */}
-                  {totalItems > 0 && (
+                  {totalPacks > 0 && (
                     <div 
                       style={{
                         position: 'absolute',
@@ -616,12 +665,41 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
                   )}
                 </div>
               </div>
+              
+              {/* Status Message */}
+              {totalPacks >= 3 ? (
+                <div style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: 'clamp(0.85rem, 1.2vw, 0.95rem)',
+                  fontWeight: '600',
+                  color: '#FFFFFF',
+                  textAlign: 'center',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                  padding: '0.5rem 0',
+                  textShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+                }}>
+                  ✓ Box Complete — Ready to Checkout
+                </div>
+              ) : totalPacks > 0 ? (
+                <div style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: 'clamp(0.8rem, 1.1vw, 0.9rem)',
+                  fontWeight: '500',
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  textAlign: 'center',
+                  letterSpacing: '0.05em'
+                }}>
+                  {3 - totalPacks} more pack{3 - totalPacks !== 1 ? 's' : ''} needed
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
 
         {/* MIDDLE - PRODUCT CAN CENTERED */}
         <div 
+          className="pdp-center-can"
           style={{
             display: 'flex',
             alignItems: 'center', // Vertical center
@@ -656,6 +734,7 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
 
          {/* RIGHT SIDE - UNIFIED RESPONSIVE CONTAINER */}
          <div 
+           className="pdp-right-content"
            style={{
              display: 'flex',
              flexDirection: 'column',
@@ -1132,8 +1211,8 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
             userSelect: 'none', // Prevent text selection
             pointerEvents: 'none', // Don't interfere with interactions
             textShadow: titleLoaded 
-              ? '0 8px 32px rgba(0, 0, 0, 0.4)' 
-              : '0 4px 16px rgba(0, 0, 0, 0.6)', // Dynamic shadow based on state
+              ? '0 8px 32px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.2)' 
+              : '0 4px 16px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.3)', // Layered dynamic shadow based on state
             willChange: 'transform, opacity' // Optimize for animations
           }}
         >

@@ -584,6 +584,100 @@ export function BuildABoxCartDrawer({
 
   return (
     <>
+      {/* MOBILE RESPONSIVE STYLES - NO DESKTOP IMPACT */}
+      <style>{`
+        /* Mobile styles only apply below 768px */
+        @media (max-width: 768px) {
+          .cart-drawer-main {
+            height: 100vh !important;
+            border-radius: 0 !important;
+          }
+          
+          .cart-drawer-header {
+            padding: 1rem !important;
+          }
+          
+          .cart-drawer-title {
+            font-size: 1.5rem !important;
+            margin-bottom: 0.75rem !important;
+          }
+          
+          .cart-drawer-close {
+            top: 1rem !important;
+            right: 1rem !important;
+            width: 36px !important;
+            height: 36px !important;
+            font-size: 1.25rem !important;
+          }
+          
+          .wake-up-happy-container {
+            min-height: 50px !important;
+            margin-bottom: 0.5rem !important;
+          }
+          
+          .wake-up-happy-container > div {
+            font-size: 0.75rem !important;
+            padding: 8px 16px !important;
+          }
+          
+          /* Size toggle buttons */
+          .cart-drawer-header button[style*="14px 40px"] {
+            padding: 10px 24px !important;
+            font-size: 0.9rem !important;
+          }
+          
+          /* Tabs */
+          .cart-drawer-header > div[style*="borderBottom"] button {
+            padding: 0.875rem 0.5rem !important;
+            font-size: 0.8rem !important;
+          }
+          
+          /* Content area with products */
+          .cart-drawer-main > div[style*="flex: 1"] {
+            padding: 1rem !important;
+          }
+          
+          /* Product grid */
+          .cart-drawer-main > div[style*="overflowY"] > div[style*="grid"] {
+            grid-template-columns: 1fr !important;
+            gap: 1rem !important;
+            padding: 1rem !important;
+          }
+          
+          /* Product cards */
+          .cart-drawer-main [style*="aspectRatio"] {
+            height: 180px !important;
+          }
+          
+          /* Footer with checkout */
+          .cart-drawer-main > div:last-child[style*="borderTop"] {
+            padding: 1rem !important;
+          }
+          
+          /* Checkout button */
+          .cart-drawer-main button[style*="width: 100%"][style*="padding: 1.25rem"] {
+            padding: 1rem 1.5rem !important;
+            font-size: 0.95rem !important;
+          }
+          
+          /* Cart items list */
+          .cart-drawer-main [style*="maxHeight"][style*="overflowY"] {
+            max-height: none !important;
+          }
+        }
+        
+        /* Tablet breakpoint for intermediate sizing */
+        @media (min-width: 769px) and (max-width: 1024px) {
+          .cart-drawer-main {
+            height: 95vh !important;
+          }
+          
+          .cart-drawer-header {
+            padding: 1.5rem !important;
+          }
+        }
+      `}</style>
+      
       {/* Backdrop */}
       <div
         onClick={onClose}
@@ -604,6 +698,7 @@ export function BuildABoxCartDrawer({
 
       {/* Main Drawer */}
       <div
+        className="cart-drawer-main"
         style={{
           position: 'fixed',
           bottom: 0,
@@ -621,6 +716,7 @@ export function BuildABoxCartDrawer({
       >
         {/* Header */}
         <div
+          className="cart-drawer-header"
           style={{
             padding: '2rem',
             borderBottom: '1px solid #E5E5E5',
@@ -631,6 +727,7 @@ export function BuildABoxCartDrawer({
           {/* Close Button */}
           <button
             onClick={onClose}
+            className="cart-drawer-close"
             style={{
               position: 'absolute',
               top: '1.5rem',
@@ -664,6 +761,7 @@ export function BuildABoxCartDrawer({
 
           {/* Title */}
           <h2
+            className="cart-drawer-title"
             style={{
               fontFamily: 'Peridot PE, Inter, sans-serif',
               fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
@@ -679,6 +777,7 @@ export function BuildABoxCartDrawer({
           
           {/* Wake Up Happy - Wild Animation */}
           <div
+            className="wake-up-happy-container"
             style={{
               display: 'flex',
               justifyContent: 'center',
