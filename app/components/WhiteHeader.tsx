@@ -12,8 +12,13 @@ export function WhiteHeader({ backgroundColor = '#000', forceWhiteText = false, 
   // Cart data for animated box indicator
   const { totalPacks, openDrawer } = useCart();
   
-  // Mobile menu state
+  // Mobile menu state - client-only to avoid hydration issues
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [isClient, setIsClient] = React.useState(false);
+  
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
   
   // Determine if background is light or dark to set appropriate text colors
   const isLightBackground = (color: string) => {
@@ -103,6 +108,17 @@ export function WhiteHeader({ backgroundColor = '#000', forceWhiteText = false, 
         @media (max-width: 768px) {
           .white-header-custom {
             height: 60px !important;
+          }
+          
+          /* Mobile logo */
+          .white-header-custom + div {
+            top: 10px !important;
+            left: 1rem !important;
+            height: 40px !important;
+          }
+          
+          .white-header-custom + div img {
+            height: 40px !important;
           }
           
           /* Hide desktop navigation on mobile */
@@ -750,8 +766,8 @@ export function WhiteHeader({ backgroundColor = '#000', forceWhiteText = false, 
         )}
       </div>
 
-      {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
+      {/* Mobile Menu Overlay - Client-only */}
+      {isClient && isMobileMenuOpen && (
         <>
           {/* Backdrop */}
           <div
