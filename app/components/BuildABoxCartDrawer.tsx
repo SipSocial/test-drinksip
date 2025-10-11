@@ -88,6 +88,77 @@ const ALL_PRODUCTS: ProductInCatalog[] = [
   }
 ];
 
+// Helper to adjust color lightness for gradients
+function adjustColorLightness(color: string, adjustment: number): string {
+  const hex = color.replace('#', '');
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  
+  const adjustComponent = (component: number) => {
+    const adjusted = component + adjustment;
+    return Math.max(0, Math.min(255, Math.round(adjusted)));
+  };
+  
+  const newR = adjustComponent(r).toString(16).padStart(2, '0');
+  const newG = adjustComponent(g).toString(16).padStart(2, '0');
+  const newB = adjustComponent(b).toString(16).padStart(2, '0');
+  
+  return `#${newR}${newG}${newB}`;
+}
+
+// Product-specific FOMO messages (matching actual products)
+const PRODUCT_MESSAGES: Record<string, string[]> = {
+  '1': [ // Hazy IPA
+    "Pick Me I'm Bold",
+    "All Flavor No Hangover",
+    "Wake Up Happy",
+    "Craft Beer Done Right"
+  ],
+  '2': [ // Watermelon
+    "Summer In A Can",
+    "Pure Refreshment",
+    "Taste The Sunshine",
+    "Light & Crisp"
+  ],
+  '3': [ // Blood Orange
+    "Citrus Perfection",
+    "Bold & Bright",
+    "Zesty Goodness",
+    "Pure Blood Orange Bliss"
+  ],
+  '4': [ // Lemon Lime
+    "Zesty & Fresh",
+    "Crisp Citrus Hit",
+    "Lime Time Baby",
+    "Refreshingly Tart"
+  ],
+  '5': [ // 311 Hazy IPA
+    "Time To Rock Out",
+    "Limited Edition Vibes",
+    "For The Culture",
+    "Collab Excellence"
+  ],
+  '6': [ // Deftones Japanese Lager
+    "Time To Rock Out",
+    "Japanese Craft Vibes",
+    "Limited Drop",
+    "Art Meets Flavor"
+  ]
+};
+
+// General top messages
+const TOP_MESSAGES = [
+  "You Won't Regret This",
+  "Smart Choices Only",
+  "Your Future Self Says Thanks",
+  "Level Up Your Game",
+  "This Is Your Sign",
+  "Better Choices Start Here",
+  "No Hangover No Problem",
+  "Crushing It Starts Here"
+];
+
 export function BuildABoxCartDrawer({
   isOpen,
   onClose,
@@ -101,13 +172,26 @@ export function BuildABoxCartDrawer({
   const [boxSize, setBoxSize] = useState<12 | 24 | null>(null);
   const [showSizeSelection, setShowSizeSelection] = useState(false);
   
-  const BOX_SIZE = boxSize || 12;
+  // Product chip animations
+  const [productChips, setProductChips] = useState<Record<string, { message: string; show: boolean; side: 'left' | 'right' }>>({});
+  
+  // Top message - always "Wake Up Happy" with wild animations
+  const [topMessagePhase, setTopMessagePhase] = useState<'hidden' | 'drop' | 'stretch' | 'explode' | 'implode'>('hidden');
+  const [topMessageColor, setTopMessageColor] = useState('#E8B122');
+  const [showWord1, setShowWord1] = useState(true);
+  const [showWord2, setShowWord2] = useState(true);
+  const [showWord3, setShowWord3] = useState(true);
+  
+  const BOX_SIZE_CANS = boxSize || 12;
+  const BOX_SIZE_PACKS = BOX_SIZE_CANS / 4; // 3 packs for 12 cans, 6 packs for 24 cans
   const PACK_SIZE = 4;
   const totalCans = items.reduce((sum, item) => sum + item.quantity, 0);
-  const progressPercent = Math.min((totalCans / BOX_SIZE) * 100, 100);
-  const cansRemaining = BOX_SIZE - totalCans;
-  const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const isBoxComplete = totalCans >= BOX_SIZE;
+  const PRICE_PER_PACK = 8.99;
+  const totalPacks = Math.floor(totalCans / PACK_SIZE);
+  const progressPercent = Math.min((totalPacks / BOX_SIZE_PACKS) * 100, 100);
+  const packsRemaining = BOX_SIZE_PACKS - totalPacks;
+  const subtotal = totalPacks * PRICE_PER_PACK;
+  const isBoxComplete = totalPacks >= BOX_SIZE_PACKS;
 
   const handleSelectBoxSize = (size: 12 | 24) => {
     setBoxSize(size);
@@ -117,17 +201,125 @@ export function BuildABoxCartDrawer({
   // Show size selection when drawer opens and no box size selected yet
   useEffect(() => {
     if (isOpen && boxSize === null) {
-      // If there are already items in cart, skip size selection and use 12-pack
-      if (items.length > 0) {
-        setBoxSize(12);
-        setShowSizeSelection(false);
-      } else {
-        setShowSizeSelection(true);
-      }
-    } else if (boxSize !== null) {
+      // Show selection modal on first open
+      setShowSizeSelection(true);
+    } else {
       setShowSizeSelection(false);
     }
-  }, [isOpen, boxSize, items.length]);
+  }, [isOpen, boxSize]);
+  
+  // Product chip animation cycle
+  useEffect(() => {
+    if (!isOpen || activeView !== 'shop') {
+      setProductChips({});
+      return;
+    }
+    
+    let currentIndex = 0;
+    const productIds = ALL_PRODUCTS.map(p => p.id);
+    
+    const showNextChip = () => {
+      const productId = productIds[currentIndex];
+      const messages = PRODUCT_MESSAGES[productId] || [];
+      const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+      const randomSide = Math.random() > 0.5 ? 'left' : 'right';
+      
+      // Show chip
+      setProductChips(prev => ({
+        ...prev,
+        [productId]: { message: randomMessage, show: true, side: randomSide }
+      }));
+      
+      // Hide after 2.5 seconds
+      setTimeout(() => {
+        setProductChips(prev => ({
+          ...prev,
+          [productId]: { ...prev[productId], show: false }
+        }));
+      }, 2500);
+      
+      // Move to next product
+      currentIndex = (currentIndex + 1) % productIds.length;
+    };
+    
+    // Show first chip immediately
+    showNextChip();
+    
+    // Then cycle every 4 seconds
+    const interval = setInterval(showNextChip, 4000);
+    
+    return () => clearInterval(interval);
+  }, [isOpen, activeView]);
+  
+  // PDP Colors for cycling
+  const PDP_COLORS = ['#E8B122', '#F05757', '#ED5335', '#77C14A', '#1E3A8A', '#2D2D2D'];
+  
+  // NEXT LEVEL "Wake Up Happy" animation sequence
+  useEffect(() => {
+    if (!isOpen) {
+      setTopMessagePhase('hidden');
+      setShowWord1(true);
+      setShowWord2(true);
+      setShowWord3(true);
+      return;
+    }
+    
+    const runNextLevelSequence = () => {
+      let colorIndex = 0;
+      
+      // Reset words
+      setShowWord1(true);
+      setShowWord2(true);
+      setShowWord3(true);
+      
+      // Phase 1: Drop in with liquid bounce
+      setTopMessagePhase('drop');
+      setTopMessageColor(PDP_COLORS[0]);
+      
+      // Phase 2: Accordion stretch - words separate
+      setTimeout(() => {
+        setTopMessagePhase('stretch');
+        
+        // Color cycling during stretch
+        const colorInterval = setInterval(() => {
+          colorIndex = (colorIndex + 1) % PDP_COLORS.length;
+          setTopMessageColor(PDP_COLORS[colorIndex]);
+        }, 180);
+        
+        setTimeout(() => {
+          clearInterval(colorInterval);
+        }, 2400);
+      }, 1000);
+      
+      // Phase 3: Explode - words fly apart
+      setTimeout(() => {
+        setTopMessagePhase('explode');
+      }, 3400);
+      
+      // Phase 4: Words disappear one by one
+      setTimeout(() => setShowWord1(false), 3800);
+      setTimeout(() => setShowWord2(false), 4000);
+      setTimeout(() => setShowWord3(false), 4200);
+      
+      // Phase 5: Implode back to center and vanish
+      setTimeout(() => {
+        setTopMessagePhase('implode');
+      }, 4400);
+      
+      // Phase 6: Hide completely
+      setTimeout(() => {
+        setTopMessagePhase('hidden');
+      }, 5000);
+    };
+    
+    // Initial delay, then run first sequence
+    setTimeout(runNextLevelSequence, 600);
+    
+    // Repeat every 8 seconds
+    const interval = setInterval(runNextLevelSequence, 8000);
+    
+    return () => clearInterval(interval);
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -147,10 +339,38 @@ export function BuildABoxCartDrawer({
     const item = items.find(i => i.variantId === productId);
     return item ? item.quantity : 0;
   };
+  
+  // Group items by product (combine duplicates)
+  const groupedItems = items.reduce((acc, item) => {
+    const existingGroup = acc.find(g => g.variantId === item.variantId);
+    if (existingGroup) {
+      existingGroup.quantity += item.quantity;
+      existingGroup.ids.push(item.id);
+    } else {
+      acc.push({
+        ...item,
+        ids: [item.id]
+      });
+    }
+    return acc;
+  }, [] as Array<CartItem & { ids: string[] }>);
+  
+  // Handle quantity change for grouped items
+  const handleGroupedQuantityChange = (groupedItem: CartItem & { ids: string[] }, newTotalQuantity: number) => {
+    if (newTotalQuantity <= 0) {
+      // Remove all instances
+      groupedItem.ids.forEach(id => onRemoveItem(id));
+    } else {
+      // Update first item, remove others
+      const firstId = groupedItem.ids[0];
+      onUpdateQuantity(firstId, newTotalQuantity);
+      groupedItem.ids.slice(1).forEach(id => onRemoveItem(id));
+    }
+  };
 
   // Handle adding product from catalog
   const handleAddFromCatalog = (product: ProductInCatalog) => {
-    if (totalCans + PACK_SIZE > BOX_SIZE) return;
+    if (totalPacks >= BOX_SIZE_PACKS) return;
     
     const existingItem = items.find(item => item.variantId === product.id);
     
@@ -413,19 +633,31 @@ export function BuildABoxCartDrawer({
             onClick={onClose}
             style={{
               position: 'absolute',
-              top: '2rem',
-              right: '2rem',
-              background: 'transparent',
+              top: '1.5rem',
+              right: '1.5rem',
+              background: '#F5F5F5',
               border: 'none',
               fontSize: '1.5rem',
               color: '#222222',
               cursor: 'pointer',
               padding: '0.5rem',
               lineHeight: 1,
-              transition: 'transform 0.2s ease'
+              transition: 'all 0.2s ease',
+              borderRadius: '50%',
+              width: '36px',
+              height: '36px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = 'rotate(90deg)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'rotate(0)'}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'rotate(90deg)';
+              e.currentTarget.style.background = '#E5E5E5';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'rotate(0)';
+              e.currentTarget.style.background = '#F5F5F5';
+            }}
           >
             ×
           </button>
@@ -444,6 +676,144 @@ export function BuildABoxCartDrawer({
           >
             Build Your Box
           </h2>
+          
+          {/* Wake Up Happy - Wild Animation */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              marginBottom: '1rem',
+              minHeight: '80px',
+              alignItems: 'center',
+              position: 'relative',
+              overflow: 'visible'
+            }}
+          >
+            {topMessagePhase !== 'hidden' && (
+              <div
+                style={{
+                  position: 'relative',
+                  animation: topMessagePhase === 'drop' ? 'liquidDrop 1s cubic-bezier(0.68, -0.55, 0.265, 1.55)' : 'none'
+                }}
+              >
+                <div
+                  style={{
+                    background: `linear-gradient(135deg, ${topMessageColor} 0%, ${adjustColorLightness(topMessageColor, -30)} 100%)`,
+                    color: '#FFFFFF',
+                    padding: '12px 24px',
+                    borderRadius: '24px',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    fontFamily: 'Inter, sans-serif',
+                    letterSpacing: topMessagePhase === 'stretch' ? '0.25em' : '0.05em',
+                    textTransform: 'uppercase',
+                    boxShadow: `0 6px 20px ${topMessageColor}40`,
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+                    transition: 'letter-spacing 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55), all 0.18s ease-in-out',
+                    animation: topMessagePhase === 'stretch' ? 'accordionPulse 0.6s ease-in-out infinite' : 'none',
+                    display: 'flex',
+                    gap: '0.5em'
+                  }}
+                >
+                  {showWord1 && (
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        animation: topMessagePhase === 'explode' ? 'explodeWord1 0.6s ease-out forwards' : 'none'
+                      }}
+                    >
+                      WAKE
+                    </span>
+                  )}
+                  {showWord2 && (
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        animation: topMessagePhase === 'explode' ? 'explodeWord2 0.6s ease-out forwards' : 'none'
+                      }}
+                    >
+                      UP
+                    </span>
+                  )}
+                  {showWord3 && (
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        animation: topMessagePhase === 'explode' ? 'explodeWord3 0.6s ease-out forwards' : 'none'
+                      }}
+                    >
+                      HAPPY
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Box Size Toggle - Centered */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', gap: '6px', background: '#F5F5F5', padding: '6px', borderRadius: '12px' }}>
+              <button
+                onClick={() => handleSelectBoxSize(12)}
+                style={{
+                  padding: '14px 40px',
+                  background: boxSize === 12 ? '#222222' : 'transparent',
+                  color: boxSize === 12 ? '#FFFFFF' : '#666666',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '1.1rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  fontFamily: 'Inter, sans-serif',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}
+                onMouseEnter={(e) => {
+                  if (boxSize !== 12) {
+                    e.currentTarget.style.background = '#E5E5E5';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (boxSize !== 12) {
+                    e.currentTarget.style.background = 'transparent';
+                  }
+                }}
+              >
+                12-Pack
+              </button>
+              <button
+                onClick={() => handleSelectBoxSize(24)}
+                style={{
+                  padding: '14px 40px',
+                  background: boxSize === 24 ? '#222222' : 'transparent',
+                  color: boxSize === 24 ? '#FFFFFF' : '#666666',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '1.1rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  fontFamily: 'Inter, sans-serif',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}
+                onMouseEnter={(e) => {
+                  if (boxSize !== 24) {
+                    e.currentTarget.style.background = '#E5E5E5';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (boxSize !== 24) {
+                    e.currentTarget.style.background = 'transparent';
+                  }
+                }}
+              >
+                24-Pack
+              </button>
+            </div>
+          </div>
 
           {/* Progress Bar */}
           <div style={{ marginBottom: '1rem' }}>
@@ -475,7 +845,7 @@ export function BuildABoxCartDrawer({
                   fontFamily: 'Inter, sans-serif'
                 }}
               >
-                {totalCans} / {BOX_SIZE}
+                {totalPacks} / {BOX_SIZE_PACKS} <span style={{ fontSize: '0.75em', fontWeight: 600, color: '#999' }}>PACKS</span>
               </span>
             </div>
             
@@ -515,7 +885,7 @@ export function BuildABoxCartDrawer({
           >
             {isBoxComplete 
               ? '✓ Box Complete — Ready to Checkout' 
-              : `${cansRemaining} More Can${cansRemaining > 1 ? 's' : ''} Needed`
+              : `${packsRemaining} More Pack${packsRemaining > 1 ? 's' : ''} Needed`
             }
           </div>
         </div>
@@ -568,7 +938,7 @@ export function BuildABoxCartDrawer({
             }}
           >
             Your Box
-            {totalCans > 0 && (
+            {totalPacks > 0 && (
               <span
                 style={{
                   position: 'absolute',
@@ -576,17 +946,18 @@ export function BuildABoxCartDrawer({
                   right: '1rem',
                   background: '#222222',
                   color: '#FFFFFF',
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '50%',
+                  padding: '4px 12px',
+                  borderRadius: '12px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: '0.75rem',
-                  fontWeight: 700
+                  fontWeight: 700,
+                  gap: '4px',
+                  whiteSpace: 'nowrap'
                 }}
               >
-                {totalCans}
+                {totalPacks}/{BOX_SIZE_PACKS} <span style={{ fontSize: '0.85em', fontWeight: 600 }}>PACKS</span>
               </span>
             )}
           </button>
@@ -612,8 +983,12 @@ export function BuildABoxCartDrawer({
             >
               {ALL_PRODUCTS.map((product) => {
                 const quantityInCart = getProductQuantity(product.id);
-                const canAdd = totalCans + PACK_SIZE <= BOX_SIZE;
+                const canAdd = totalPacks < BOX_SIZE_PACKS;
 
+                const chipData = productChips[product.id];
+                const showChip = chipData?.show;
+                const chipSide = chipData?.side || 'left';
+                
                 return (
                   <div
                     key={product.id}
@@ -634,6 +1009,40 @@ export function BuildABoxCartDrawer({
                       e.currentTarget.style.transform = 'translateY(0)';
                     }}
                   >
+                    {/* Product-specific FOMO chip */}
+                    {showChip && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: '-12px',
+                          [chipSide]: '-12px',
+                          zIndex: 10,
+                          transform: showChip ? 'scale(1) rotate(-5deg)' : 'scale(0)',
+                          opacity: showChip ? 1 : 0,
+                          transition: 'all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+                          animation: showChip ? 'chipJitter 0.3s ease-in-out 0.4s' : 'none'
+                        }}
+                      >
+                        <div
+                          style={{
+                            background: `linear-gradient(135deg, ${product.color} 0%, ${adjustColorLightness(product.color, -20)} 100%)`,
+                            color: '#FFFFFF',
+                            padding: '8px 16px',
+                            borderRadius: '20px',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            fontFamily: 'Inter, sans-serif',
+                            letterSpacing: '0.05em',
+                            textTransform: 'uppercase',
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)',
+                            whiteSpace: 'nowrap',
+                            textShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+                          }}
+                        >
+                          {chipData?.message}
+                        </div>
+                      </div>
+                    )}
                     {/* Product Image */}
                     <div
                       style={{
@@ -719,7 +1128,7 @@ export function BuildABoxCartDrawer({
                           fontFamily: 'Inter, sans-serif'
                         }}
                       >
-                        ${product.price.toFixed(2)} <span style={{ fontSize: '0.85rem', color: '#A6A6A6', fontWeight: 600 }}>/ 4pk</span>
+                        $8.99 <span style={{ fontSize: '0.85rem', color: '#A6A6A6', fontWeight: 600 }}>/ 4pk</span>
                       </div>
 
                       {/* Add Button */}
@@ -764,7 +1173,7 @@ export function BuildABoxCartDrawer({
           {/* BOX VIEW */}
           {activeView === 'box' && (
             <div style={{ padding: '2rem' }}>
-              {items.length === 0 ? (
+              {groupedItems.length === 0 ? (
                 <div
                   style={{
                     textAlign: 'center',
@@ -790,7 +1199,7 @@ export function BuildABoxCartDrawer({
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  {items.map((item) => (
+                  {groupedItems.map((item) => (
                     <div
                       key={item.id}
                       style={{
@@ -846,14 +1255,14 @@ export function BuildABoxCartDrawer({
                             fontFamily: 'Inter, sans-serif'
                           }}
                         >
-                          {item.quantity} cans • ${(item.price * item.quantity).toFixed(2)}
+                          {Math.floor(item.quantity / 4)} pack{Math.floor(item.quantity / 4) !== 1 ? 's' : ''} • ${(8.99 * Math.floor(item.quantity / 4)).toFixed(2)}
                         </div>
                       </div>
 
                       {/* Quantity Controls */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                         <button
-                          onClick={() => onUpdateQuantity(item.id, Math.max(0, item.quantity - PACK_SIZE))}
+                          onClick={() => handleGroupedQuantityChange(item, Math.max(0, item.quantity - PACK_SIZE))}
                           style={{
                             width: '32px',
                             height: '32px',
@@ -889,30 +1298,30 @@ export function BuildABoxCartDrawer({
                             fontFamily: 'Inter, sans-serif'
                           }}
                         >
-                          {item.quantity}
+                          {Math.floor(item.quantity / 4)}
                         </span>
 
                         <button
-                          onClick={() => onUpdateQuantity(item.id, item.quantity + PACK_SIZE)}
-                          disabled={totalCans >= BOX_SIZE}
+                          onClick={() => handleGroupedQuantityChange(item, item.quantity + PACK_SIZE)}
+                          disabled={totalPacks >= BOX_SIZE_PACKS}
                           style={{
                             width: '32px',
                             height: '32px',
-                            border: `1px solid ${totalCans >= BOX_SIZE ? '#E5E5E5' : '#E5E5E5'}`,
+                            border: `1px solid ${totalPacks >= BOX_SIZE_PACKS ? '#E5E5E5' : '#E5E5E5'}`,
                             background: '#FFFFFF',
-                            color: totalCans >= BOX_SIZE ? '#A6A6A6' : '#222222',
+                            color: totalPacks >= BOX_SIZE_PACKS ? '#A6A6A6' : '#222222',
                             fontSize: '1.2rem',
                             fontWeight: 700,
-                            cursor: totalCans >= BOX_SIZE ? 'not-allowed' : 'pointer',
+                            cursor: totalPacks >= BOX_SIZE_PACKS ? 'not-allowed' : 'pointer',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             transition: 'all 0.2s ease',
                             fontFamily: 'Inter, sans-serif',
-                            opacity: totalCans >= BOX_SIZE ? 0.5 : 1
+                            opacity: totalPacks >= BOX_SIZE_PACKS ? 0.5 : 1
                           }}
                           onMouseEnter={(e) => {
-                            if (totalCans < BOX_SIZE) {
+                            if (totalPacks < BOX_SIZE_PACKS) {
                               e.currentTarget.style.borderColor = '#222222';
                             }
                           }}
@@ -998,11 +1407,92 @@ export function BuildABoxCartDrawer({
                 }
               }}
             >
-              {isBoxComplete ? 'Continue to Checkout' : `Add ${cansRemaining} More Can${cansRemaining > 1 ? 's' : ''}`}
+              {isBoxComplete ? 'Continue to Checkout' : `Add ${packsRemaining} More Pack${packsRemaining > 1 ? 's' : ''}`}
             </button>
           </div>
         )}
       </div>
+      
+      {/* Chip Animation Styles */}
+      <style>{`
+        @keyframes chipJitter {
+          0%, 100% {
+            transform: rotate(-5deg);
+          }
+          25% {
+            transform: rotate(-7deg);
+          }
+          50% {
+            transform: rotate(-3deg);
+          }
+          75% {
+            transform: rotate(-6deg);
+          }
+        }
+        
+        @keyframes liquidDrop {
+          0% {
+            transform: translateY(-100px) scaleY(2) scaleX(0.5);
+            opacity: 0;
+          }
+          40% {
+            transform: translateY(10px) scaleY(0.7) scaleX(1.3);
+            opacity: 1;
+          }
+          60% {
+            transform: translateY(-5px) scaleY(1.1) scaleX(0.9);
+          }
+          80% {
+            transform: translateY(3px) scaleY(0.95) scaleX(1.05);
+          }
+          100% {
+            transform: translateY(0) scaleY(1) scaleX(1);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes accordionPulse {
+          0%, 100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.15) rotateZ(5deg);
+          }
+        }
+        
+        @keyframes explodeWord1 {
+          0% {
+            transform: translate(0, 0) rotate(0deg) scale(1);
+            opacity: 1;
+          }
+          100% {
+            transform: translate(-120px, -80px) rotate(-45deg) scale(0.5);
+            opacity: 0;
+          }
+        }
+        
+        @keyframes explodeWord2 {
+          0% {
+            transform: translate(0, 0) rotate(0deg) scale(1);
+            opacity: 1;
+          }
+          100% {
+            transform: translate(0, -100px) rotate(180deg) scale(0.5);
+            opacity: 0;
+          }
+        }
+        
+        @keyframes explodeWord3 {
+          0% {
+            transform: translate(0, 0) rotate(0deg) scale(1);
+            opacity: 1;
+          }
+          100% {
+            transform: translate(120px, -80px) rotate(45deg) scale(0.5);
+            opacity: 0;
+          }
+        }
+      `}</style>
     </>
   );
 }
