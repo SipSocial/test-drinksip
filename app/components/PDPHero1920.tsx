@@ -278,44 +278,130 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
           }
         }
         
-        /* MOBILE RESPONSIVE STYLES - DO NOT AFFECT DESKTOP */
+        /* ============================================
+           MOBILE COMPLETE OVERHAUL - NO DESKTOP IMPACT
+           ============================================ */
         @media (max-width: 768px) {
+          /* Hero container - completely redesigned for mobile */
           .pdp-hero-1920 {
-            padding-top: 80px !important;
-            min-height: auto !important;
-          }
-          
-          .pdp-split-background {
+            padding-top: 60px !important;
+            min-height: 100vh !important;
+            display: flex !important;
             flex-direction: column !important;
           }
           
-          .pdp-split-left, .pdp-split-right {
-            width: 100% !important;
-            height: 50% !important;
-          }
-          
-          .pdp-content-grid {
-            grid-template-columns: 1fr !important;
-            gap: 2rem !important;
-            padding: 2rem 1.5rem !important;
-          }
-          
-          .pdp-left-content, .pdp-center-can, .pdp-right-content {
-            grid-column: 1 !important;
-            max-width: 100% !important;
-          }
-          
-          .pdp-center-can {
-            order: -1 !important;
-            padding: 2rem 0 !important;
-          }
-          
-          .pdp-product-thumbnails {
+          /* Background - single color, no split on mobile */
+          .pdp-split-background {
             display: none !important;
           }
           
-          .pdp-massive-title {
-            font-size: clamp(4rem, 15vw, 6rem) !important;
+          /* Content grid - complete mobile stack */
+          .pdp-content-grid {
+            display: flex !important;
+            flex-direction: column !important;
+            height: auto !important;
+            max-width: 100% !important;
+            padding: 0 !important;
+            gap: 0 !important;
+            margin: 0 !important;
+          }
+          
+          /* Product image - hero section on mobile */
+          .pdp-center-can {
+            order: 1 !important;
+            min-width: 100% !important;
+            height: 60vh !important;
+            padding: 2rem 1rem !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            position: relative !important;
+          }
+          
+          .pdp-center-can img {
+            width: 80vw !important;
+            max-width: 400px !important;
+            height: auto !important;
+            object-fit: contain !important;
+          }
+          
+          /* Left content - mobile optimized */
+          .pdp-left-content {
+            order: 2 !important;
+            padding: 2rem 1.5rem !important;
+            height: auto !important;
+            gap: 1.5rem !important;
+            max-width: 100% !important;
+          }
+          
+          .pdp-left-content > div {
+            width: 100% !important;
+          }
+          
+          /* Chips - mobile friendly */
+          .pdp-left-content > div:first-child {
+            flex-wrap: wrap !important;
+            gap: 0.5rem !important;
+          }
+          
+          .pdp-left-content > div:first-child > div {
+            font-size: 0.75rem !important;
+            padding: 0.5rem 0.875rem !important;
+          }
+          
+          /* Price - larger on mobile */
+          .pdp-left-content > div:nth-child(2) {
+            font-size: 2.5rem !important;
+          }
+          
+          /* Add to box button - full width mobile */
+          .pdp-left-content > div:last-child button {
+            width: 100% !important;
+            padding: 1.25rem 2rem !important;
+            font-size: 1rem !important;
+          }
+          
+          /* Right content - mobile tabs */
+          .pdp-right-content {
+            order: 3 !important;
+            padding: 1.5rem !important;
+            height: auto !important;
+            max-width: 100% !important;
+            min-width: 100% !important;
+          }
+          
+          /* Tabs - mobile friendly */
+          .pdp-right-content button {
+            padding: 0.875rem 0.75rem !important;
+            font-size: 0.8rem !important;
+          }
+          
+          /* Tab content - readable on mobile */
+          .pdp-right-content > div > div:last-child {
+            padding: 1.5rem 1rem !important;
+            font-size: 0.9rem !important;
+            line-height: 1.6 !important;
+          }
+          
+          /* Hide thumbnails completely on mobile */
+          .pdp-product-thumbnails,
+          .pdp-right-content img,
+          .pdp-right-content [style*="display: grid"] {
+            display: none !important;
+          }
+          
+          /* Build-a-box section - mobile optimized */
+          .pdp-left-content [style*="BUILD-A-BOX"] {
+            padding: 1.5rem !important;
+          }
+          
+          .pdp-left-content [style*="BUILD-A-BOX"] > div {
+            font-size: 0.9rem !important;
+          }
+          
+          /* Progress bar - visible and prominent */
+          .pdp-left-content [style*="progress"] {
+            margin-top: 1rem !important;
           }
         }
       `}</style>

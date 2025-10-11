@@ -257,19 +257,32 @@ export default function ProductPage() {
             padding: 0;
             transition: background 0.6s cubic-bezier(0.4, 0, 0.2, 1);
           }
+          
+          /* MOBILE PDP BACKGROUND - SOLID COLOR */
+          @media (max-width: 768px) {
+            .pdp-page-container {
+              background: ${currentColor} !important;
+            }
+            
+            /* Mobile logo adjustment */
+            .white-header-custom + div img {
+              height: 60px !important;
+              top: 0 !important;
+            }
+          }
         `}
       </style>
 
       {/* HEADER WITH PRODUCT COLOR */}
     <div style={{ 
-        position: 'fixed',
+        position: 'absolute',
           top: 0,
           left: 0,
         right: 0,
         zIndex: 1000,
-        background: '#000', // Header back to black
+        background: 'rgba(255, 255, 255, 0.08)', // 92% transparent white - ultra-subtle
         transition: 'background 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-        boxShadow: '0 2px 20px rgba(0, 0, 0, 0.1)'
+        boxShadow: 'none'
       }}>
         <WhiteHeader forceWhiteText={true} productColor={currentColor} />
         </div>

@@ -19,31 +19,35 @@ interface CartContextType {
   removeItem: (id: string) => void;
   openDrawer: () => void;
   closeDrawer: () => void;
-  totalItems: number;
+  totalItems: number; // Total number of cans
+  totalPacks: number; // Total number of 4-packs
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  // Load cart from localStorage on mount
-  useEffect(() => {
-    const savedCart = localStorage.getItem('drinksip-cart');
-    if (savedCart) {
-      try {
-        const parsedCart = JSON.parse(savedCart) as CartItem[];
-        setItems(parsedCart);
-      } catch (e) {
-        console.error('Failed to parse cart from localStorage', e);
+  // Initialize state from localStorage if available (client-side only)
+  const [items, setItems] = useState<CartItem[]>(() => {
+    if (typeof window !== 'undefined') {
+      const savedCart = localStorage.getItem('drinksip-cart');
+      if (savedCart) {
+        try {
+          return JSON.parse(savedCart) as CartItem[];
+        } catch (e) {
+          console.error('Failed to parse cart from localStorage', e);
+        }
       }
     }
-  }, []);
+    return [];
+  });
+  
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  // Save cart to localStorage whenever it changes
+  // Save cart to localStorage whenever it changes (client-side only)
   useEffect(() => {
-    localStorage.setItem('drinksip-cart', JSON.stringify(items));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('drinksip-cart', JSON.stringify(items));
+    }
   }, [items]);
 
   const addItem = (newItem: Omit<CartItem, 'id' | 'quantity'>) => {
@@ -99,6 +103,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const closeDrawer = () => setIsDrawerOpen(false);
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  const totalPacks = Math.floor(totalItems / 4); // Each pack has 4 cans
 
   return (
     <CartContext.Provider
@@ -110,7 +115,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
         removeItem,
         openDrawer,
         closeDrawer,
-        totalItems
+        totalItems,
+        totalPacks
       }}
     >
       {children}

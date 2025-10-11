@@ -13,18 +13,16 @@ interface AddToBoxButtonProps {
 }
 
 export function AddToBoxButton({ product }: AddToBoxButtonProps) {
-  const { addItem, totalItems, items, openDrawer } = useCart();
+  const { addItem, totalPacks, items, openDrawer } = useCart();
   const [isAdding, setIsAdding] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const BOX_SIZE = 12;
-  const PACK_SIZE = 4;
-  const totalCans = totalItems; // totalItems from CartContext is the total cans
-  const isBoxFull = totalCans >= BOX_SIZE;
-  const progressPercent = Math.min((totalCans / BOX_SIZE) * 100, 100);
-  const packsInBox = Math.floor(totalCans / PACK_SIZE);
-  const totalPacks = BOX_SIZE / PACK_SIZE;
-  const cansRemaining = BOX_SIZE - totalCans;
+  const BOX_SIZE = 3; // 3 packs per box
+  const PACK_SIZE = 4; // 4 cans per pack
+  const packsInBox = totalPacks;
+  const isBoxFull = packsInBox >= BOX_SIZE;
+  const progressPercent = Math.min((packsInBox / BOX_SIZE) * 100, 100);
+  const packsRemaining = BOX_SIZE - packsInBox;
   
   // Calculate if this product is already in cart
   const productInCart = items.find(item => item.variantId === product.variantId);
@@ -155,16 +153,16 @@ export function AddToBoxButton({ product }: AddToBoxButtonProps) {
               letterSpacing: '-0.01em'
             }}
           >
-            {totalCans}<span style={{ 
+            {packsInBox}<span style={{ 
               fontSize: '0.7em', 
               color: 'rgba(255, 255, 255, 0.6)',
               fontWeight: 600 
-            }}>/12</span>
+            }}>/3 PACKS</span>
           </div>
         </div>
 
         {/* Compact Progress Bar */}
-        {totalCans > 0 && (
+        {packsInBox > 0 && (
           <>
             <div
               style={{
@@ -200,16 +198,16 @@ export function AddToBoxButton({ product }: AddToBoxButtonProps) {
                 textAlign: 'center'
               }}
             >
-              {totalCans >= BOX_SIZE 
-                ? 'Complete — Ready to Checkout' 
-                : `${cansRemaining} more can${cansRemaining > 1 ? 's' : ''} to complete`
+              {packsInBox >= BOX_SIZE 
+                ? 'Box Full — Ready to Checkout' 
+                : `${packsRemaining} more pack${packsRemaining > 1 ? 's' : ''} to complete`
               }
             </div>
           </>
         )}
 
         {/* View Box Link - Only show if items in cart */}
-        {totalCans > 0 && (
+        {packsInBox > 0 && (
           <button
             onClick={openDrawer}
             style={{
