@@ -285,9 +285,8 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
           /* Hero container - completely redesigned for mobile */
           .pdp-hero-1920 {
             padding-top: 60px !important;
-            min-height: 100vh !important;
-            display: flex !important;
-            flex-direction: column !important;
+            min-height: auto !important;
+            height: auto !important;
           }
           
           /* Background - single color, no split on mobile */
@@ -295,7 +294,7 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
             display: none !important;
           }
           
-          /* Content grid - complete mobile stack */
+          /* Content grid - proper stacking */
           .pdp-content-grid {
             display: flex !important;
             flex-direction: column !important;
@@ -306,102 +305,136 @@ export function PDPHero1920({ product, productImage, onColorChange, allProducts 
             margin: 0 !important;
           }
           
-          /* Product image - hero section on mobile */
+          /* Product image - top of mobile layout */
           .pdp-center-can {
             order: 1 !important;
+            width: 100% !important;
             min-width: 100% !important;
-            height: 60vh !important;
-            padding: 2rem 1rem !important;
+            height: auto !important;
+            min-height: 50vh !important;
+            padding: 1rem !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
             position: relative !important;
+            flex: none !important;
           }
           
           .pdp-center-can img {
-            width: 80vw !important;
-            max-width: 400px !important;
+            width: 70vw !important;
+            max-width: 300px !important;
             height: auto !important;
+            max-height: 45vh !important;
             object-fit: contain !important;
           }
           
-          /* Left content - mobile optimized */
+          /* Left content - chips, price, button */
           .pdp-left-content {
             order: 2 !important;
-            padding: 2rem 1.5rem !important;
-            height: auto !important;
-            gap: 1.5rem !important;
-            max-width: 100% !important;
-          }
-          
-          .pdp-left-content > div {
             width: 100% !important;
+            padding: 1.5rem !important;
+            height: auto !important;
+            gap: 1.25rem !important;
+            max-width: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: flex-start !important;
           }
           
-          /* Chips - mobile friendly */
+          /* Chips container */
           .pdp-left-content > div:first-child {
+            display: flex !important;
             flex-wrap: wrap !important;
             gap: 0.5rem !important;
+            justify-content: flex-start !important;
+            width: 100% !important;
           }
           
           .pdp-left-content > div:first-child > div {
-            font-size: 0.75rem !important;
-            padding: 0.5rem 0.875rem !important;
+            font-size: 0.7rem !important;
+            padding: 0.5rem 0.75rem !important;
+            white-space: nowrap !important;
           }
           
-          /* Price - larger on mobile */
+          /* Price */
           .pdp-left-content > div:nth-child(2) {
-            font-size: 2.5rem !important;
+            font-size: 2.25rem !important;
+            margin: 0 !important;
           }
           
-          /* Add to box button - full width mobile */
-          .pdp-left-content > div:last-child button {
+          /* Add to box button container */
+          .pdp-left-content > div:nth-child(3) {
             width: 100% !important;
-            padding: 1.25rem 2rem !important;
-            font-size: 1rem !important;
           }
           
-          /* Right content - mobile tabs */
+          .pdp-left-content > div:nth-child(3) button {
+            width: 100% !important;
+            padding: 1rem 1.5rem !important;
+            font-size: 0.95rem !important;
+          }
+          
+          /* Build-a-box progress section */
+          .pdp-left-content > div:nth-child(4) {
+            width: 100% !important;
+            padding: 1.25rem !important;
+          }
+          
+          /* Right content - tabs and details */
           .pdp-right-content {
             order: 3 !important;
+            width: 100% !important;
             padding: 1.5rem !important;
             height: auto !important;
             max-width: 100% !important;
             min-width: 100% !important;
           }
           
-          /* Tabs - mobile friendly */
-          .pdp-right-content button {
-            padding: 0.875rem 0.75rem !important;
-            font-size: 0.8rem !important;
-          }
-          
-          /* Tab content - readable on mobile */
-          .pdp-right-content > div > div:last-child {
-            padding: 1.5rem 1rem !important;
-            font-size: 0.9rem !important;
-            line-height: 1.6 !important;
-          }
-          
-          /* Hide thumbnails completely on mobile */
-          .pdp-product-thumbnails,
-          .pdp-right-content img,
-          .pdp-right-content [style*="display: grid"] {
+          /* Hide flavor selector thumbnails on mobile */
+          .pdp-right-content > div:last-child {
             display: none !important;
           }
           
-          /* Build-a-box section - mobile optimized */
-          .pdp-left-content [style*="BUILD-A-BOX"] {
-            padding: 1.5rem !important;
+          /* Tabs container */
+          .pdp-right-content > div:first-child > div:first-child {
+            display: flex !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
           }
           
-          .pdp-left-content [style*="BUILD-A-BOX"] > div {
-            font-size: 0.9rem !important;
+          .pdp-right-content > div:first-child button {
+            padding: 0.75rem 1rem !important;
+            font-size: 0.75rem !important;
+            white-space: nowrap !important;
+            flex-shrink: 0 !important;
           }
           
-          /* Progress bar - visible and prominent */
-          .pdp-left-content [style*="progress"] {
-            margin-top: 1rem !important;
+          /* Tab content */
+          .pdp-right-content > div:first-child > div:last-child {
+            padding: 1.25rem 0.75rem !important;
+            font-size: 0.875rem !important;
+            line-height: 1.6 !important;
+          }
+          
+          /* Massive background title - hide on mobile */
+          .pdp-hero-1920 > div:last-child {
+            display: none !important;
+          }
+          
+          /* Hide "CRAFT EXCELLENCE REDEFINED" section on mobile */
+          .pdp-hero-1920 ~ div {
+            display: none !important;
+          }
+          
+          /* "You May Also Like" section - mobile optimized */
+          .pdp-hero-1920 ~ div ~ div {
+            display: block !important;
+            padding: 2rem 1rem !important;
+          }
+          
+          .pdp-hero-1920 ~ div ~ div h1 {
+            font-size: 1.5rem !important;
+            text-align: center !important;
+            margin-bottom: 1rem !important;
           }
         }
       `}</style>
